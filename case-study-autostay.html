@@ -1,0 +1,1029 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Autostay · 세차 구독 전환율 개선 — Sumin Lee</title>
+  <link rel="icon" type="image/png" href="./favicon.png" />
+  <link rel="preconnect" href="https://fonts.googleapis.com" />
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+  <link href="https://fonts.googleapis.com/css2?family=Lexend:wght@300;400;500;600;700&family=Inter:wght@300;400;500;600&display=swap" rel="stylesheet" />
+  <style>
+    :root {
+      --bg:        #0B0C11;
+      --bg-2:      #111318;
+      --bg-card:   #15161C;
+      --bg-card-h: #1C1D25;
+      --accent:    #A78BFA;
+      --accent-dim: rgba(167,139,250,.10);
+      --accent-glow: rgba(167,139,250,.22);
+      --text:      #F0ECE6;
+      --text-2:    #CCCAC6;
+      --text-3:    #5A5A66;
+      --border:    rgba(255,255,255,0.07);
+      --border-h:  rgba(255,255,255,0.13);
+    }
+    *, *::before, *::after { margin:0; padding:0; box-sizing:border-box; }
+    html { scroll-behavior: smooth; }
+    body {
+      background-color: var(--bg);
+      background-image:
+        radial-gradient(ellipse 80% 55% at -5% -5%, rgba(28,20,60,.55) 0%, transparent 50%),
+        radial-gradient(ellipse 50% 40% at 105% 105%, rgba(10,6,20,.9) 0%, transparent 48%),
+        radial-gradient(ellipse 60% 40% at 60% 0%, rgba(167,139,250,.025) 0%, transparent 55%);
+      color: var(--text); font-family: 'Inter', sans-serif;
+      font-size: 16px; line-height: 1.6; overflow-x: hidden;
+      -webkit-font-smoothing: antialiased; cursor: none;
+    }
+    a { color: inherit; text-decoration: none; cursor: none; }
+
+    #grain {
+      position: fixed; inset: 0; z-index: 998; pointer-events: none; opacity: .038;
+      background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='256' height='256'%3E%3Cfilter id='n'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.85' numOctaves='4' stitchTiles='stitch'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23n)'/%3E%3C/svg%3E");
+      background-repeat: repeat; background-size: 256px 256px;
+    }
+    #cur-dot {
+      position: fixed; width: 6px; height: 6px; background: var(--text);
+      border-radius: 50%; pointer-events: none; z-index: 9999;
+      transform: translate(-50%,-50%); transition: width .15s, height .15s, background .15s;
+    }
+    #cur-ring {
+      position: fixed; width: 34px; height: 34px;
+      border: 1px solid rgba(240,236,230,.22); border-radius: 50%;
+      pointer-events: none; z-index: 9998; transform: translate(-50%,-50%);
+      transition: width .3s, height .3s, border-color .3s, opacity .3s;
+    }
+    body.cursor-link #cur-dot { width:44px; height:44px; background:var(--accent-dim); border:1px solid var(--accent-glow); }
+    body.cursor-link #cur-ring { opacity:0; }
+
+    /* NAV */
+    nav {
+      position: fixed; inset: 0 0 auto; z-index: 200;
+      padding: 22px 64px; display: flex; justify-content: space-between; align-items: center;
+      transition: background .4s, border-color .4s; border-bottom: 1px solid transparent;
+    }
+    nav.scrolled { background: rgba(11,12,17,.88); backdrop-filter: blur(20px); border-color: var(--border); }
+    .nav-back {
+      display: flex; align-items: center; gap: 10px;
+      font-size: 12px; letter-spacing: 0.1em; text-transform: uppercase;
+      color: var(--text-3); transition: color .2s;
+    }
+    .nav-back:hover { color: var(--text); }
+    .nav-back:hover svg { transform: translateX(-3px); }
+    .nav-back svg { transition: transform .2s; }
+    .nav-right { display: flex; align-items: center; gap: 40px; }
+    .nav-links { display:flex; gap:36px; list-style:none; }
+    .nav-links a { font-size:13px; letter-spacing:.06em; color:var(--text-2); transition:color .2s; position:relative; }
+    .nav-links a::after { content:''; position:absolute; left:0; bottom:-3px; width:0; height:1px; background:var(--accent); transition:width .3s; }
+    .nav-links a:hover { color:var(--text); }
+    .nav-links a:hover::after { width:100%; }
+    .lang-toggle { display:flex; align-items:center; gap:4px; border:1px solid var(--border); border-radius:100px; padding:3px 4px; }
+    .lang-btn {
+      background:none; border:none; outline:none; cursor:none;
+      font-family:'Lexend',sans-serif; font-size:10px; font-weight:600; letter-spacing:0.1em;
+      color:var(--text-3); padding:4px 10px; border-radius:100px; transition:background .2s,color .2s;
+    }
+    .lang-btn.active { background:var(--accent); color:#0B0C11; }
+    .lang-btn:hover:not(.active) { color:var(--text); }
+
+    /* HERO */
+    .cs-hero {
+      min-height: 100vh; display: flex; flex-direction: column;
+      justify-content: flex-end; padding: 0 64px 80px;
+      position: relative; overflow: hidden;
+    }
+    .cs-hero-bg {
+      position: absolute; inset: 0;
+      background:
+        radial-gradient(ellipse 70% 60% at 100% 0%, rgba(167,139,250,.05) 0%, transparent 55%),
+        radial-gradient(ellipse 50% 40% at 0% 100%, rgba(28,20,60,.4) 0%, transparent 50%);
+    }
+    .cs-hero-img {
+      position: absolute; inset: 0; width: 100%; height: 100%;
+      object-fit: cover; opacity: .18; z-index: 0; pointer-events: none;
+    }
+    .cs-hero-number {
+      font-family:'Lexend',sans-serif; font-size:180px; font-weight:700;
+      letter-spacing:-12px; color:rgba(167,139,250,.04); line-height:1;
+      position:absolute; right:40px; bottom:60px; user-select:none; pointer-events:none;
+    }
+    .cs-eyebrow {
+      display:inline-flex; align-items:center; gap:8px;
+      font-size:10px; font-weight:500; letter-spacing:0.22em; text-transform:uppercase;
+      color:var(--accent); margin-bottom:28px;
+      opacity:0; animation:fadeUp .7s .2s forwards;
+    }
+    .cs-eyebrow::before { content:''; width:3px; height:12px; background:var(--accent); border-radius:2px; }
+    .cs-hero h1 {
+      font-family:'Lexend',sans-serif; font-size:clamp(30px, 4.8vw, 70px);
+      font-weight:700; letter-spacing:-2px; line-height:1.05;
+      max-width:900px; margin-bottom:28px;
+      opacity:0; animation:fadeUp .9s .3s forwards;
+    }
+    .cs-hero h1 em { font-style:normal; color:var(--accent); }
+    .cs-hero-sub {
+      font-size:13px; letter-spacing:0.06em; text-transform:uppercase;
+      color:var(--text-3); margin-bottom:16px;
+      opacity:0; animation:fadeUp .7s .25s forwards;
+    }
+    .cs-hero-question {
+      font-size:clamp(14px,1.4vw,18px); color:var(--text-2);
+      max-width:620px; line-height:1.75; font-weight:300;
+      opacity:0; animation:fadeUp .8s .45s forwards;
+    }
+    .cs-hero-meta {
+      display:flex; gap:48px; flex-wrap:wrap; margin-top:56px;
+      padding-top:40px; border-top:1px solid var(--border);
+      opacity:0; animation:fadeUp .7s .6s forwards;
+    }
+    .meta-label { font-size:9px; letter-spacing:0.22em; text-transform:uppercase; color:var(--text-3); margin-bottom:6px; }
+    .meta-val { font-family:'Lexend',sans-serif; font-size:14px; font-weight:500; color:var(--text); }
+    @keyframes fadeUp { from { opacity:0; transform:translateY(16px); } to { opacity:1; transform:translateY(0); } }
+
+    /* BODY */
+    .cs-body { max-width:900px; margin:0 auto; padding:0 64px 160px; }
+    @media (max-width:900px) { .cs-body{padding:0 28px 100px;} nav{padding:18px 28px;} .cs-hero{padding:0 28px 60px;} }
+
+    /* SECTION */
+    .cs-section { padding:80px 0; border-top:1px solid var(--border); opacity:0; transform:translateY(28px); transition:opacity .75s,transform .75s; }
+    .cs-section.visible { opacity:1; transform:none; }
+    .cs-num { font-family:'Lexend',sans-serif; font-size:11px; font-weight:500; letter-spacing:0.22em; text-transform:uppercase; color:var(--accent); margin-bottom:8px; }
+    .cs-title { font-family:'Lexend',sans-serif; font-size:clamp(24px,3vw,36px); font-weight:700; letter-spacing:-1px; line-height:1.1; margin-bottom:40px; color:var(--text); }
+    .cs-title em { font-style:normal; color:var(--accent); }
+    .cs-p { font-size:15px; color:var(--text-2); line-height:1.85; margin-bottom:20px; }
+    .cs-p:last-child { margin-bottom:0; }
+    .cs-p strong { color:var(--text); font-weight:500; }
+
+    /* CALLOUT */
+    .cs-callout { border-left:3px solid var(--accent); padding:20px 24px; background:rgba(167,139,250,.04); border-radius:0 8px 8px 0; margin:32px 0; }
+    .cs-callout p { font-size:15px; color:var(--text); line-height:1.8; }
+    .cs-callout strong { color:var(--accent); }
+
+    /* TWO COL */
+    .cs-two-col { display:grid; grid-template-columns:1fr 1fr; gap:24px; margin:28px 0; }
+    @media (max-width:640px) { .cs-two-col{grid-template-columns:1fr;} }
+    .cs-col-card { background:var(--bg-card); border:1px solid var(--border); border-radius:12px; padding:28px; }
+    .cs-col-card h4 { font-family:'Lexend',sans-serif; font-size:12px; font-weight:600; letter-spacing:0.1em; text-transform:uppercase; color:var(--text-3); margin-bottom:16px; }
+    .cs-col-card h4.accent { color:var(--accent); }
+    .cs-col-card ul { list-style:none; display:flex; flex-direction:column; gap:10px; }
+    .cs-col-card ul li { font-size:14px; color:var(--text-2); line-height:1.65; padding-left:16px; position:relative; }
+    .cs-col-card ul li::before { content:''; position:absolute; left:0; top:9px; width:5px; height:5px; border-radius:50%; background:var(--border-h); }
+    .cs-col-card.accent-border { border-color:rgba(167,139,250,.22); background:rgba(167,139,250,.025); }
+    .cs-col-card.accent-border ul li::before { background:var(--accent); opacity:.6; }
+
+    /* STATS GRID */
+    .cs-stats { display:grid; grid-template-columns:repeat(3,1fr); gap:2px; background:var(--border); margin:36px 0; }
+    .cs-stat { background:var(--bg-card); padding:28px 24px; }
+    .cs-stat-num { font-family:'Lexend',sans-serif; font-size:36px; font-weight:700; letter-spacing:-2px; color:var(--accent); line-height:1; margin-bottom:8px; }
+    .cs-stat-label { font-size:12px; color:var(--text-3); line-height:1.5; }
+
+    /* BIG STAT */
+    .big-stat-block {
+      display:flex; align-items:center; gap:32px; padding:40px;
+      background:var(--bg-card); border:1px solid var(--border); border-radius:16px;
+      margin:36px 0; position:relative; overflow:hidden;
+    }
+    .big-stat-block::before {
+      content:''; position:absolute; inset:0;
+      background:radial-gradient(ellipse 60% 70% at 0% 50%, rgba(167,139,250,.07) 0%, transparent 60%);
+    }
+    .big-stat-num {
+      font-family:'Lexend',sans-serif; font-size:clamp(60px,8vw,100px);
+      font-weight:700; letter-spacing:-4px; color:var(--accent); line-height:1; flex-shrink:0;
+    }
+    .big-stat-desc { font-size:15px; color:var(--text-2); line-height:1.75; }
+    .big-stat-desc strong { color:var(--text); font-weight:500; }
+
+    /* SEGMENTS */
+    .segments { display:grid; grid-template-columns:repeat(2,1fr); gap:12px; margin:28px 0; }
+    @media (max-width:640px) { .segments{grid-template-columns:1fr;} }
+    .segment-card { background:var(--bg-card); border:1px solid var(--border); border-radius:10px; padding:18px; transition:border-color .2s; }
+    .segment-card.target { border-color:rgba(167,139,250,.35); background:rgba(167,139,250,.03); }
+    .seg-icon { font-size:20px; margin-bottom:10px; }
+    .seg-name { font-family:'Lexend',sans-serif; font-size:13px; font-weight:600; color:var(--text); margin-bottom:4px; }
+    .seg-name .target-badge { font-size:9px; font-weight:600; letter-spacing:0.1em; text-transform:uppercase; color:var(--accent); background:rgba(167,139,250,.12); padding:2px 7px; border-radius:100px; margin-left:6px; }
+    .seg-desc { font-size:12px; color:var(--text-3); line-height:1.55; }
+
+    /* HYPOTHESIS */
+    .hypothesis-card {
+      background:var(--bg-card); border:1px solid rgba(167,139,250,.2); border-radius:12px;
+      padding:36px; margin:28px 0; position:relative; overflow:hidden;
+    }
+    .hypothesis-card::before {
+      content:'"'; position:absolute; top:-10px; left:20px; font-family:'Lexend',sans-serif;
+      font-size:120px; font-weight:700; color:rgba(167,139,250,.06); line-height:1; pointer-events:none;
+    }
+    .hypothesis-text { font-family:'Lexend',sans-serif; font-size:clamp(15px,1.8vw,20px); font-weight:500; line-height:1.65; color:var(--text); letter-spacing:-0.2px; position:relative; z-index:1; }
+    .hypothesis-text em { color:var(--accent); font-style:normal; }
+    .hyp-meta { margin-top:20px; padding-top:18px; border-top:1px solid var(--border); display:flex; flex-wrap:wrap; gap:8px; }
+    .hyp-chip { font-size:11px; padding:4px 12px; border:1px solid rgba(167,139,250,.2); border-radius:100px; color:var(--text-3); }
+
+    /* AS-IS TO-BE */
+    .as-is-tobe { display:grid; grid-template-columns:1fr 40px 1fr; gap:0; margin:36px 0; align-items:start; }
+    @media (max-width:640px) { .as-is-tobe{grid-template-columns:1fr;} .arrow-col{display:none;} }
+    .arrow-col { display:flex; justify-content:center; align-items:center; padding-top:60px; }
+
+    /* STRATEGIES */
+    .strategies { display:grid; grid-template-columns:repeat(3,1fr); gap:2px; background:var(--border); margin:28px 0; }
+    @media (max-width:640px) { .strategies{grid-template-columns:1fr;} }
+    .strat-card { background:var(--bg-card); padding:28px; }
+    .strat-num { font-size:10px; font-weight:600; letter-spacing:0.18em; text-transform:uppercase; color:var(--accent); margin-bottom:10px; }
+    .strat-name { font-family:'Lexend',sans-serif; font-size:16px; font-weight:600; color:var(--text); margin-bottom:8px; }
+    .strat-desc { font-size:13px; color:var(--text-2); line-height:1.65; }
+
+    /* EXEC BLOCKS */
+    .exec-block-list{display:flex;flex-direction:column;gap:0;margin:0;}
+    .exec-block{padding:52px 0 0;border-top:1px solid var(--border);}
+    .exec-block-header{margin-bottom:32px;}
+    .exec-block-num{font-family:'Lexend',sans-serif;font-size:10px;font-weight:700;letter-spacing:.2em;text-transform:uppercase;color:var(--accent);margin-bottom:10px;}
+    .exec-block-name{font-family:'Lexend',sans-serif;font-size:clamp(20px,2.2vw,28px);font-weight:700;color:var(--text);line-height:1.15;}
+    .exec-block-meta{display:grid;grid-template-columns:1fr 1fr;gap:52px;margin-bottom:32px;}
+    @media(max-width:640px){.exec-block-meta{grid-template-columns:1fr;gap:20px;}}
+    .exec-block-label{font-size:9px;font-weight:700;letter-spacing:.18em;text-transform:uppercase;color:var(--text-3);margin-bottom:10px;}
+    .exec-block-purpose{font-size:15px;font-weight:600;font-family:'Lexend',sans-serif;color:var(--text);line-height:1.5;}
+    .exec-block-features{font-size:14px;color:var(--text-2);line-height:1.9;}
+    .exec-block-features li{list-style:none;padding-left:0;margin-bottom:8px;}
+    .exec-block-features li::before{content:'→ ';color:var(--accent);}
+    .exec-block-features strong{color:var(--text);font-weight:500;}
+    .exec-block-features em{color:var(--accent);font-style:normal;}
+    .exec-img-wrap{background:transparent;border:1px solid var(--border);border-radius:16px;overflow:hidden;margin:0 0 60px;width:100%;}
+    .exec-img-wrap img{width:100%;height:auto;display:block;}
+
+    /* RESULT GRID */
+    .result-grid { display:grid; grid-template-columns:repeat(4,1fr); gap:2px; background:var(--border); margin:36px 0; }
+    @media (max-width:640px) { .result-grid{grid-template-columns:1fr 1fr;} }
+    .result-cell { background:var(--bg-card); padding:32px 28px; position:relative; overflow:hidden; }
+    .result-cell::before { content:''; position:absolute; bottom:0; left:0; right:0; height:2px; background:linear-gradient(to right, var(--accent), transparent); }
+    .result-num { font-family:'Lexend',sans-serif; font-size:42px; font-weight:700; letter-spacing:-3px; color:var(--accent); line-height:1; margin-bottom:10px; }
+    .result-desc { font-size:13px; color:var(--text-2); line-height:1.6; }
+    .result-sub  { font-size:11px; color:var(--text-3); margin-top:4px; letter-spacing:0.04em; }
+
+    /* PROB STATEMENT */
+    .prob-statement-card{background:var(--bg-card);border:1px solid var(--border);border-radius:16px;padding:52px 48px;text-align:center;margin:32px 0;}
+    .prob-icon-wrap{width:48px;height:48px;border:1px solid var(--accent);border-radius:50%;display:flex;align-items:center;justify-content:center;margin:0 auto 14px;color:var(--accent);}
+    .prob-stmt-label{font-size:10px;font-weight:600;letter-spacing:.22em;text-transform:uppercase;color:var(--text-3);margin-bottom:22px;}
+    .prob-quote{font-family:'Lexend',sans-serif;font-size:clamp(15px,1.8vw,22px);font-weight:500;line-height:1.65;color:var(--text);max-width:720px;margin:0 auto;}
+
+    /* QUOTE GRID */
+    .quote-grid { display:grid; grid-template-columns:1fr 1fr; gap:16px; margin:28px 0; }
+    @media (max-width:640px) { .quote-grid{grid-template-columns:1fr;} }
+    .quote-card {
+      background:var(--bg-card); border:1px solid var(--border); border-radius:10px;
+      padding:20px 20px 20px 24px; position:relative;
+    }
+    .quote-card::before { content:'"'; position:absolute; top:8px; left:14px; font-family:'Lexend',sans-serif; font-size:36px; color:var(--accent); opacity:.3; line-height:1; }
+    .quote-text { font-size:14px; color:var(--text-2); line-height:1.7; padding-top:12px; }
+    .quote-tag { font-size:10px; letter-spacing:0.1em; text-transform:uppercase; color:var(--accent); margin-bottom:6px; font-weight:600; padding-top:12px; }
+
+    /* LESSON LIST */
+    .lesson-list { display:flex; flex-direction:column; gap:24px; margin:28px 0; }
+    .lesson-item { display:grid; grid-template-columns:40px 1fr; gap:16px; align-items:start; }
+    .lesson-icon { width:40px; height:40px; border-radius:50%; background:rgba(167,139,250,.1); border:1px solid rgba(167,139,250,.25); display:flex; align-items:center; justify-content:center; font-family:'Lexend',sans-serif; font-size:12px; font-weight:700; color:var(--accent); flex-shrink:0; }
+    .lesson-content h4 { font-family:'Lexend',sans-serif; font-size:15px; font-weight:600; color:var(--text); margin-bottom:8px; margin-top:10px; }
+    .lesson-content p { font-size:14px; color:var(--text-2); line-height:1.8; }
+
+    /* IMAGE */
+    .img-wrap { width:100%; background:transparent; border:1px solid var(--border); border-radius:14px; overflow:hidden; margin:24px 0; }
+    .img-wrap img { width:100%; height:auto; display:block; }
+
+    /* RESULTS TABLE */
+    .results-table { width:100%; border-collapse:collapse; margin:32px 0; }
+    .results-table th { font-family:'Lexend',sans-serif; font-size:10px; font-weight:600; letter-spacing:.14em; text-transform:uppercase; color:var(--text-3); padding:12px 16px; border-bottom:1px solid var(--border); text-align:left; }
+    .results-table td { font-size:14px; color:var(--text-2); padding:16px 16px; border-bottom:1px solid var(--border); }
+    .results-table td:first-child { color:var(--text); font-weight:500; }
+    .results-table td.improvement { color:var(--accent); font-family:'Lexend',sans-serif; font-weight:600; }
+    .results-table tr:last-child td { border-bottom:none; }
+
+    /* TOC */
+    .cs-toc {
+      position: fixed; right: 28px; top: 50%; transform: translateY(-50%);
+      z-index: 150; display: flex; flex-direction: column; gap: 0;
+      pointer-events: auto; align-items: flex-start; width: max-content;
+      opacity: 0; visibility: hidden; transition: opacity .4s, visibility .4s;
+    }
+    .cs-toc.toc-visible { opacity: 1; visibility: visible; }
+    .cs-toc-link {
+      display: flex; align-items: center; gap: 10px; padding: 5px 0;
+      color: var(--text-3); font-size: 11px; letter-spacing: 0.03em;
+      white-space: nowrap; text-decoration: none; cursor: none;
+      transition: color .25s, opacity .25s; opacity: .4;
+    }
+    .cs-toc-link:hover { color: var(--text-2); opacity: .85; }
+    .cs-toc-link.active { color: var(--accent); opacity: 1; font-weight: 500; }
+    .cs-toc-tick { width: 1.5px; height: 12px; background: currentColor; border-radius: 2px; flex-shrink: 0; transition: height .25s, width .25s; }
+    .cs-toc-link.active .cs-toc-tick { height: 20px; width: 2px; }
+    @media (max-width: 1260px) { .cs-toc { display: none; } }
+
+    /* NEXT */
+    .cs-next { border-top:1px solid var(--border); padding:64px; display:flex; justify-content:space-between; align-items:center; }
+    .next-label { font-size:10px; letter-spacing:0.22em; text-transform:uppercase; color:var(--text-3); margin-bottom:12px; }
+    .next-title { font-family:'Lexend',sans-serif; font-size:22px; font-weight:600; color:var(--text); transition:color .2s; }
+    .next-link:hover .next-title { color:var(--accent); }
+    .next-arrow { font-size:28px; color:var(--text-3); transition:color .3s,transform .3s; }
+    .next-link:hover .next-arrow { color:var(--accent); transform:translate(6px,-6px); }
+
+    footer { padding:28px 64px; border-top:1px solid var(--border); display:flex; justify-content:space-between; align-items:center; }
+    footer p { font-size:11px; color:var(--text-3); }
+    .t-fade { transition:opacity .25s; }
+    .t-fade.fading { opacity:0; }
+  </style>
+</head>
+<body>
+  <div id="grain" aria-hidden="true"></div>
+  <div id="cur-dot"></div>
+  <div id="cur-ring"></div>
+
+  <!-- TOC -->
+  <nav class="cs-toc" id="csToc">
+    <a class="cs-toc-link active" href="#s1"><span class="cs-toc-tick"></span>배경</a>
+    <a class="cs-toc-link" href="#s2"><span class="cs-toc-tick"></span>목표</a>
+    <a class="cs-toc-link" href="#s3"><span class="cs-toc-tick"></span>원인 분석</a>
+    <a class="cs-toc-link" href="#s4"><span class="cs-toc-tick"></span>문제 정의</a>
+    <a class="cs-toc-link" href="#s5"><span class="cs-toc-tick"></span>가설</a>
+    <a class="cs-toc-link" href="#s6"><span class="cs-toc-tick"></span>액션</a>
+    <a class="cs-toc-link" href="#s7"><span class="cs-toc-tick"></span>결과</a>
+    <a class="cs-toc-link" href="#s8"><span class="cs-toc-tick"></span>레슨런</a>
+  </nav>
+
+  <!-- NAV -->
+  <nav id="nav">
+    <a href="./work.html" class="nav-back" onclick="if(history.length>1){history.back();return false;}">
+      <svg width="16" height="16" viewBox="0 0 16 16" fill="none" stroke="currentColor" stroke-width="1.5"><path d="M10 12L6 8l4-4"/></svg>
+    </a>
+    <div class="nav-right">
+      <ul class="nav-links">
+        <li><a href="./work.html" data-i18n="nav.work">Projects</a></li>
+        <li><a href="./contact.html" data-i18n="nav.about">About</a></li>
+      </ul>
+      <div class="lang-toggle" id="langToggle">
+        <button class="lang-btn active" data-lang="ko">KR</button>
+        <button class="lang-btn" data-lang="en">EN</button>
+      </div>
+    </div>
+  </nav>
+
+  <!-- HERO -->
+  <section class="cs-hero">
+    <div class="cs-hero-bg"></div>
+    <img class="cs-hero-img" src="./thumb-autostay.jpg" alt="" />
+    <div class="cs-hero-number" aria-hidden="true">06</div>
+
+    <p class="cs-hero-sub" data-i18n="hero.sub">Autostay · 2026</p>
+    <div class="cs-eyebrow" data-i18n="hero.eyebrow">Growth Strategy · Subscription · Habit Design</div>
+
+    <h1 data-i18n="hero.h1">
+      구독 전환이 낮은 게 아니다.<br><em>세차 습관</em>이 없는 것이다.
+    </h1>
+
+    <p class="cs-hero-question" data-i18n="hero.question">
+      단건 이용 후 이탈률 75%에 달하던 세차 서비스에서, 환경 트리거 기반 UX와 2회 경험 압축 전략으로
+      구독 전환율을 8%에서 14%로, 30-day Repeat Rate를 25%에서 38%로 끌어올린 Growth 프로젝트.
+    </p>
+
+    <div class="cs-hero-meta">
+      <div>
+        <div class="meta-label" data-i18n="meta.role.l">Role</div>
+        <div class="meta-val" data-i18n="meta.role.v">PM · Growth 전략 · 서비스 기획</div>
+      </div>
+      <div>
+        <div class="meta-label" data-i18n="meta.period.l">Period</div>
+        <div class="meta-val">2026</div>
+      </div>
+      <div>
+        <div class="meta-label" data-i18n="meta.domain.l">Domain</div>
+        <div class="meta-val" data-i18n="meta.domain.v">구독 · Growth · Habit Loop</div>
+      </div>
+      <div>
+        <div class="meta-label" data-i18n="meta.tools.l">Tools</div>
+        <div class="meta-val">Figma · Notion · Amplitude</div>
+      </div>
+    </div>
+  </section>
+
+  <div class="cs-body">
+
+    <!-- 01 BACKGROUND -->
+    <section class="cs-section" id="s1">
+      <div class="cs-num">01</div>
+      <h2 class="cs-title" data-i18n="s1.title">배경 <em>·</em> Background</h2>
+
+      <p class="cs-p" data-i18n="s1.p1">
+        Autostay는 단건 세차와 월 구독 모델을 동시에 운영하는 세차 플랫폼이다.
+        핵심 수익은 <strong>구독 기반 LTV 극대화</strong>에 있으나,
+        실제 유저 행동은 구독보다 단건 이용에 집중되어 있었다.
+      </p>
+
+      <div class="cs-two-col">
+        <div class="cs-col-card">
+          <h4 data-i18n="s1.bm">Business Model</h4>
+          <ul>
+            <li data-i18n="s1.bm1">단건 세차 + 월 구독 모델 병행 운영</li>
+            <li data-i18n="s1.bm2">정기 세차 제공을 통한 반복 방문 유도</li>
+            <li data-i18n="s1.bm3">핵심 수익 구조는 구독 기반 LTV 극대화</li>
+          </ul>
+        </div>
+        <div class="cs-col-card accent-border">
+          <h4 class="accent" data-i18n="s1.risk">핵심 리스크</h4>
+          <ul>
+            <li data-i18n="s1.r1">1회 이용 후 이탈 비율 높음 — 단건 전환이 반복으로 이어지지 않음</li>
+            <li data-i18n="s1.r2">세차가 "비정기 소비"로 인식 — 구독 전환 저조</li>
+            <li data-i18n="s1.r3">구독이 <strong style="color:var(--text)">할인 상품</strong>으로 인식 → 가격 경쟁 구조로 전락</li>
+          </ul>
+        </div>
+      </div>
+    </section>
+
+    <!-- 02 GOAL -->
+    <section class="cs-section" id="s2">
+      <div class="cs-num">02</div>
+      <h2 class="cs-title" data-i18n="s2.title">목표 <em>·</em> Goal</h2>
+
+      <div class="cs-two-col">
+        <div class="cs-col-card accent-border">
+          <h4 class="accent" data-i18n="s2.inp">Input (선행 지표)</h4>
+          <ul>
+            <li data-i18n="s2.i1"><strong style="color:var(--text)">30-day Repeat Rate: 25% → 38%</strong></li>
+            <li data-i18n="s2.i2"><strong style="color:var(--text)">Avg Washes/Month: 0.8 → 1.4</strong></li>
+          </ul>
+        </div>
+        <div class="cs-col-card">
+          <h4 data-i18n="s2.out">Output (성과 지표)</h4>
+          <ul>
+            <li data-i18n="s2.o1"><strong style="color:var(--text)">Subscription Conversion: 8% → 14%</strong></li>
+            <li data-i18n="s2.o2"><strong style="color:var(--text)">60-day Retention: +20%p</strong></li>
+          </ul>
+        </div>
+      </div>
+
+      <div class="cs-callout">
+        <p data-i18n="s2.note"><strong>전략적 관점:</strong> Output(구독 전환율)을 직접 높이려는 접근 대신, Input 행동(반복 세차 경험)을 먼저 설계하여 구독이 자연스럽게 발생하는 구조를 목표로 했다.</p>
+      </div>
+    </section>
+
+    <!-- 03 ANALYSIS -->
+    <section class="cs-section" id="s3">
+      <div class="cs-num">03</div>
+      <h2 class="cs-title" data-i18n="s3.title">원인 분석 <em>·</em> Data Analysis</h2>
+
+      <div class="big-stat-block">
+        <div class="big-stat-num">25%</div>
+        <p class="big-stat-desc" data-i18n="s3.bigstat">
+          1회 이용자 중 <strong>30-day Repeat Rate가 25%</strong>로 핵심 병목.
+          그러나 Repeat 사용자 중 구독 전환율은 <strong>32%</strong>로 상대적으로 높아,
+          문제는 전환 의지가 아닌 <strong>반복 경험 유도 부재</strong>임을 확인했다.
+        </p>
+      </div>
+
+      <p class="cs-p" style="margin-bottom:8px;"><strong>유저 세그먼트</strong></p>
+      <div class="segments">
+        <div class="segment-card target">
+          <div class="seg-icon">🚗</div>
+          <div class="seg-name">고빈도 사용자 <span class="target-badge">TARGET</span></div>
+          <div class="seg-desc">출퇴근 자차 + 고급차 보유 · High LTV · 반복 사용 가능성 및 차량 관리 니즈 높음</div>
+        </div>
+        <div class="segment-card">
+          <div class="seg-icon">🌧️</div>
+          <div class="seg-name">트리거형 사용자</div>
+          <div class="seg-desc">비 온 뒤 이용 · 환경 이벤트 기반 행동 · 주기보다 상황에 반응</div>
+        </div>
+        <div class="segment-card">
+          <div class="seg-icon">💸</div>
+          <div class="seg-name">저빈도 사용자</div>
+          <div class="seg-desc">가격 민감 + 필요 시만 이용 · 구독 가치 체감 낮음</div>
+        </div>
+        <div class="segment-card">
+          <div class="seg-icon">📊</div>
+          <div class="seg-name">세그먼트 비교</div>
+          <div class="seg-desc">고급차 Repeat Rate 38% vs 일반차 22% — LTV 높은 세그먼트 명확히 식별</div>
+        </div>
+      </div>
+
+      <div class="cs-two-col" style="margin-top:32px;">
+        <div class="cs-col-card">
+          <h4 data-i18n="s3.quant">정량 분석</h4>
+          <ul>
+            <li data-i18n="s3.q1">1회 이용자 중 30-day Repeat Rate: <strong style="color:var(--text)">25%</strong> (핵심 병목)</li>
+            <li data-i18n="s3.q2">Repeat 사용자 중 구독 전환율: <strong style="color:var(--text)">32%</strong> (상대적으로 높음)</li>
+            <li data-i18n="s3.q3">평균 세차 주기: <strong style="color:var(--text)">28일</strong> (비정기적)</li>
+            <li data-i18n="s3.q4">고급차 사용자 Repeat Rate: <strong style="color:var(--text)">38%</strong> vs 일반차 22%</li>
+          </ul>
+        </div>
+        <div class="cs-col-card">
+          <h4 data-i18n="s3.qual">정성 분석</h4>
+          <ul>
+            <li data-i18n="s3.qa1">세차는 필요 인지 타이밍이 불명확</li>
+            <li data-i18n="s3.qa2">구독 가치보다 "귀찮음 회피"가 핵심 동기</li>
+            <li data-i18n="s3.qa3">주기보다 "상황(비, 오염)" 기반으로 행동</li>
+          </ul>
+        </div>
+      </div>
+
+      <p class="cs-p" style="margin-top:32px; margin-bottom:8px;"><strong>유저 인터뷰</strong></p>
+      <div class="quote-grid">
+        <div class="quote-card">
+          <div class="quote-tag">고빈도 사용자</div>
+          <p class="quote-text">"세차를 언제 해야겠다고 느끼냐고요? 비 맞고 나서요. 아니면 차가 너무 더러워 보일 때요. 달력 보고 하는 건 아니에요."</p>
+        </div>
+        <div class="quote-card">
+          <div class="quote-tag">저빈도 사용자</div>
+          <p class="quote-text">"구독이 왜 필요없냐고요? 한 달에 한 번 할까말까인데 굳이요. 그냥 필요할 때 오면 되지 않나요?"</p>
+        </div>
+        <div class="quote-card">
+          <div class="quote-tag">트리거형 사용자</div>
+          <p class="quote-text">"필요하다는 건 알아요. 근데 막상 예약하려면 귀찮고, 나중에 해야지 하다 또 잊게 되더라고요."</p>
+        </div>
+        <div class="quote-card">
+          <div class="quote-tag">고급차 보유자</div>
+          <p class="quote-text">"차 관리는 중요하게 생각하는데 세차만큼은 불규칙해요. 딱 알아서 챙겨주는 게 있으면 쓸 것 같아요."</p>
+        </div>
+      </div>
+    </section>
+
+    <!-- 04 PROBLEM DEFINITION -->
+    <section class="cs-section" id="s4">
+      <div class="cs-num">04</div>
+      <h2 class="cs-title" data-i18n="s4.title">문제 정의 <em>·</em> Problem Definition</h2>
+
+      <div class="prob-statement-card">
+        <div class="prob-icon-wrap">
+          <svg width="20" height="20" viewBox="0 0 20 20" fill="none" stroke="currentColor" stroke-width="1.5"><circle cx="10" cy="10" r="8"/><path d="M10 6v4l3 3"/></svg>
+        </div>
+        <p class="prob-stmt-label" data-i18n="s4.label">Problem Statement</p>
+        <p class="prob-quote" data-i18n="s4.quote">
+          구독 전환이 낮은 것이 아니라,<br>
+          "세차가 반복 행동으로 설계되지 않아<br>
+          차량 관리 습관이 형성되지 않는 구조"
+        </p>
+      </div>
+
+      <p class="cs-p" style="margin-bottom:8px;"><strong>타겟 선정 이유</strong></p>
+      <div class="cs-col-card accent-border" style="margin-top:0;">
+        <h4 class="accent">출퇴근 자차 사용자 + 고급차 보유</h4>
+        <ul>
+          <li>차량 관리 니즈 높고 반복 사용 가능성 높음</li>
+          <li>LTV 높아 구독 전환 시 비즈니스 임팩트 최대</li>
+          <li>고급차 사용자 Repeat Rate 38% — 이미 반복 행동 잠재성 입증</li>
+          <li>Habit 형성 시 이탈률 낮고 자연 구독 전환 가능성 높음</li>
+        </ul>
+      </div>
+    </section>
+
+    <!-- 05 HYPOTHESIS -->
+    <section class="cs-section" id="s5">
+      <div class="cs-num">05</div>
+      <h2 class="cs-title" data-i18n="s5.title">가설 <em>·</em> Hypothesis</h2>
+
+      <div class="hypothesis-card">
+        <p class="hypothesis-text" data-i18n="s5.h1">
+          세차는 <em>주기 기반</em>이 아니라 "환경 트리거 기반 행동"이다.<br>
+          따라서 달력이 아닌 <em>상황(비, 오염)</em>에 개입해야 반복이 시작된다.
+        </p>
+        <div class="hyp-meta">
+          <span class="hyp-chip">가설 1</span>
+          <span class="hyp-chip">Trigger-based Behavior</span>
+          <span class="hyp-chip">환경 기반 개입</span>
+        </div>
+      </div>
+
+      <div class="hypothesis-card">
+        <p class="hypothesis-text" data-i18n="s5.h2">
+          <em>2회 경험을 14일 내 유도</em>하면 Habit 형성이 촉진된다.<br>
+          반복 경험이 쌓이면 구독은 설득이 아니라 <em>자연스러운 선택</em>이 된다.
+        </p>
+        <div class="hyp-meta">
+          <span class="hyp-chip">가설 2</span>
+          <span class="hyp-chip">2nd Wash Within 14 Days</span>
+          <span class="hyp-chip">Habit Loop</span>
+        </div>
+      </div>
+
+      <div class="hypothesis-card">
+        <p class="hypothesis-text" data-i18n="s5.h3">
+          구독을 <em>가격 할인이 아니라</em> "루틴 관리 도구"로 재정의하면,<br>
+          가격 경쟁 없이도 <em>지속적인 전환</em>이 가능하다.
+        </p>
+        <div class="hyp-meta">
+          <span class="hyp-chip">가설 3</span>
+          <span class="hyp-chip">Value Reframing</span>
+          <span class="hyp-chip">루틴 관리 도구</span>
+        </div>
+      </div>
+
+      <p class="cs-p" style="margin-top:12px;" data-i18n="s5.strategy"><strong>솔루션 전략 방향:</strong> Trigger 기반 UX 설계 → 2회 경험 압축 → 구독을 가격이 아닌 루틴 도구로 재정의</p>
+    </section>
+
+    <!-- 06 ACTION -->
+    <section class="cs-section" id="s6">
+      <div class="cs-num">06</div>
+      <h2 class="cs-title" data-i18n="s6.title">액션 <em>·</em> Execution</h2>
+
+      <p class="cs-p" data-i18n="s6.intro">As-is 구조의 핵심 문제는 단건 이용 후 추가 개입이 전무하다는 것이었다. 이를 4가지 실행 축으로 재설계했다.</p>
+
+      <div class="as-is-tobe">
+        <div class="cs-col-card">
+          <h4>As-Is</h4>
+          <ul>
+            <li>단건 이용 후 추가 유도 없음</li>
+            <li>구독은 가격 할인 중심 노출</li>
+            <li>세차 타이밍 정보 제공 부재</li>
+            <li>앱 내 재방문 유인 없음</li>
+          </ul>
+        </div>
+        <div class="arrow-col">
+          <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="var(--accent)" stroke-width="1.5"><path d="M5 12h14M12 5l7 7-7 7"/></svg>
+        </div>
+        <div class="cs-col-card accent-border">
+          <h4 class="accent">To-Be</h4>
+          <ul>
+            <li>2회 이용 시 구독 할인 자동 제안</li>
+            <li>14일 내 재방문 시 인센티브 제공</li>
+            <li>비 온 후 푸시 알림 + 세차 필요 예측</li>
+            <li>Care Calendar + 관리 히스토리 제공</li>
+          </ul>
+        </div>
+      </div>
+
+      <div class="exec-block-list" style="margin-top:48px;">
+
+        <!-- EXEC 01 -->
+        <div class="exec-block">
+          <div class="exec-block-header">
+            <div class="exec-block-num">Action 01</div>
+            <div class="exec-block-name">2회 경험 압축 유도</div>
+          </div>
+          <div class="exec-block-meta">
+            <div>
+              <div class="exec-block-label">목적</div>
+              <div class="exec-block-purpose">14일 내 2번째 세차 경험을 만들어 Habit Loop의 출발점을 확보</div>
+            </div>
+            <div>
+              <div class="exec-block-label">핵심 기능</div>
+              <ul class="exec-block-features">
+                <li><strong>2회 이용 시 구독 할인 자동 제안</strong> — 마찰 없는 타이밍에 개입</li>
+                <li><strong>14일 내 재방문 인센티브</strong> — 행동 압축 유도</li>
+                <li>1회 이용 완료 후 <em>스마트 리마인더</em> 발송</li>
+              </ul>
+            </div>
+          </div>
+          <div class="exec-img-wrap">
+            <img src="./Autostay/exec-01.jpg" alt="2회 경험 압축 유도" />
+          </div>
+        </div>
+
+        <!-- EXEC 02 -->
+        <div class="exec-block">
+          <div class="exec-block-header">
+            <div class="exec-block-num">Action 02</div>
+            <div class="exec-block-name">Trigger 기반 개입</div>
+          </div>
+          <div class="exec-block-meta">
+            <div>
+              <div class="exec-block-label">목적</div>
+              <div class="exec-block-purpose">상황(비, 오염) 기반으로 세차 필요 타이밍을 포착하여 자연스러운 방문 유도</div>
+            </div>
+            <div>
+              <div class="exec-block-label">핵심 기능</div>
+              <ul class="exec-block-features">
+                <li><strong>비 온 후 푸시 알림</strong> — 날씨 API 연동 자동 발송</li>
+                <li><strong>세차 필요 시점 예측 알림</strong> — 마지막 세차일 + 평균 주기 기반</li>
+                <li>미세먼지·황사 이벤트 <em>상황별 트리거</em> 설계</li>
+              </ul>
+            </div>
+          </div>
+          <div class="exec-img-wrap">
+            <img src="./Autostay/exec-02.jpg" alt="Trigger 기반 개입" />
+          </div>
+        </div>
+
+        <!-- EXEC 03 -->
+        <div class="exec-block">
+          <div class="exec-block-header">
+            <div class="exec-block-num">Action 03</div>
+            <div class="exec-block-name">Habit UX 설계 — Care Calendar</div>
+          </div>
+          <div class="exec-block-meta">
+            <div>
+              <div class="exec-block-label">목적</div>
+              <div class="exec-block-purpose">세차를 "차량 관리 루틴"으로 시각화하여 주기 인식과 습관 형성을 촉진</div>
+            </div>
+            <div>
+              <div class="exec-block-label">핵심 기능</div>
+              <ul class="exec-block-features">
+                <li><strong>Care Calendar</strong> — 월 단위 세차 관리 뷰 제공</li>
+                <li><strong>세차 추천 날짜 시각화</strong> — 이력 기반 다음 세차 예측</li>
+                <li>세차 이력 기반 <em>차량 관리 히스토리</em> 누적 제공</li>
+              </ul>
+            </div>
+          </div>
+          <div class="exec-img-wrap">
+            <img src="./Autostay/exec-03.jpg" alt="Care Calendar" />
+          </div>
+        </div>
+
+        <!-- EXEC 04 -->
+        <div class="exec-block">
+          <div class="exec-block-header">
+            <div class="exec-block-num">Action 04</div>
+            <div class="exec-block-name">구독 가치 재정의</div>
+          </div>
+          <div class="exec-block-meta">
+            <div>
+              <div class="exec-block-label">목적</div>
+              <div class="exec-block-purpose">구독을 "할인 상품"이 아닌 "루틴 관리 도구"로 재프레이밍하여 가격 경쟁 탈피</div>
+            </div>
+            <div>
+              <div class="exec-block-label">핵심 기능</div>
+              <ul class="exec-block-features">
+                <li><strong>구독 vs 단건 비용 비교 시각화</strong> — 가치 명확화</li>
+                <li><strong>세차 이력 기반 관리 경험</strong> — 누적 데이터로 Lock-in 강화</li>
+                <li>구독 전환 타이밍: <em>2회 이용 직후</em> 최적 노출</li>
+              </ul>
+            </div>
+          </div>
+          <div class="exec-img-wrap">
+            <img src="./Autostay/exec-04.jpg" alt="구독 가치 재정의" />
+          </div>
+        </div>
+
+      </div>
+    </section>
+
+    <!-- 07 RESULTS -->
+    <section class="cs-section" id="s7">
+      <div class="cs-num">07</div>
+      <h2 class="cs-title" data-i18n="s7.title">결과 <em>·</em> Results</h2>
+
+      <p class="cs-p" data-i18n="s7.intro">습관 형성 구조 설계를 통해 Input 지표와 Output 지표가 함께 개선되었으며, Unit Economics 구조도 근본적으로 개선됐다.</p>
+
+      <table class="results-table">
+        <thead>
+          <tr>
+            <th>Metric</th>
+            <th>As-is</th>
+            <th>To-be</th>
+            <th>Impact</th>
+          </tr>
+        </thead>
+        <tbody>
+          <tr>
+            <td>Repeat Rate (30-day)</td>
+            <td>25%</td>
+            <td>38%</td>
+            <td class="improvement">+52%</td>
+          </tr>
+          <tr>
+            <td>Subscription Conversion</td>
+            <td>8%</td>
+            <td>14%</td>
+            <td class="improvement">+75%</td>
+          </tr>
+          <tr>
+            <td>Avg Washes / Month</td>
+            <td>0.8</td>
+            <td>1.4</td>
+            <td class="improvement">+75%</td>
+          </tr>
+          <tr>
+            <td>LTV (월 29k 기준)</td>
+            <td>87k</td>
+            <td>152k</td>
+            <td class="improvement">+75%</td>
+          </tr>
+          <tr>
+            <td>CAC</td>
+            <td>15k</td>
+            <td>15k</td>
+            <td>유지</td>
+          </tr>
+          <tr>
+            <td>Break-even 기간</td>
+            <td>6개월</td>
+            <td>3.5개월</td>
+            <td class="improvement">-42%</td>
+          </tr>
+        </tbody>
+      </table>
+
+      <div class="result-grid">
+        <div class="result-cell">
+          <div class="result-num">+52%</div>
+          <div class="result-desc">30-day Repeat Rate</div>
+          <div class="result-sub">25% → 38%</div>
+        </div>
+        <div class="result-cell">
+          <div class="result-num">+75%</div>
+          <div class="result-desc">Subscription Conversion</div>
+          <div class="result-sub">8% → 14%</div>
+        </div>
+        <div class="result-cell">
+          <div class="result-num">1.75×</div>
+          <div class="result-desc">LTV 증가</div>
+          <div class="result-sub">87k → 152k</div>
+        </div>
+        <div class="result-cell">
+          <div class="result-num">-42%</div>
+          <div class="result-desc">Break-even 단축</div>
+          <div class="result-sub">6개월 → 3.5개월</div>
+        </div>
+      </div>
+    </section>
+
+    <!-- 08 LESSONS -->
+    <section class="cs-section" id="s8">
+      <div class="cs-num">08</div>
+      <h2 class="cs-title" data-i18n="s8.title">레슨런 <em>·</em> Lessons Learned</h2>
+
+      <div class="lesson-list">
+        <div class="lesson-item">
+          <div class="lesson-icon">01</div>
+          <div class="lesson-content">
+            <h4 data-i18n="s8.l1h">구독은 가격이 아니라 "행동의 결과"다</h4>
+            <p data-i18n="s8.l1p">전환율 문제는 항상 "이전 퍼널"에서 발생한다. 구독 화면을 바꾸기 전에 반복 경험 구조를 먼저 설계해야 했다. Output 지표를 직접 공략하면 구조적 해결이 아닌 일시적 개선에 그친다.</p>
+          </div>
+        </div>
+        <div class="lesson-item">
+          <div class="lesson-icon">02</div>
+          <div class="lesson-content">
+            <h4 data-i18n="s8.l2h">유저 행동은 주기보다 "트리거"에 의해 발생한다</h4>
+            <p data-i18n="s8.l2p">제품은 시간 기반이 아니라 상황 기반으로 설계해야 한다. "28일마다 오세요"가 아니라 "비 왔을 때 알려드릴게요"가 행동을 만든다. 인터뷰에서 유저가 직접 말한 내용을 그대로 설계에 반영한 것이 효과적이었다.</p>
+          </div>
+        </div>
+        <div class="lesson-item">
+          <div class="lesson-icon">03</div>
+          <div class="lesson-content">
+            <h4 data-i18n="s8.l3h">PM은 기능을 만드는 사람이 아니라 "행동을 설계하는 사람"이다</h4>
+            <p data-i18n="s8.l3p">앞으로는 Output 지표가 아닌 Input 행동부터 설계하고, Habit 형성 구조를 먼저 만든 뒤 BM을 그 위에 얹는 방식으로 접근하겠다. 좋은 제품은 유저에게 행동을 "강요"하지 않는다 — 행동이 자연스럽게 발생하는 구조를 만든다.</p>
+          </div>
+        </div>
+      </div>
+    </section>
+
+  </div><!-- /cs-body -->
+
+  <div class="cs-next">
+    <a href="./case-study-tada.html" class="next-link">
+      <p class="next-label">Next Project</p>
+      <p class="next-title">Tada Premium · 공항 이동 서비스</p>
+    </a>
+    <a href="./case-study-tada.html" class="next-link">
+      <span class="next-arrow">↗</span>
+    </a>
+  </div>
+
+  <footer>
+    <p>© 2026 Sumin Lee</p>
+    <p data-i18n="footer.made">Designed & Built by Sumin</p>
+  </footer>
+
+  <script>
+    /* ── i18n ──────────────────────────────────── */
+    const i18n = {
+      ko: {
+        'nav.work': 'Projects', 'nav.about': 'About',
+        'hero.sub': 'Autostay · 2026',
+        'hero.eyebrow': 'Growth Strategy · Subscription · Habit Design',
+        'hero.h1': '구독 전환이 낮은 게 아니다.<br><em>세차 습관</em>이 없는 것이다.',
+        'hero.question': '단건 이용 후 이탈률 75%에 달하던 세차 서비스에서, 환경 트리거 기반 UX와 2회 경험 압축 전략으로 구독 전환율을 8%에서 14%로, 30-day Repeat Rate를 25%에서 38%로 끌어올린 Growth 프로젝트.',
+        'meta.role.l': 'Role', 'meta.role.v': 'PM · Growth 전략 · 서비스 기획',
+        'meta.period.l': 'Period',
+        'meta.domain.l': 'Domain', 'meta.domain.v': '구독 · Growth · Habit Loop',
+        'meta.tools.l': 'Tools',
+        's1.title': '배경 · Background',
+        's1.bm': 'Business Model', 's1.bm1': '단건 세차 + 월 구독 모델 병행 운영', 's1.bm2': '정기 세차 제공을 통한 반복 방문 유도', 's1.bm3': '핵심 수익 구조는 구독 기반 LTV 극대화',
+        's1.risk': '핵심 리스크', 's1.r1': '1회 이용 후 이탈 비율 높음', 's1.r2': '세차가 "비정기 소비"로 인식 — 구독 전환 저조', 's1.r3': '구독이 할인 상품으로 인식 → 가격 경쟁 구조로 전락',
+        's2.title': '목표 · Goal',
+        's2.inp': 'Input (선행 지표)', 's2.i1': '30-day Repeat Rate: 25% → 38%', 's2.i2': 'Avg Washes/Month: 0.8 → 1.4',
+        's2.out': 'Output (성과 지표)', 's2.o1': 'Subscription Conversion: 8% → 14%', 's2.o2': '60-day Retention: +20%p',
+        's2.note': '전략적 관점: Output(구독 전환율)을 직접 높이려는 접근 대신, Input 행동(반복 세차 경험)을 먼저 설계하여 구독이 자연스럽게 발생하는 구조를 목표로 했다.',
+        's3.title': '원인 분석 · Data Analysis',
+        's3.bigstat': '1회 이용자 중 30-day Repeat Rate가 25%로 핵심 병목. 그러나 Repeat 사용자 중 구독 전환율은 32%로 상대적으로 높아, 문제는 전환 의지가 아닌 반복 경험 유도 부재임을 확인했다.',
+        's3.quant': '정량 분석', 's3.q1': '1회 이용자 중 30-day Repeat Rate: 25%', 's3.q2': 'Repeat 사용자 중 구독 전환율: 32%', 's3.q3': '평균 세차 주기: 28일 (비정기적)', 's3.q4': '고급차 사용자 Repeat Rate: 38% vs 일반차 22%',
+        's3.qual': '정성 분석', 's3.qa1': '세차는 필요 인지 타이밍이 불명확', 's3.qa2': '구독 가치보다 "귀찮음 회피"가 핵심 동기', 's3.qa3': '주기보다 "상황(비, 오염)" 기반으로 행동',
+        's4.title': '문제 정의 · Problem Definition',
+        's4.label': 'Problem Statement',
+        's4.quote': '구독 전환이 낮은 것이 아니라,<br>"세차가 반복 행동으로 설계되지 않아<br>차량 관리 습관이 형성되지 않는 구조"',
+        's5.title': '가설 · Hypothesis',
+        's5.h1': '세차는 주기 기반이 아니라 "환경 트리거 기반 행동"이다. 따라서 달력이 아닌 상황(비, 오염)에 개입해야 반복이 시작된다.',
+        's5.h2': '2회 경험을 14일 내 유도하면 Habit 형성이 촉진된다. 반복 경험이 쌓이면 구독은 설득이 아니라 자연스러운 선택이 된다.',
+        's5.h3': '구독을 가격 할인이 아니라 "루틴 관리 도구"로 재정의하면, 가격 경쟁 없이도 지속적인 전환이 가능하다.',
+        's5.strategy': '솔루션 전략 방향: Trigger 기반 UX 설계 → 2회 경험 압축 → 구독을 가격이 아닌 루틴 도구로 재정의',
+        's6.title': '액션 · Execution',
+        's6.intro': 'As-is 구조의 핵심 문제는 단건 이용 후 추가 개입이 전무하다는 것이었다. 이를 4가지 실행 축으로 재설계했다.',
+        's7.title': '결과 · Results',
+        's7.intro': '습관 형성 구조 설계를 통해 Input 지표와 Output 지표가 함께 개선되었으며, Unit Economics 구조도 근본적으로 개선됐다.',
+        's8.title': '레슨런 · Lessons Learned',
+        's8.l1h': '구독은 가격이 아니라 "행동의 결과"다',
+        's8.l1p': '전환율 문제는 항상 "이전 퍼널"에서 발생한다. 구독 화면을 바꾸기 전에 반복 경험 구조를 먼저 설계해야 했다.',
+        's8.l2h': '유저 행동은 주기보다 "트리거"에 의해 발생한다',
+        's8.l2p': '제품은 시간 기반이 아니라 상황 기반으로 설계해야 한다. "비 왔을 때 알려드릴게요"가 행동을 만든다.',
+        's8.l3h': 'PM은 기능을 만드는 사람이 아니라 "행동을 설계하는 사람"이다',
+        's8.l3p': '앞으로는 Output 지표가 아닌 Input 행동부터 설계하고, Habit 형성 구조를 먼저 만든 뒤 BM을 그 위에 얹는 방식으로 접근하겠다.',
+        'footer.made': 'Designed & Built by Sumin',
+      },
+      en: {
+        'nav.work': 'Projects', 'nav.about': 'About',
+        'hero.sub': 'Autostay · 2026',
+        'hero.eyebrow': 'Growth Strategy · Subscription · Habit Design',
+        'hero.h1': 'It\'s not that conversion is low.<br>There\'s no <em>car wash habit</em>.',
+        'hero.question': 'A growth project that lifted subscription conversion from 8% to 14% and 30-day repeat rate from 25% to 38%, by designing environment-trigger UX and a 2nd-wash-within-14-days strategy for a car wash platform with 75% churn after first use.',
+        'meta.role.l': 'Role', 'meta.role.v': 'PM · Growth Strategy · Service Design',
+        'meta.period.l': 'Period',
+        'meta.domain.l': 'Domain', 'meta.domain.v': 'Subscription · Growth · Habit Loop',
+        'meta.tools.l': 'Tools',
+        's1.title': 'Background',
+        's1.bm': 'Business Model', 's1.bm1': 'One-time wash + monthly subscription model', 's1.bm2': 'Recurring visits through scheduled car wash offering', 's1.bm3': 'Core revenue from subscription-based LTV maximization',
+        's1.risk': 'Core Risks', 's1.r1': 'High churn after first use — single visits don\'t convert to repeat', 's1.r2': 'Car washing perceived as irregular spend — low subscription uptake', 's1.r3': 'Subscription perceived as discount product → price competition trap',
+        's2.title': 'Goal',
+        's2.inp': 'Input (Leading Metrics)', 's2.i1': '30-day Repeat Rate: 25% → 38%', 's2.i2': 'Avg Washes/Month: 0.8 → 1.4',
+        's2.out': 'Output (Outcome Metrics)', 's2.o1': 'Subscription Conversion: 8% → 14%', 's2.o2': '60-day Retention: +20%p',
+        's2.note': 'Strategic lens: Rather than pushing subscription conversion directly, the goal was to design repeated wash behavior first — so subscriptions emerge naturally.',
+        's3.title': 'Data Analysis',
+        's3.bigstat': '30-day repeat rate among first-time users: 25% — the core bottleneck. However, repeat users converted to subscriptions at 32%, revealing that the problem was not conversion intent but the absence of habit-building design.',
+        's3.quant': 'Quantitative', 's3.q1': '30-day repeat rate (1st-timers): 25%', 's3.q2': 'Subscription conversion (repeat users): 32%', 's3.q3': 'Avg wash cycle: 28 days (irregular)', 's3.q4': 'Premium car repeat rate: 38% vs standard 22%',
+        's3.qual': 'Qualitative', 's3.qa1': 'Users unclear on when they need a wash', 's3.qa2': '"Avoiding hassle" is the core motivation, not subscription value', 's3.qa3': 'Behavior driven by situations (rain, dirt) not schedules',
+        's4.title': 'Problem Definition',
+        's4.label': 'Problem Statement',
+        's4.quote': 'It\'s not that subscription conversion is low.<br>It\'s that "car washing is not designed as a repeated behavior,<br>so vehicle care habits never form."',
+        's5.title': 'Hypothesis',
+        's5.h1': 'Car washing is situation-triggered, not schedule-based. Intervention must happen at environmental cues (rain, dirt) — not on a calendar.',
+        's5.h2': 'Driving a 2nd wash within 14 days accelerates habit formation. Once repeated, subscription becomes a natural choice — not a persuasion challenge.',
+        's5.h3': 'Reframing subscription from "discount product" to "routine management tool" enables conversion without price competition.',
+        's5.strategy': 'Strategy: Trigger-based UX → Compress 2nd experience within 14 days → Reframe subscription as a routine tool',
+        's6.title': 'Execution',
+        's6.intro': 'The core failure of the as-is structure was zero post-purchase engagement. This was redesigned across 4 execution pillars.',
+        's7.title': 'Results',
+        's7.intro': 'Designing a habit-formation structure improved both input and output metrics simultaneously, and fundamentally restructured unit economics.',
+        's8.title': 'Lessons Learned',
+        's8.l1h': 'Subscription is the result of behavior, not a price decision',
+        's8.l1p': 'Conversion problems always originate in the previous funnel. The right lever was repeated experience design — not subscription UI changes.',
+        's8.l2h': 'User behavior is trigger-driven, not schedule-driven',
+        's8.l2p': 'Products should be designed around situations, not time. "We\'ll let you know when it rains" creates behavior. Intervals don\'t.',
+        's8.l3h': 'A PM designs behavior — not features',
+        's8.l3p': 'Going forward: design input behaviors first, build habit structure before the business model, and layer BM on top of that foundation.',
+        'footer.made': 'Designed & Built by Sumin',
+      }
+    };
+
+    let lang = 'ko';
+    function applyLang(l) {
+      lang = l;
+      document.querySelectorAll('[data-i18n]').forEach(el => {
+        const key = el.getAttribute('data-i18n');
+        if (i18n[l][key] !== undefined) el.innerHTML = i18n[l][key];
+      });
+      document.querySelectorAll('.lang-btn').forEach(b => b.classList.toggle('active', b.dataset.lang === l));
+    }
+    document.getElementById('langToggle').addEventListener('click', e => {
+      const btn = e.target.closest('.lang-btn');
+      if (btn) applyLang(btn.dataset.lang);
+    });
+
+    /* ── NAV SCROLL ───────────────────────────── */
+    const nav = document.getElementById('nav');
+    window.addEventListener('scroll', () => {
+      nav.classList.toggle('scrolled', window.scrollY > 40);
+    }, { passive: true });
+
+    /* ── CURSOR ───────────────────────────────── */
+    const dot = document.getElementById('cur-dot');
+    const ring = document.getElementById('cur-ring');
+    let mx = 0, my = 0, rx = 0, ry = 0;
+    document.addEventListener('mousemove', e => { mx = e.clientX; my = e.clientY; dot.style.left = mx+'px'; dot.style.top = my+'px'; });
+    (function animRing() { rx+=(mx-rx)*.12; ry+=(my-ry)*.12; ring.style.left=rx+'px'; ring.style.top=ry+'px'; requestAnimationFrame(animRing); })();
+    document.querySelectorAll('a,button').forEach(el => {
+      el.addEventListener('mouseenter', () => document.body.classList.add('cursor-link'));
+      el.addEventListener('mouseleave', () => document.body.classList.remove('cursor-link'));
+    });
+
+    /* ── SECTION REVEAL ───────────────────────── */
+    const revealObs = new IntersectionObserver(entries => {
+      entries.forEach(e => { if (e.isIntersecting) { e.target.classList.add('visible'); revealObs.unobserve(e.target); } });
+    }, { threshold: 0.08 });
+    document.querySelectorAll('.cs-section').forEach(s => revealObs.observe(s));
+
+    /* ── TOC VISIBILITY + ACTIVE ──────────────── */
+    const toc = document.getElementById('csToc');
+    const hero = document.querySelector('.cs-hero');
+    const tocLinks = document.querySelectorAll('.cs-toc-link');
+    const sections = document.querySelectorAll('.cs-section');
+
+    function updateToc() {
+      const heroH = hero.offsetHeight;
+      if (window.scrollY > heroH * 0.6) {
+        toc.classList.add('toc-visible');
+      } else {
+        toc.classList.remove('toc-visible');
+      }
+      let current = '';
+      sections.forEach(sec => {
+        if (window.scrollY >= sec.offsetTop - 160) current = sec.id;
+      });
+      tocLinks.forEach(link => {
+        link.classList.toggle('active', link.getAttribute('href') === '#' + current);
+      });
+    }
+    window.addEventListener('scroll', updateToc, { passive: true });
+    updateToc();
+  </script>
+</body>
+</html>
