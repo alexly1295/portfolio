@@ -131,7 +131,7 @@
       opacity: 0; animation: fadeUp .8s .2s forwards;
     }
     .page-header h1 em { font-style: normal; color: var(--text-3); }
-    .page-desc {
+    .page-desc { white-space: nowrap;
       margin-top: 28px; font-size: 15px; color: var(--text-2); max-width: 520px; line-height: 1.8;
       opacity: 0; animation: fadeUp .7s .35s forwards;
     }
@@ -364,6 +364,7 @@
     .t-fade { transition: opacity .22s; }
     .t-fade.fading { opacity: 0; }
 
+    @media (max-width: 768px) { .page-desc { white-space: normal; } }
     @media (max-width: 860px) {
       nav, .page-header, .page-content, footer { padding-left: 28px; padding-right: 28px; }
       .project-row { grid-template-columns: 40px 1fr; }
@@ -518,7 +519,7 @@
           <div class="row-title" data-i18n="p5.title">
             Master's Graduation · Airway
           </div>
-          <div class="row-sub" data-i18n="p5.co">서울대학교 대학원 졸업 논문</div>
+          <div class="row-sub" data-i18n="p5.co">서울대학교 석사 졸업 논문</div>
         </div>
         <div class="row-right">
           <div>
