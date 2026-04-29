@@ -14,9 +14,9 @@
       --bg-2:      #111318;
       --bg-card:   #15161C;
       --bg-card-h: #1C1D25;
-      --accent:    #A78BFA;
-      --accent-dim: rgba(167,139,250,.10);
-      --accent-glow: rgba(167,139,250,.22);
+      --accent:    #4A9EFF;
+      --accent-dim: rgba(74,158,255,.10);
+      --accent-glow: rgba(74,158,255,.22);
       --text:      #F0ECE6;
       --text-2:    #CCCAC6;
       --text-3:    #5A5A66;
@@ -30,7 +30,7 @@
       background-image:
         radial-gradient(ellipse 80% 55% at -5% -5%, rgba(28,20,60,.55) 0%, transparent 50%),
         radial-gradient(ellipse 50% 40% at 105% 105%, rgba(10,6,20,.9) 0%, transparent 48%),
-        radial-gradient(ellipse 60% 40% at 60% 0%, rgba(167,139,250,.025) 0%, transparent 55%);
+        radial-gradient(ellipse 60% 40% at 60% 0%, rgba(74,158,255,.025) 0%, transparent 55%);
       color: var(--text); font-family: 'Inter', sans-serif;
       font-size: 16px; line-height: 1.6; overflow-x: hidden;
       -webkit-font-smoothing: antialiased; cursor: none;
@@ -95,7 +95,7 @@
     .cs-hero-bg {
       position: absolute; inset: 0;
       background:
-        radial-gradient(ellipse 70% 60% at 100% 0%, rgba(167,139,250,.05) 0%, transparent 55%),
+        radial-gradient(ellipse 70% 60% at 100% 0%, rgba(74,158,255,.05) 0%, transparent 55%),
         radial-gradient(ellipse 50% 40% at 0% 100%, rgba(28,20,60,.4) 0%, transparent 50%);
     }
     .cs-hero-img {
@@ -104,7 +104,7 @@
     }
     .cs-hero-number {
       font-family:'Lexend',sans-serif; font-size:180px; font-weight:700;
-      letter-spacing:-12px; color:rgba(167,139,250,.04); line-height:1;
+      letter-spacing:-12px; color:rgba(74,158,255,.04); line-height:1;
       position:absolute; right:40px; bottom:60px; user-select:none; pointer-events:none;
     }
     .cs-eyebrow {
@@ -155,7 +155,7 @@
     .cs-p strong { color:var(--text); font-weight:500; }
 
     /* CALLOUT */
-    .cs-callout { border-left:3px solid var(--accent); padding:20px 24px; background:rgba(167,139,250,.04); border-radius:0 8px 8px 0; margin:32px 0; }
+    .cs-callout { border-left:3px solid var(--accent); padding:20px 24px; background:rgba(74,158,255,.04); border-radius:0 8px 8px 0; margin:32px 0; }
     .cs-callout p { font-size:15px; color:var(--text); line-height:1.8; }
     .cs-callout strong { color:var(--accent); }
 
@@ -168,7 +168,7 @@
     .cs-col-card ul { list-style:none; display:flex; flex-direction:column; gap:10px; }
     .cs-col-card ul li { font-size:14px; color:var(--text-2); line-height:1.65; padding-left:16px; position:relative; }
     .cs-col-card ul li::before { content:''; position:absolute; left:0; top:9px; width:5px; height:5px; border-radius:50%; background:var(--border-h); }
-    .cs-col-card.accent-border { border-color:rgba(167,139,250,.22); background:rgba(167,139,250,.025); }
+    .cs-col-card.accent-border { border-color:rgba(74,158,255,.22); background:rgba(74,158,255,.025); }
     .cs-col-card.accent-border ul li::before { background:var(--accent); opacity:.6; }
 
     /* STATS GRID */
@@ -185,7 +185,7 @@
     }
     .big-stat-block::before {
       content:''; position:absolute; inset:0;
-      background:radial-gradient(ellipse 60% 70% at 0% 50%, rgba(167,139,250,.07) 0%, transparent 60%);
+      background:radial-gradient(ellipse 60% 70% at 0% 50%, rgba(74,158,255,.07) 0%, transparent 60%);
     }
     .big-stat-num {
       font-family:'Lexend',sans-serif; font-size:clamp(60px,8vw,100px);
@@ -198,25 +198,25 @@
     .segments { display:grid; grid-template-columns:repeat(2,1fr); gap:12px; margin:28px 0; }
     @media (max-width:640px) { .segments{grid-template-columns:1fr;} }
     .segment-card { background:var(--bg-card); border:1px solid var(--border); border-radius:10px; padding:18px; transition:border-color .2s; }
-    .segment-card.target { border-color:rgba(167,139,250,.35); background:rgba(167,139,250,.03); }
+    .segment-card.target { border-color:rgba(74,158,255,.35); background:rgba(74,158,255,.03); }
     .seg-icon { font-size:20px; margin-bottom:10px; }
     .seg-name { font-family:'Lexend',sans-serif; font-size:13px; font-weight:600; color:var(--text); margin-bottom:4px; }
-    .seg-name .target-badge { font-size:9px; font-weight:600; letter-spacing:0.1em; text-transform:uppercase; color:var(--accent); background:rgba(167,139,250,.12); padding:2px 7px; border-radius:100px; margin-left:6px; }
+    .seg-name .target-badge { font-size:9px; font-weight:600; letter-spacing:0.1em; text-transform:uppercase; color:var(--accent); background:rgba(74,158,255,.12); padding:2px 7px; border-radius:100px; margin-left:6px; }
     .seg-desc { font-size:12px; color:var(--text-3); line-height:1.55; }
 
     /* HYPOTHESIS */
     .hypothesis-card {
-      background:var(--bg-card); border:1px solid rgba(167,139,250,.2); border-radius:12px;
+      background:var(--bg-card); border:1px solid rgba(74,158,255,.2); border-radius:12px;
       padding:36px; margin:28px 0; position:relative; overflow:hidden;
     }
     .hypothesis-card::before {
       content:'"'; position:absolute; top:-10px; left:20px; font-family:'Lexend',sans-serif;
-      font-size:120px; font-weight:700; color:rgba(167,139,250,.06); line-height:1; pointer-events:none;
+      font-size:120px; font-weight:700; color:rgba(74,158,255,.06); line-height:1; pointer-events:none;
     }
     .hypothesis-text { font-family:'Lexend',sans-serif; font-size:clamp(15px,1.8vw,20px); font-weight:500; line-height:1.65; color:var(--text); letter-spacing:-0.2px; position:relative; z-index:1; }
     .hypothesis-text em { color:var(--accent); font-style:normal; }
     .hyp-meta { margin-top:20px; padding-top:18px; border-top:1px solid var(--border); display:flex; flex-wrap:wrap; gap:8px; }
-    .hyp-chip { font-size:11px; padding:4px 12px; border:1px solid rgba(167,139,250,.2); border-radius:100px; color:var(--text-3); }
+    .hyp-chip { font-size:11px; padding:4px 12px; border:1px solid rgba(74,158,255,.2); border-radius:100px; color:var(--text-3); }
 
     /* AS-IS TO-BE */
     .as-is-tobe { display:grid; grid-template-columns:1fr 40px 1fr; gap:0; margin:36px 0; align-items:start; }
@@ -278,7 +278,7 @@
     /* LESSON LIST */
     .lesson-list { display:flex; flex-direction:column; gap:24px; margin:28px 0; }
     .lesson-item { display:grid; grid-template-columns:40px 1fr; gap:16px; align-items:start; }
-    .lesson-icon { width:40px; height:40px; border-radius:50%; background:rgba(167,139,250,.1); border:1px solid rgba(167,139,250,.25); display:flex; align-items:center; justify-content:center; font-family:'Lexend',sans-serif; font-size:12px; font-weight:700; color:var(--accent); flex-shrink:0; }
+    .lesson-icon { width:40px; height:40px; border-radius:50%; background:rgba(74,158,255,.1); border:1px solid rgba(74,158,255,.25); display:flex; align-items:center; justify-content:center; font-family:'Lexend',sans-serif; font-size:12px; font-weight:700; color:var(--accent); flex-shrink:0; }
     .lesson-content h4 { font-family:'Lexend',sans-serif; font-size:15px; font-weight:600; color:var(--text); margin-bottom:8px; margin-top:10px; }
     .lesson-content p { font-size:14px; color:var(--text-2); line-height:1.8; }
 
@@ -568,7 +568,7 @@
               <div style="font-size:13px;color:var(--text-3);">× 반복 이용 있으나 LTV 제한적</div>
             </div>
           </div>
-          <div style="background:rgba(167,139,250,.06);border:1px solid rgba(167,139,250,.2);border-radius:12px;padding:24px;">
+          <div style="background:rgba(74,158,255,.06);border:1px solid rgba(74,158,255,.2);border-radius:12px;padding:24px;">
             <div style="font-size:11px;font-weight:600;letter-spacing:.1em;color:#4ade80;margin-bottom:10px;">핵심 타겟 ✓</div>
             <div style="font-family:'Lexend',sans-serif;font-size:18px;font-weight:700;color:var(--text);margin-bottom:12px;">가족단위 이용자</div>
             <div style="display:flex;flex-direction:column;gap:6px;">
@@ -647,7 +647,7 @@
           </ul>
         </div>
         <div class="arrow-col">
-          <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="rgba(167,139,250,.4)" stroke-width="1.5"><path d="M5 12h14M12 5l7 7-7 7"/></svg>
+          <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="rgba(74,158,255,.4)" stroke-width="1.5"><path d="M5 12h14M12 5l7 7-7 7"/></svg>
         </div>
         <div class="cs-col-card accent-border">
           <h4 class="accent" data-i18n="s6.tobe">To-be — 개선 방향</h4>
