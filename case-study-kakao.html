@@ -1,0 +1,1610 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Explainable UX for AV — Sumin Lee</title>
+  <link rel="icon" type="image/png" href="./favicon.png" />
+  <link rel="preconnect" href="https://fonts.googleapis.com" />
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+  <link href="https://fonts.googleapis.com/css2?family=Lexend:wght@300;400;500;600;700&family=Inter:wght@300;400;500;600&display=swap" rel="stylesheet" />
+  <style>
+    :root {
+      --bg:        #0B0C11;
+      --bg-2:      #111318;
+      --bg-card:   #15161C;
+      --bg-card-h: #1C1D25;
+      --accent:    #F5C518;
+      --accent-dim: rgba(245,197,24,.10);
+      --accent-glow: rgba(245,197,24,.22);
+      --red:       #E8182E;
+      --text:      #F0ECE6;
+      --text-2:    #CCCAC6;
+      --text-3:    #5A5A66;
+      --border:    rgba(255,255,255,0.07);
+      --border-h:  rgba(255,255,255,0.13);
+    }
+    *, *::before, *::after { margin:0; padding:0; box-sizing:border-box; }
+    html { scroll-behavior: smooth; }
+    body {
+      background-color: var(--bg);
+      background-image:
+        radial-gradient(ellipse 80% 55% at -5% -5%, rgba(28,42,80,.55) 0%, transparent 50%),
+        radial-gradient(ellipse 50% 40% at 105% 105%, rgba(10,8,0,.9) 0%, transparent 48%),
+        radial-gradient(ellipse 60% 40% at 60% 0%, rgba(245,197,24,.025) 0%, transparent 55%);
+      color: var(--text); font-family: 'Inter', sans-serif;
+      font-size: 16px; line-height: 1.6; overflow-x: hidden;
+      -webkit-font-smoothing: antialiased; cursor: none;
+    }
+    a { color: inherit; text-decoration: none; cursor: none; }
+
+    #grain {
+      position: fixed; inset: 0; z-index: 998; pointer-events: none; opacity: .038;
+      background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='256' height='256'%3E%3Cfilter id='n'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.85' numOctaves='4' stitchTiles='stitch'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23n)'/%3E%3C/svg%3E");
+      background-repeat: repeat; background-size: 256px 256px;
+    }
+    #cur-dot {
+      position: fixed; width: 6px; height: 6px; background: var(--text);
+      border-radius: 50%; pointer-events: none; z-index: 9999;
+      transform: translate(-50%,-50%); transition: width .15s, height .15s, background .15s;
+    }
+    #cur-ring {
+      position: fixed; width: 34px; height: 34px;
+      border: 1px solid rgba(240,236,230,.22); border-radius: 50%;
+      pointer-events: none; z-index: 9998; transform: translate(-50%,-50%);
+      transition: width .3s, height .3s, border-color .3s, opacity .3s;
+    }
+    body.cursor-link #cur-dot { width:44px; height:44px; background:var(--accent-dim); border:1px solid var(--accent-glow); }
+    body.cursor-link #cur-ring { opacity:0; }
+
+    /* NAV */
+    nav {
+      position: fixed; inset: 0 0 auto; z-index: 200;
+      padding: 22px 64px; display: flex; justify-content: space-between; align-items: center;
+      transition: background .4s, border-color .4s; border-bottom: 1px solid transparent;
+    }
+    nav.scrolled { background: rgba(11,12,17,.88); backdrop-filter: blur(20px); border-color: var(--border); }
+    .nav-back {
+      display: flex; align-items: center; gap: 10px;
+      font-size: 12px; letter-spacing: 0.1em; text-transform: uppercase;
+      color: var(--text-3); transition: color .2s;
+    }
+    .nav-back:hover { color: var(--text); }
+    .nav-back:hover svg { transform: translateX(-3px); }
+    .nav-back svg { transition: transform .2s; }
+    .nav-right { display: flex; align-items: center; gap: 40px; }
+    .nav-links { display:flex; gap:36px; list-style:none; }
+    .nav-links a { font-size:13px; letter-spacing:.06em; color:var(--text-2); transition:color .2s; position:relative; }
+    .nav-links a::after { content:''; position:absolute; left:0; bottom:-3px; width:0; height:1px; background:var(--accent); transition:width .3s; }
+    .nav-links a:hover { color:var(--text); }
+    .nav-links a:hover::after { width:100%; }
+    .lang-toggle { display:flex; align-items:center; gap:4px; border:1px solid var(--border); border-radius:100px; padding:3px 4px; }
+    .lang-btn {
+      background:none; border:none; outline:none; cursor:none;
+      font-family:'Lexend',sans-serif; font-size:10px; font-weight:600; letter-spacing:0.1em;
+      color:var(--text-3); padding:4px 10px; border-radius:100px; transition:background .2s,color .2s;
+    }
+    .lang-btn.active { background:var(--accent); color:#0B0C11; }
+    .lang-btn:hover:not(.active) { color:var(--text); }
+
+    /* HERO */
+    .cs-hero {
+      min-height: 100vh; display: flex; flex-direction: column;
+      justify-content: flex-end; padding: 0 64px 80px;
+      position: relative; overflow: hidden;
+    }
+    .cs-hero-bg {
+      position: absolute; inset: 0;
+      background:
+        radial-gradient(ellipse 70% 60% at 100% 0%, rgba(245,197,24,.05) 0%, transparent 55%),
+        radial-gradient(ellipse 50% 40% at 0% 100%, rgba(28,42,80,.4) 0%, transparent 50%);
+    }
+    .cs-hero-img {
+      position: absolute; inset: 0; width: 100%; height: 100%;
+      object-fit: cover; opacity: .18; z-index: 0; pointer-events: none;
+    }
+    .cs-hero-number {
+      font-family:'Lexend',sans-serif; font-size:180px; font-weight:700;
+      letter-spacing:-12px; color:rgba(245,197,24,.04); line-height:1;
+      position:absolute; right:40px; bottom:60px; user-select:none; pointer-events:none;
+    }
+    .cs-eyebrow {
+      display:inline-flex; align-items:center; gap:8px;
+      font-size:10px; font-weight:500; letter-spacing:0.22em; text-transform:uppercase;
+      color:var(--accent); margin-bottom:28px;
+      opacity:0; animation:fadeUp .7s .2s forwards;
+    }
+    .cs-eyebrow::before { content:''; width:3px; height:12px; background:var(--accent); border-radius:2px; }
+    .cs-hero h1 {
+      font-family:'Lexend',sans-serif; font-size:clamp(30px, 4.8vw, 70px);
+      font-weight:700; letter-spacing:-2px; line-height:1.05;
+      max-width:900px; margin-bottom:28px;
+      opacity:0; animation:fadeUp .9s .3s forwards;
+    }
+    .cs-hero h1 em { font-style:normal; color:var(--accent); }
+    .cs-hero-sub {
+      font-size:13px; letter-spacing:0.06em; text-transform:uppercase;
+      color:var(--text-3); margin-bottom:16px;
+      opacity:0; animation:fadeUp .7s .25s forwards;
+    }
+    .cs-hero-question {
+      font-size:clamp(14px,1.4vw,18px); color:var(--text-2);
+      max-width:620px; line-height:1.75; font-weight:300;
+      opacity:0; animation:fadeUp .8s .45s forwards;
+    }
+    .cs-hero-meta {
+      display:flex; gap:48px; flex-wrap:wrap; margin-top:56px;
+      padding-top:40px; border-top:1px solid var(--border);
+      opacity:0; animation:fadeUp .7s .6s forwards;
+    }
+    .meta-label { font-size:9px; letter-spacing:0.22em; text-transform:uppercase; color:var(--text-3); margin-bottom:6px; }
+    .meta-val { font-family:'Lexend',sans-serif; font-size:14px; font-weight:500; color:var(--text); }
+    @keyframes fadeUp { to { opacity:1; transform:translateY(0); } }
+
+    /* BODY */
+    .cs-body { max-width:900px; margin:0 auto; padding:0 64px 160px; }
+    @media (max-width:900px) { .cs-body{padding:0 28px 100px;} nav{padding:18px 28px;} .cs-hero{padding:0 28px 60px;} }
+
+    /* SECTION */
+    .cs-section { padding:80px 0; border-top:1px solid var(--border); opacity:0; transform:translateY(28px); transition:opacity .75s,transform .75s; }
+    .cs-section.visible { opacity:1; transform:none; }
+    .cs-section-num { font-family:'Lexend',sans-serif; font-size:11px; font-weight:500; letter-spacing:0.22em; text-transform:uppercase; color:var(--accent); margin-bottom:8px; }
+    .cs-section-title { font-family:'Lexend',sans-serif; font-size:clamp(24px,3vw,36px); font-weight:700; letter-spacing:-1px; line-height:1.1; margin-bottom:40px; color:var(--text); }
+    .cs-section-title em { font-style:normal; color:var(--accent); }
+
+    .cs-p { font-size:15px; color:var(--text-2); line-height:1.85; margin-bottom:20px; }
+    .cs-p:last-child { margin-bottom:0; }
+    .cs-p strong { color:var(--text); font-weight:500; }
+
+    /* CALLOUT */
+    .cs-callout { border-left:3px solid var(--accent); padding:20px 24px; background:rgba(245,197,24,.04); border-radius:0 8px 8px 0; margin:32px 0; }
+    .cs-callout p { font-size:15px; color:var(--text); line-height:1.8; }
+    .cs-callout strong { color:var(--accent); }
+
+    /* BIG STAT HERO */
+    .big-stat-block {
+      display:flex; align-items:center; gap:32px; padding:40px;
+      background:var(--bg-card); border:1px solid var(--border); border-radius:16px;
+      margin:36px 0; position:relative; overflow:hidden;
+    }
+    .big-stat-block::before {
+      content:''; position:absolute; inset:0;
+      background:radial-gradient(ellipse 60% 70% at 0% 50%, rgba(245,197,24,.07) 0%, transparent 60%);
+    }
+    .big-stat-num {
+      font-family:'Lexend',sans-serif; font-size:clamp(60px,8vw,100px);
+      font-weight:700; letter-spacing:-4px; color:var(--accent); line-height:1; flex-shrink:0;
+    }
+    .big-stat-desc { font-size:15px; color:var(--text-2); line-height:1.75; }
+    .big-stat-desc strong { color:var(--text); font-weight:500; }
+
+    /* TWO COL */
+    .cs-two-col { display:grid; grid-template-columns:1fr 1fr; gap:24px; margin:28px 0; }
+    @media (max-width:640px) { .cs-two-col{grid-template-columns:1fr;} .cs-stats{grid-template-columns:1fr 1fr;} }
+    .cs-col-card { background:var(--bg-card); border:1px solid var(--border); border-radius:12px; padding:28px; }
+    .cs-col-card h4 { font-family:'Lexend',sans-serif; font-size:12px; font-weight:600; letter-spacing:0.1em; text-transform:uppercase; color:var(--text-3); margin-bottom:16px; }
+    .cs-col-card h4.accent { color:var(--accent); }
+    .cs-col-card ul { list-style:none; display:flex; flex-direction:column; gap:10px; }
+    .cs-col-card ul li { font-size:14px; color:var(--text-2); line-height:1.65; padding-left:16px; position:relative; }
+    .cs-col-card ul li::before { content:''; position:absolute; left:0; top:9px; width:5px; height:5px; border-radius:50%; background:var(--border-h); }
+    .cs-col-card.accent-border { border-color:rgba(245,197,24,.22); background:rgba(245,197,24,.025); }
+    .cs-col-card.accent-border ul li::before { background:var(--accent); opacity:.6; }
+
+    /* QUOTE ROW */
+    .quote-grid { display:grid; grid-template-columns:1fr 1fr; gap:16px; margin:28px 0; }
+    @media (max-width:640px) { .quote-grid{grid-template-columns:1fr;} }
+    .quote-card {
+      background:var(--bg-card); border:1px solid var(--border); border-radius:10px;
+      padding:20px 20px 20px 24px; position:relative;
+    }
+    .quote-card::before { content:'"'; position:absolute; top:8px; left:14px; font-family:'Lexend',sans-serif; font-size:36px; color:var(--accent); opacity:.3; line-height:1; }
+    .quote-text { font-size:14px; color:var(--text-2); line-height:1.7; padding-top:12px; }
+
+    /* STATS GRID */
+    .cs-stats { display:grid; grid-template-columns:repeat(3,1fr); gap:2px; background:var(--border); margin:36px 0; }
+    .cs-stat { background:var(--bg-card); padding:28px 24px; }
+    .cs-stat-num { font-family:'Lexend',sans-serif; font-size:36px; font-weight:700; letter-spacing:-2px; color:var(--accent); line-height:1; margin-bottom:8px; }
+    .cs-stat-label { font-size:12px; color:var(--text-3); line-height:1.5; }
+
+    /* SEGMENTS */
+    .segments { display:grid; grid-template-columns:repeat(4,1fr); gap:12px; margin:28px 0; }
+    @media (max-width:700px) { .segments{grid-template-columns:1fr 1fr;} }
+    .segment-card { background:var(--bg-card); border:1px solid var(--border); border-radius:10px; padding:18px; transition:border-color .2s; }
+    .segment-card.target { border-color:rgba(245,197,24,.35); background:rgba(245,197,24,.03); }
+    .seg-icon { font-size:20px; margin-bottom:10px; }
+    .seg-name { font-family:'Lexend',sans-serif; font-size:13px; font-weight:600; color:var(--text); margin-bottom:4px; }
+    .seg-name .target-badge { font-size:9px; font-weight:600; letter-spacing:0.1em; text-transform:uppercase; color:var(--accent); background:rgba(245,197,24,.12); padding:2px 7px; border-radius:100px; margin-left:6px; }
+    .seg-desc { font-size:12px; color:var(--text-3); line-height:1.55; }
+
+    /* HYPOTHESIS */
+    .hypothesis-card {
+      background:var(--bg-card); border:1px solid rgba(245,197,24,.2); border-radius:12px;
+      padding:36px; margin:28px 0; position:relative; overflow:hidden;
+    }
+    .hypothesis-card::before {
+      content:'"'; position:absolute; top:-10px; left:20px; font-family:'Lexend',sans-serif;
+      font-size:120px; font-weight:700; color:rgba(245,197,24,.06); line-height:1; pointer-events:none;
+    }
+    .hypothesis-text { font-family:'Lexend',sans-serif; font-size:clamp(15px,1.8vw,20px); font-weight:500; line-height:1.65; color:var(--text); letter-spacing:-0.2px; position:relative; z-index:1; }
+    .hypothesis-text em { color:var(--accent); font-style:normal; }
+    .hyp-meta { margin-top:20px; padding-top:18px; border-top:1px solid var(--border); display:flex; flex-wrap:wrap; gap:8px; }
+    .hyp-chip { font-size:11px; padding:4px 12px; border:1px solid rgba(245,197,24,.2); border-radius:100px; color:var(--text-3); }
+
+    /* AS-IS TO-BE */
+    .as-is-tobe { display:grid; grid-template-columns:1fr 40px 1fr; gap:0; margin:36px 0; align-items:start; }
+    @media (max-width:640px) { .as-is-tobe{grid-template-columns:1fr;} .arrow-col{display:none;} }
+    .arrow-col { display:flex; justify-content:center; align-items:center; padding-top:80px; }
+
+    /* 4-ELEMENT FRAMEWORK */
+    .framework { display:grid; grid-template-columns:repeat(4,1fr); gap:12px; margin:28px 0; }
+    @media (max-width:700px) { .framework{grid-template-columns:1fr 1fr;} }
+    .fw-card {
+      background:var(--bg-card); border:1px solid var(--border); border-radius:12px;
+      padding:22px 18px; position:relative; overflow:hidden;
+      transition:border-color .25s;
+    }
+    .fw-card:hover { border-color:rgba(245,197,24,.3); }
+    .fw-rank {
+      font-family:'Lexend',sans-serif; font-size:11px; font-weight:700;
+      color:var(--accent); letter-spacing:0.1em; margin-bottom:10px;
+    }
+    .fw-key {
+      font-family:'Lexend',sans-serif; font-size:18px; font-weight:700;
+      color:var(--text); margin-bottom:6px;
+    }
+    .fw-label { font-size:12px; color:var(--text-3); margin-bottom:10px; }
+    .fw-example { font-size:12px; color:var(--text-2); line-height:1.6; padding:10px 12px; background:rgba(255,255,255,.03); border-radius:6px; }
+    .fw-example em { color:var(--accent); font-style:normal; font-weight:500; }
+
+    /* EXECUTION PLAN */
+    .exec-plan-wrap { margin-top:72px; }
+    .exec-plan-header { display:grid; grid-template-columns:1fr 1fr; gap:60px; margin-bottom:40px; align-items:start; }
+    @media(max-width:680px){ .exec-plan-header{grid-template-columns:1fr;gap:16px;} }
+    .exec-plan-htitle { font-family:'Lexend',sans-serif; font-size:clamp(18px,2vw,24px); font-weight:700; color:var(--text); line-height:1.35; }
+    .exec-plan-hdesc { font-size:14px; color:var(--text-2); line-height:1.9; }
+    .exec-plan-hdesc p { margin-bottom:14px; }
+    .exec-plan-hdesc p:last-child { margin-bottom:0; }
+    .exec-plan-hdesc strong { color:var(--text); font-weight:500; }
+    .exec-list { display:flex; flex-direction:column; gap:10px; }
+    .exec-item { display:block; background:var(--bg-card); border:1px solid var(--border); border-radius:14px; padding:20px 24px; }
+    .exec-item-num { font-family:'Lexend',sans-serif; font-size:10px; font-weight:700; letter-spacing:.2em; color:var(--accent); margin-bottom:8px; }
+    .exec-item-title { font-family:'Lexend',sans-serif; font-size:16px; font-weight:700; color:var(--text); line-height:1.3; margin-bottom:5px; }
+    .exec-item-sub { font-size:13px; color:var(--text-3); line-height:1.6; }
+    .exec-item-img { display:none; }
+
+    /* UI FLOW */
+    /* UI STATE FLOW — BLOCK LAYOUT */
+    .ui-block-list { display:flex; flex-direction:column; gap:0; margin:0; }
+    .ui-block { padding:52px 0 0; border-top:1px solid var(--border); }
+    .ui-block-header { margin-bottom:32px; }
+    .ui-block-num { font-family:'Lexend',sans-serif; font-size:10px; font-weight:700; letter-spacing:.2em; text-transform:uppercase; color:var(--accent); margin-bottom:10px; }
+    .ui-block-name { font-family:'Lexend',sans-serif; font-size:clamp(20px,2.2vw,28px); font-weight:700; color:var(--text); line-height:1.15; }
+    .ui-block-meta { display:grid; grid-template-columns:1fr 1fr; gap:52px; margin-bottom:32px; }
+    @media(max-width:640px){ .ui-block-meta{grid-template-columns:1fr;gap:20px;} }
+    .ui-block-left-sub { font-size:13px; color:var(--text-3); line-height:1.7; margin-top:8px; }
+    .ui-block-right p { font-size:14px; color:var(--text-2); line-height:1.9; margin-bottom:14px; }
+    .ui-block-right p:last-child { margin-bottom:0; }
+    .ui-block-right strong { color:var(--text); font-weight:500; }
+    .ui-block-right em { color:var(--accent); font-style:normal; }
+    .ui-voice::before { content:'\201C'; color:var(--accent); font-size:1.25em; line-height:0; vertical-align:-0.1em; margin-right:3px; }
+    .ui-voice::after  { content:'\201D'; color:var(--accent); font-size:1.25em; line-height:0; vertical-align:-0.1em; margin-left:3px; }
+    .ui-img-wrap { background:var(--bg-card-h); border:1px solid var(--border); border-radius:16px; overflow:hidden; margin:32px 0 60px; aspect-ratio:4/3; display:flex; align-items:center; justify-content:center; position:relative; }
+    @media(min-width:900px){ .ui-img-wrap { aspect-ratio:16/9; } }
+    .ui-img-wrap img { max-width:100%; max-height:100%; width:auto; height:auto; object-fit:contain; display:block; }
+    .ui-img-hint { font-size:11px; color:var(--border-h); letter-spacing:.12em; text-transform:uppercase; user-select:none; pointer-events:none; position:absolute; }
+    .ui-img-wrap img ~ .ui-img-hint { display:none; }
+    /* keep old classes for any legacy references */
+    .ui-flow { display:grid; grid-template-columns:repeat(4,1fr); gap:12px; margin:36px 0; }
+    @media (max-width:700px) { .ui-flow{grid-template-columns:1fr 1fr;} }
+    .ui-state {
+      background:var(--bg-card); border:1px solid var(--border); border-radius:12px;
+      padding:20px; display:flex; flex-direction:column; gap:12px;
+    }
+    .ui-state-num { font-size:9px; font-weight:600; letter-spacing:0.2em; text-transform:uppercase; color:var(--text-3); }
+    .ui-dot { width:10px; height:10px; border-radius:50%; flex-shrink:0; }
+    .ui-dot.yellow { background:#F5C518; box-shadow:0 0 8px rgba(245,197,24,.5); }
+    .ui-dot.blue   { background:#4A9EFF; box-shadow:0 0 8px rgba(74,158,255,.5); }
+    .ui-dot.green  { background:#22C55E; box-shadow:0 0 8px rgba(34,197,94,.5); }
+    .ui-status { display:flex; align-items:center; gap:8px; }
+    .ui-status-text { font-size:11px; font-weight:600; letter-spacing:0.06em; }
+    .ui-status-text.yellow { color:#F5C518; }
+    .ui-status-text.blue   { color:#4A9EFF; }
+    .ui-status-text.green  { color:#22C55E; }
+    .ui-title { font-family:'Lexend',sans-serif; font-size:14px; font-weight:700; color:var(--text); line-height:1.3; }
+    .ui-body { font-size:12px; color:var(--text-2); line-height:1.6; }
+    .ui-eta { font-family:'Lexend',sans-serif; font-size:20px; font-weight:700; color:var(--accent); }
+    .ui-progress { display:flex; flex-direction:column; gap:5px; }
+    .ui-step { display:flex; align-items:center; gap:7px; font-size:11px; color:var(--text-3); }
+    .ui-step-dot { width:6px; height:6px; border-radius:50%; background:var(--border-h); flex-shrink:0; }
+    .ui-step.active .ui-step-dot { background:var(--accent); }
+    .ui-step.done .ui-step-dot   { background:#22C55E; }
+    .ui-step.active { color:var(--text-2); }
+    .ui-btn { font-size:12px; font-weight:600; text-align:center; padding:10px; border-radius:8px; margin-top:4px; }
+    .ui-btn.primary { background:rgba(74,158,255,.15); color:#4A9EFF; }
+    .ui-btn.success { background:rgba(34,197,94,.15); color:#22C55E; }
+    .ui-btn.neutral { background:rgba(255,255,255,.06); color:var(--text-2); }
+    .ui-collab { font-size:11px; color:var(--text-3); line-height:1.55; padding-top:8px; border-top:1px solid var(--border); }
+
+    /* STRATEGIES */
+    .strategies { display:grid; grid-template-columns:repeat(3,1fr); gap:2px; background:var(--border); margin:28px 0; }
+    @media (max-width:640px) { .strategies{grid-template-columns:1fr;} }
+    .strat-card { background:var(--bg-card); padding:28px; }
+    .strat-num { font-size:10px; font-weight:600; letter-spacing:0.18em; text-transform:uppercase; color:var(--accent); margin-bottom:10px; }
+    .strat-name { font-family:'Lexend',sans-serif; font-size:16px; font-weight:600; color:var(--text); margin-bottom:8px; }
+    .strat-desc { font-size:13px; color:var(--text-2); line-height:1.65; }
+
+    /* RESULT GRID */
+    .result-grid { display:grid; grid-template-columns:repeat(2,1fr); gap:2px; background:var(--border); margin:36px 0; }
+    .result-cell { background:var(--bg-card); padding:32px 28px; position:relative; overflow:hidden; }
+    .result-cell::before { content:''; position:absolute; bottom:0; left:0; right:0; height:2px; background:linear-gradient(to right, var(--accent), transparent); }
+    .result-num { font-family:'Lexend',sans-serif; font-size:48px; font-weight:700; letter-spacing:-3px; color:var(--accent); line-height:1; margin-bottom:10px; }
+    .result-desc { font-size:13px; color:var(--text-2); line-height:1.6; }
+    .result-sub  { font-size:11px; color:var(--text-3); margin-top:4px; letter-spacing:0.04em; }
+
+    /* METRICS TABLE */
+    .metrics-table { width:100%; border-collapse:collapse; margin:28px 0; }
+    .metrics-table th { font-size:10px; letter-spacing:0.16em; text-transform:uppercase; color:var(--text-3); text-align:left; padding:10px 16px; border-bottom:1px solid var(--border); }
+    .metrics-table td { font-size:13px; color:var(--text-2); padding:14px 16px; border-bottom:1px solid var(--border); line-height:1.5; }
+    .metrics-table td:first-child { color:var(--text); font-weight:500; }
+    .metrics-table tr:last-child td { border-bottom:none; }
+    .metrics-table tr:hover td { background:rgba(255,255,255,.02); }
+
+    /* LESSONS */
+    .lesson-list { display:flex; flex-direction:column; gap:24px; margin:28px 0; }
+    .lesson-item { display:grid; grid-template-columns:40px 1fr; gap:16px; align-items:start; }
+    .lesson-icon { width:40px; height:40px; border-radius:50%; background:rgba(245,197,24,.1); border:1px solid rgba(245,197,24,.25); display:flex; align-items:center; justify-content:center; font-family:'Lexend',sans-serif; font-size:12px; font-weight:700; color:var(--accent); flex-shrink:0; }
+    .lesson-content h4 { font-family:'Lexend',sans-serif; font-size:15px; font-weight:600; color:var(--text); margin-bottom:8px; margin-top:10px; }
+    .lesson-content p { font-size:14px; color:var(--text-2); line-height:1.8; }
+
+    /* NEXT */
+    .cs-next { border-top:1px solid var(--border); padding:64px; display:flex; justify-content:space-between; align-items:center; }
+    .next-label { font-size:10px; letter-spacing:0.22em; text-transform:uppercase; color:var(--text-3); margin-bottom:12px; }
+    .next-title { font-family:'Lexend',sans-serif; font-size:22px; font-weight:600; color:var(--text); transition:color .2s; }
+    .next-link:hover .next-title { color:var(--accent); }
+    .next-arrow { font-size:28px; color:var(--text-3); transition:color .3s,transform .3s; }
+    .next-link:hover .next-arrow { color:var(--accent); transform:translate(6px,-6px); }
+
+    footer { padding:28px 64px; border-top:1px solid var(--border); display:flex; justify-content:space-between; align-items:center; }
+    footer p { font-size:11px; color:var(--text-3); }
+
+    .t-fade { transition:opacity .25s; }
+    .t-fade.fading { opacity:0; }
+
+    /* SEGMENT MATRIX TABLE */
+    .seg-matrix-wrap{margin:16px 0 48px;overflow:hidden;border-radius:12px;border:1px solid var(--border);}
+    .seg-matrix{width:100%;border-collapse:collapse;background:var(--bg-card);}
+    .seg-matrix th{font-size:10px;font-weight:600;letter-spacing:.14em;text-transform:uppercase;color:var(--text-3);padding:11px 16px;text-align:left;border-bottom:1px solid var(--border);white-space:nowrap;background:rgba(255,255,255,.02);}
+    .seg-matrix td{font-size:13px;color:var(--text-3);padding:14px 16px;border-bottom:1px solid var(--border);vertical-align:middle;white-space:nowrap;}
+    .seg-matrix tr:last-child td{border-bottom:none;}
+    .seg-matrix tr.row-target td{color:var(--text-2);background:rgba(245,197,24,.04);}
+    .seg-matrix tr.row-target td:first-child{border-left:2px solid var(--accent);}
+    .seg-name-wrap{display:flex;align-items:center;gap:8px;}
+    .seg-name-label{font-family:'Lexend',sans-serif;font-size:13px;font-weight:600;color:var(--text);white-space:nowrap;}
+    .seg-name-wrap .seg-tag{font-size:8px;font-weight:700;letter-spacing:.1em;text-transform:uppercase;background:var(--accent);color:#0B0C11;border-radius:3px;padding:2px 6px;flex-shrink:0;}
+    .seg-val-accent{color:var(--accent);font-weight:600;}
+    .seg-val-green{color:#4ade80;font-weight:600;}
+    .seg-val-blue{color:#60a5fa;font-weight:600;}
+    .seg-stars{letter-spacing:1px;font-size:11px;}
+    .seg-stars .on{color:var(--accent);}
+    .seg-stars .off{color:var(--border-h);}
+    .seg-pill-primary{display:inline-flex;align-items:center;gap:5px;background:rgba(245,197,24,.12);border:1px solid rgba(245,197,24,.35);color:var(--accent);font-size:11px;font-weight:600;letter-spacing:.04em;padding:5px 14px;border-radius:100px;white-space:nowrap;}
+    .seg-pill{display:inline-flex;align-items:center;justify-content:center;background:var(--bg-card-h);border:1px solid var(--border);color:var(--text-3);font-size:11px;padding:5px 14px;border-radius:100px;white-space:nowrap;min-width:80px;}
+
+    /* PROBLEM SECTION REDESIGN */
+    .prob-statement-card{background:var(--bg-card);border:1px solid var(--border);border-radius:16px;padding:52px 48px;text-align:center;margin:32px 0;}
+    .prob-icon-wrap{width:48px;height:48px;border:1px solid var(--accent);border-radius:50%;display:flex;align-items:center;justify-content:center;margin:0 auto 14px;color:var(--accent);}
+    .prob-stmt-label{font-size:10px;font-weight:600;letter-spacing:.22em;text-transform:uppercase;color:var(--text-3);margin-bottom:22px;}
+    .prob-quote{font-family:'Lexend',sans-serif;font-size:clamp(15px,1.8vw,22px);font-weight:500;line-height:1.65;color:var(--text);max-width:720px;margin:0 auto;}
+    .prob-metrics{display:grid;grid-template-columns:1fr 1fr;gap:32px;align-items:center;margin-top:48px;padding-top:40px;border-top:1px solid var(--border);}
+    @media(max-width:640px){.prob-metrics{grid-template-columns:1fr;}}
+    .prob-metrics-q{font-family:'Lexend',sans-serif;font-size:clamp(16px,1.7vw,21px);font-weight:600;color:var(--text);line-height:1.35;}
+    .prob-pills{display:flex;flex-direction:column;gap:10px;}
+    .prob-pill{display:flex;align-items:center;gap:12px;background:var(--bg-card-h);border:1px solid var(--border);border-radius:100px;padding:12px 20px;font-size:13px;color:var(--text-2);}
+    .prob-pill-icon{width:26px;height:26px;border-radius:50%;border:1px solid var(--border-h);display:flex;align-items:center;justify-content:center;flex-shrink:0;font-size:11px;color:var(--text-3);}
+
+    /* ── FLOATING TOC ───────────────────── */
+    .cs-toc {
+      position: fixed; right: 28px; top: 50%; transform: translateY(-50%);
+      z-index: 150; display: flex; flex-direction: column; gap: 0;
+      pointer-events: auto; align-items: flex-start; width: max-content;
+      transition: opacity .35s, visibility .35s;
+    }
+    .cs-toc-link {
+      display: flex; align-items: center; gap: 10px; padding: 5px 0;
+      color: var(--text-3); font-size: 11px; font-family: 'Inter', sans-serif;
+      letter-spacing: 0.03em; white-space: nowrap; text-decoration: none;
+      cursor: none; transition: color .25s, opacity .25s; opacity: .4;
+    }
+    .cs-toc-link:hover { color: var(--text-2); opacity: .85; }
+    .cs-toc-link.active { color: var(--accent); opacity: 1; font-weight: 500; }
+    .cs-toc-tick {
+      width: 1.5px; height: 12px; background: currentColor; border-radius: 2px;
+      flex-shrink: 0; transition: height .25s, width .25s;
+    }
+    .cs-toc-link.active .cs-toc-tick { height: 20px; width: 2px; }
+    @media (max-width: 1260px) { .cs-toc { display: none; } }
+
+    /* ── CONTEXT SUBSECTIONS ─────────────── */
+    .ctx-label {
+      font-size: 10px; font-weight: 600; letter-spacing: .18em;
+      text-transform: uppercase; color: var(--text-3);
+      display: flex; align-items: center; gap: 12px; margin: 32px 0 16px;
+    }
+    .ctx-label::after { content:''; flex:1; height:1px; background:var(--border); }
+    .ctx-two-col { display:grid; grid-template-columns:1fr 1.15fr; gap:14px; }
+    @media(max-width:760px){ .ctx-two-col{grid-template-columns:1fr;} }
+    .ctx-chart {
+      display: flex; flex-direction: column; gap: 20px;
+      padding: 24px 28px; background: var(--bg-card);
+      border: 1px solid var(--border); border-radius: 12px;
+    }
+    .ctx-line-wrap { background:var(--bg-card); border:1px solid var(--border); border-radius:12px; padding:24px 28px; display:flex; flex-direction:column; }
+    .ctx-line-wrap svg { flex:1; min-height:0; }
+    .chart-item { display: flex; flex-direction: column; gap: 8px; }
+    .chart-item-label { font-size: 12px; color: var(--text-3); line-height: 1.4; }
+    .chart-bar-row { display: flex; align-items: center; gap: 12px; }
+    .chart-bar-wrap {
+      flex: 1; height: 5px; background: rgba(255,255,255,.06); border-radius: 3px; overflow: hidden;
+    }
+    .chart-bar { height: 100%; border-radius: 3px; background: var(--accent); }
+    .chart-pct {
+      font-family:'Lexend',sans-serif; font-size:13px; font-weight:700;
+      color:var(--accent); min-width:38px; text-align:right;
+    }
+    .ctx-quotes { display: flex; flex-direction: column; gap: 10px; }
+    .ctx-quote {
+      display: flex; align-items: flex-start; gap: 16px; padding: 16px 20px;
+      background: var(--bg-card); border: 1px solid var(--border); border-radius: 10px;
+      transition: border-color .2s;
+    }
+    .ctx-quote:hover { border-color: var(--border-h); }
+    .ctx-num {
+      font-family:'Lexend',sans-serif; font-size:11px; font-weight:700;
+      color:var(--accent); background:rgba(245,197,24,.1);
+      border:1px solid rgba(245,197,24,.25); border-radius:50%;
+      width:26px; height:26px; display:flex; align-items:center; justify-content:center;
+      flex-shrink:0; margin-top:1px;
+    }
+    .ctx-text { font-size:14px; color:var(--text-2); line-height:1.7; }
+
+    /* ── JOURNEY VOICE MAP ─────────────── */
+    /* JTBD Layout */
+    .jtbd-wrap{background:var(--bg-card);border:1px solid var(--border);border-radius:16px;padding:32px;margin:24px 0 32px;display:flex;gap:20px;}
+    .jtbd-axis{display:flex;flex-direction:column;align-items:center;gap:0;width:26px;flex-shrink:0;padding-top:36px;}
+    .jtbd-axis-arrow{width:2px;flex:1;background:linear-gradient(to bottom,var(--accent) 0%,transparent 100%);position:relative;margin-bottom:8px;}
+    .jtbd-axis-arrow::before{content:'';position:absolute;top:0;left:50%;transform:translateX(-50%);width:0;height:0;border-left:4px solid transparent;border-right:4px solid transparent;border-bottom:6px solid var(--accent);}
+    .jtbd-axis-label{font-size:9px;font-weight:700;letter-spacing:.15em;color:var(--text-3);writing-mode:vertical-rl;}
+    .jtbd-body{flex:1;display:flex;flex-direction:column;gap:10px;}
+    .jtbd-label{font-size:9px;font-weight:700;letter-spacing:.2em;text-transform:uppercase;color:var(--text-3);margin-bottom:18px;}
+    .jtbd-row{display:grid;grid-template-columns:160px 1fr;gap:10px;align-items:stretch;}
+    .jtbd-cat{background:var(--bg-card-h);border:1px solid var(--border-h);border-radius:12px;padding:20px 16px;display:flex;flex-direction:column;gap:10px;}
+    .jtbd-cat-icon{width:26px;height:26px;color:var(--text-2);}
+    .jtbd-cat-name{font-family:'Lexend',sans-serif;font-size:15px;font-weight:600;color:var(--text);}
+    .jtbd-cards{display:flex;gap:10px;}
+    .jtbd-card{flex:1;background:var(--bg-card-h);border:1px solid var(--border);border-radius:12px;padding:16px 15px;}
+    .jtbd-card-title{font-size:13px;font-weight:600;color:var(--text);margin-bottom:6px;}
+    .jtbd-card-desc{font-size:12.5px;color:var(--text-2);line-height:1.65;}
+    @media(max-width:720px){.jtbd-wrap{flex-direction:column;} .jtbd-axis{flex-direction:row;width:auto;padding-top:0;} .jtbd-axis-arrow{flex:1;height:2px;width:auto;background:linear-gradient(to right,var(--accent),transparent);} .jtbd-axis-label{writing-mode:horizontal-tb;transform:none;} .jtbd-row{grid-template-columns:1fr;} .jtbd-cards{flex-direction:column;}}
+  </style>
+</head>
+<body>
+  <div id="grain" aria-hidden="true"></div>
+  <div id="cur-dot"></div>
+  <div id="cur-ring"></div>
+  <nav class="cs-toc" id="csToc"></nav>
+
+  <!-- NAV -->
+  <nav id="nav">
+    <a href="./work.html" class="nav-back" onclick="if(history.length>1){history.back();return false;}">
+      <svg width="16" height="16" viewBox="0 0 16 16" fill="none" stroke="currentColor" stroke-width="1.5"><path d="M10 12L6 8l4-4"/></svg>
+    </a>
+    <div class="nav-right">
+      <ul class="nav-links">
+        <li><a href="./work.html" data-i18n="nav.work">Projects</a></li>
+        <li><a href="./contact.html" data-i18n="nav.about">About</a></li>
+      </ul>
+      <div class="lang-toggle" id="langToggle">
+        <button class="lang-btn active" data-lang="ko">KR</button>
+        <button class="lang-btn" data-lang="en">EN</button>
+      </div>
+    </div>
+  </nav>
+
+  <!-- HERO -->
+  <section class="cs-hero">
+    <div class="cs-hero-bg"></div>
+    <img class="cs-hero-img" src="./thumb-kakao.jpg" alt="" />
+    <div class="cs-hero-number" aria-hidden="true">01</div>
+
+    <p class="cs-hero-sub" data-i18n="hero.sub">KakaoMobility · UX Service Growth Case · 2026</p>
+    <div class="cs-eyebrow" data-i18n="hero.eyebrow">Explainable UX · Autonomous Vehicle</div>
+
+    <h1 data-i18n="hero.h1">
+      자율주행 차량이 멈췄다.<br><span style="white-space:nowrap">사용자에게 <em>무엇을</em> 전달해야 하는가.</span>
+    </h1>
+
+    <p class="cs-hero-question" data-i18n="hero.question">
+      기사 없는 자율주행 서비스에서 센서 오류·원격 승인 등 예외 상황 발생 시,
+      사용자의 인지 불일치를 해소하는 Explainable UX 설계 전략
+    </p>
+
+    <div class="cs-hero-meta">
+      <div>
+        <div class="meta-label" data-i18n="meta.role.l">Role</div>
+        <div class="meta-val" data-i18n="meta.role.v">서비스 기획 · PM (역기획)</div>
+      </div>
+      <div>
+        <div class="meta-label" data-i18n="meta.period.l">Period</div>
+        <div class="meta-val">2026</div>
+      </div>
+      <div>
+        <div class="meta-label" data-i18n="meta.domain.l">Domain</div>
+        <div class="meta-val" data-i18n="meta.domain.v">모빌리티 · Robotaxi</div>
+      </div>
+      <div>
+        <div class="meta-label" data-i18n="meta.tools.l">Tools</div>
+        <div class="meta-val">Figma · Amplitude · Notion</div>
+      </div>
+    </div>
+  </section>
+
+  <!-- BODY -->
+  <div class="cs-body">
+
+    <!-- 01 BACKGROUND -->
+    <section class="cs-section" id="s1">
+      <div class="cs-section-num">01</div>
+      <h2 class="cs-section-title" data-i18n="s1.title">배경 <em>·</em> Background</h2>
+
+      <p class="cs-p" data-i18n="s1.p1">
+        자율주행 모빌리티 서비스는 호출 → 탑승 → 이동 → 하차까지
+        <strong>끊김 없는 이동 경험</strong>이 핵심 가치이며, 서비스 신뢰도가 재사용률과 직결된다.
+        기사 없는 구조에서는 <strong>문제 상황 발생 시 '설명 가능한 시스템'이 곧 서비스 품질</strong>이 된다.
+      </p>
+      <p class="cs-p" data-i18n="s1.p2">
+        특히 심야 시간대는 고객센터 대응이 제한적이어서, <strong>설명 없는 정지로 인한 이탈이 발생할 경우
+        브랜드 신뢰도에 치명적인 타격</strong>을 주며, 장기적인 서비스 확장 전략의 병목이 되고 있었다.
+      </p>
+
+      <div class="cs-two-col">
+        <div class="cs-col-card">
+          <h4 data-i18n="s1.bm">비즈니스 모델</h4>
+          <ul>
+            <li data-i18n="s1.bm1">카카오T 앱 내 자율주행 택시 서비스 통합</li>
+            <li data-i18n="s1.bm2">기사 없는 구조: 서비스 신뢰도 = 재사용률</li>
+            <li data-i18n="s1.bm3">첫 탑승 경험의 품질이 장기 LTV를 결정</li>
+          </ul>
+        </div>
+        <div class="cs-col-card">
+          <h4 data-i18n="s1.risk">핵심 리스크 — 시스템은 정상, 사용자는 이해 불가</h4>
+          <ul>
+            <li data-i18n="s1.r1">센서 오류·판단 불확실성 → 갑작스러운 정지·비정상 경로 선택</li>
+            <li data-i18n="s1.r2">사용자 인지 불일치 → 차량 정상 작동 중, 사용자는 "고장"으로 인식</li>
+            <li data-i18n="s1.r3">신뢰 붕괴 → 이유 모르는 정지 → 불안 → 서비스 이탈</li>
+          </ul>
+        </div>
+      </div>
+    </section>
+
+    <!-- 02 GOAL -->
+    <section class="cs-section" id="s2">
+      <div class="cs-section-num">02</div>
+      <h2 class="cs-section-title" data-i18n="s2.title">목표 <em>·</em> Goal</h2>
+
+      <div class="cs-two-col">
+        <div class="cs-col-card accent-border">
+          <h4 class="accent" data-i18n="s2.inp">Input (선행 지표)</h4>
+          <ul>
+            <li data-i18n="s2.i1"><strong style="color:var(--text)">주행 완료율 96%</strong> — 예외 상황에서도 주행 완료</li>
+            <li data-i18n="s2.i2">CS 문의율 35% 감소</li>
+            <li data-i18n="s2.i3">주행 중 이탈률 감소</li>
+            <li data-i18n="s2.i4">재호출률 증가</li>
+          </ul>
+        </div>
+        <div class="cs-col-card accent-border">
+          <h4 class="accent" data-i18n="s2.out">Output (성과 지표)</h4>
+          <ul>
+            <li data-i18n="s2.o1"><strong style="color:var(--text)">14일 재이용률 +25% 향상</strong></li>
+            <li data-i18n="s2.o2">7일 재이용률 +18%</li>
+            <li data-i18n="s2.o3">신뢰 기반 장기 LTV 확보</li>
+          </ul>
+        </div>
+      </div>
+    </section>
+
+    <!-- 03 ROOT CAUSE -->
+    <section class="cs-section" id="s3">
+      <div class="cs-section-num">03</div>
+      <h2 class="cs-section-title" data-i18n="s3.title">원인 분석 <em>·</em> Data Analysis</h2>
+
+      <!-- User Segments -->
+      <h3 style="font-family:'Lexend',sans-serif;font-size:12px;font-weight:600;color:var(--text-3);letter-spacing:0.14em;text-transform:uppercase;margin:0 0 16px;" data-i18n="s4.seg.title">사용자 세그먼트</h3>
+      <div class="segments" style="margin-bottom:16px;">
+        <div class="segment-card">
+          <div class="seg-icon">🏙️</div>
+          <div class="seg-name" data-i18n="s4.seg1">출퇴근 이용자</div>
+          <div class="seg-desc" data-i18n="s4.seg1d">루틴 이용, 이탈 비용이 큼</div>
+        </div>
+        <div class="segment-card target">
+          <div class="seg-icon">🌙</div>
+          <div class="seg-name">
+            <span data-i18n="s4.seg2">심야 이용자</span>
+            <span class="target-badge">Target</span>
+          </div>
+          <div class="seg-desc" data-i18n="s4.seg2d">상황 이해도↓ 통제감↓ 불안 민감도↑</div>
+        </div>
+        <div class="segment-card">
+          <div class="seg-icon">🗺️</div>
+          <div class="seg-name" data-i18n="s4.seg3">초행길 이용자</div>
+          <div class="seg-desc" data-i18n="s4.seg3d">낯선 환경, 판단 기준 부재</div>
+        </div>
+        <div class="segment-card">
+          <div class="seg-icon">📱</div>
+          <div class="seg-name" data-i18n="s4.seg4">기술 비친숙 사용자</div>
+          <div class="seg-desc" data-i18n="s4.seg4d">AV 메커니즘 이해 낮음</div>
+        </div>
+      </div>
+
+      <!-- Segment Matrix Table -->
+      <div class="seg-matrix-wrap">
+        <table class="seg-matrix">
+          <thead>
+            <tr>
+              <th>유저 세그먼트</th>
+              <th>공급 불균형</th>
+              <th>가격 비탄력성</th>
+              <th>이용 빈도</th>
+              <th>LTV 잠재력</th>
+              <th>ETA 민감도</th>
+              <th>전략 우선순위</th>
+            </tr>
+          </thead>
+          <tbody>
+            <tr class="row-target">
+              <td><div class="seg-name-wrap"><span class="seg-name-label">심야 이동 사용자</span><span class="seg-tag">선정</span></div></td>
+              <td><span class="seg-val-accent">50%</span></td>
+              <td><span class="seg-val-green">85%</span></td>
+              <td><span class="seg-val-blue">주 4–5회</span></td>
+              <td><span class="seg-stars"><span class="on">★★★★★</span></span></td>
+              <td><span class="seg-val-accent">매우 높음</span></td>
+              <td><span class="seg-pill-primary">★ Primary Target</span></td>
+            </tr>
+            <tr>
+              <td><div class="seg-name-wrap"><span class="seg-name-label" style="color:var(--text-2)">출퇴근 이용자</span></div></td>
+              <td>35%</td>
+              <td>70%</td>
+              <td>주 3–4회</td>
+              <td><span class="seg-stars"><span class="on">★★★★</span><span class="off">★</span></span></td>
+              <td>높음</td>
+              <td><span class="seg-pill">Secondary</span></td>
+            </tr>
+            <tr>
+              <td><div class="seg-name-wrap"><span class="seg-name-label" style="color:var(--text-2)">초행길 이용자</span></div></td>
+              <td>15%</td>
+              <td>55%</td>
+              <td>월 2–3회</td>
+              <td><span class="seg-stars"><span class="on">★★★</span><span class="off">★★</span></span></td>
+              <td>중간</td>
+              <td><span class="seg-pill">3순위</span></td>
+            </tr>
+            <tr>
+              <td><div class="seg-name-wrap"><span class="seg-name-label" style="color:var(--text-2)">기술 비친숙 사용자</span></div></td>
+              <td>25%</td>
+              <td>40%</td>
+              <td>월 1–2회</td>
+              <td><span class="seg-stars"><span class="on">★★</span><span class="off">★★★</span></span></td>
+              <td>낮음</td>
+              <td><span class="seg-pill">Acquisition</span></td>
+            </tr>
+          </tbody>
+        </table>
+      </div>
+
+      <!-- Context · Product -->
+      <div class="ctx-label">Context · Product</div>
+      <div class="ctx-two-col">
+
+        <div class="ctx-chart">
+          <div class="chart-item">
+            <div class="chart-item-label">센서 오류 및 원격 승인 상황에서 중도 하차요청률</div>
+            <div class="chart-bar-row">
+              <div class="chart-bar-wrap"><div class="chart-bar" style="width:42%"></div></div>
+              <div class="chart-pct">42%</div>
+            </div>
+          </div>
+          <div class="chart-item">
+            <div class="chart-item-label">불확실 상황 발생 시 CS 문의율</div>
+            <div class="chart-bar-row">
+              <div class="chart-bar-wrap"><div class="chart-bar" style="width:38%"></div></div>
+              <div class="chart-pct">38%</div>
+            </div>
+          </div>
+          <div class="chart-item">
+            <div class="chart-item-label">설명 없이 정지하는 경우 주행완료율</div>
+            <div class="chart-bar-row">
+              <div class="chart-bar-wrap"><div class="chart-bar" style="width:61%; background:rgba(245,197,24,.35)"></div></div>
+              <div class="chart-pct" style="color:var(--text-3)">61%</div>
+            </div>
+          </div>
+          <div class="chart-item">
+            <div class="chart-item-label">문제 경험 이후 서비스 재이용률</div>
+            <div class="chart-bar-row">
+              <div class="chart-bar-wrap"><div class="chart-bar" style="width:28%; background:rgba(245,197,24,.35)"></div></div>
+              <div class="chart-pct" style="color:var(--text-3)">28%</div>
+            </div>
+          </div>
+        </div>
+
+        <!-- Line chart: 정지 후 경과시간별 누적 이탈률 -->
+        <div class="ctx-line-wrap">
+          <svg viewBox="0 0 560 330" xmlns="http://www.w3.org/2000/svg" preserveAspectRatio="xMidYMid meet" style="width:100%;height:100%;display:block;">
+            <defs>
+              <linearGradient id="dropGrad" x1="0" y1="0" x2="0" y2="1">
+                <stop offset="0%" stop-color="#E55C5C" stop-opacity="0.45"/>
+                <stop offset="100%" stop-color="#E55C5C" stop-opacity="0"/>
+              </linearGradient>
+              <clipPath id="dropClip">
+                <rect x="50" y="58" width="500" height="232"/>
+              </clipPath>
+            </defs>
+
+            <!-- Title -->
+            <text x="50" y="20" font-family="Lexend,sans-serif" font-size="14" font-weight="700" fill="#F5C518">정지 후 경과시간별 누적 이탈률</text>
+            <text x="50" y="42" font-family="sans-serif" font-size="12" fill="#5A5A66">설명 없는 정지 상황 (n=2,300 케이스)</text>
+
+            <!-- Horizontal grid lines: chart y 58→290 -->
+            <line x1="50" y1="58"  x2="550" y2="58"  stroke="rgba(255,255,255,0.07)" stroke-dasharray="4,4"/>
+            <line x1="50" y1="116" x2="550" y2="116" stroke="rgba(255,255,255,0.07)" stroke-dasharray="4,4"/>
+            <line x1="50" y1="174" x2="550" y2="174" stroke="rgba(255,255,255,0.07)" stroke-dasharray="4,4"/>
+            <line x1="50" y1="232" x2="550" y2="232" stroke="rgba(255,255,255,0.07)" stroke-dasharray="4,4"/>
+            <line x1="50" y1="290" x2="550" y2="290" stroke="rgba(255,255,255,0.10)"/>
+
+            <!-- Y-axis labels -->
+            <text x="44" y="62"  font-size="10" fill="#5A5A66" text-anchor="end">100%</text>
+            <text x="44" y="120" font-size="10" fill="#5A5A66" text-anchor="end">75%</text>
+            <text x="44" y="178" font-size="10" fill="#5A5A66" text-anchor="end">50%</text>
+            <text x="44" y="236" font-size="10" fill="#5A5A66" text-anchor="end">25%</text>
+            <text x="44" y="294" font-size="10" fill="#5A5A66" text-anchor="end">0%</text>
+
+            <!-- Gradient fill area (data: 0s=283, 10s=244, 20s=170, 30s=111, 40s=90, 50s=75, 60s=69) -->
+            <path d="M 50,283 C 82,278 113,260 133,244 C 158,226 192,196 217,170 C 244,148 274,118 300,111 C 328,104 358,94 383,90 C 410,86 442,79 467,75 C 496,71 526,69 550,68 L 550,290 L 50,290 Z"
+                  fill="url(#dropGrad)" clip-path="url(#dropClip)"/>
+
+            <!-- Vertical dashed yellow line at 30s -->
+            <line x1="300" y1="52" x2="300" y2="290" stroke="#F5C518" stroke-dasharray="5,4" stroke-width="1.5" opacity="0.85"/>
+            <text x="307" y="62" font-family="Lexend,sans-serif" font-size="12" font-weight="700" fill="#F5C518">30초</text>
+
+            <!-- Red curve line -->
+            <path d="M 50,283 C 82,278 113,260 133,244 C 158,226 192,196 217,170 C 244,148 274,118 300,111 C 328,104 358,94 383,90 C 410,86 442,79 467,75 C 496,71 526,69 550,68"
+                  fill="none" stroke="#E55C5C" stroke-width="2.5" stroke-linejoin="round" stroke-linecap="round"/>
+
+            <!-- Data point dots -->
+            <circle cx="50"  cy="283" r="3.5" fill="#E55C5C"/>
+            <circle cx="133" cy="244" r="3.5" fill="#E55C5C"/>
+            <circle cx="217" cy="170" r="3.5" fill="#E55C5C"/>
+            <circle cx="300" cy="111" r="3.5" fill="#E55C5C"/>
+            <circle cx="383" cy="90"  r="3.5" fill="#E55C5C"/>
+            <circle cx="467" cy="75"  r="3.5" fill="#E55C5C"/>
+            <circle cx="550" cy="68"  r="3.5" fill="#E55C5C"/>
+
+            <!-- X-axis labels -->
+            <text x="50"  y="311" font-size="10" fill="#5A5A66" text-anchor="middle">0s</text>
+            <text x="133" y="311" font-size="10" fill="#5A5A66" text-anchor="middle">10s</text>
+            <text x="217" y="311" font-size="10" fill="#5A5A66" text-anchor="middle">20s</text>
+            <text x="300" y="311" font-size="10" fill="#5A5A66" text-anchor="middle">30s</text>
+            <text x="383" y="311" font-size="10" fill="#5A5A66" text-anchor="middle">40s</text>
+            <text x="467" y="311" font-size="10" fill="#5A5A66" text-anchor="middle">50s</text>
+            <text x="550" y="311" font-size="10" fill="#5A5A66" text-anchor="middle">60s+</text>
+          </svg>
+        </div>
+
+      </div>
+
+      <!-- Big stat -->
+      <div class="big-stat-block">
+        <div class="big-stat-num">80%</div>
+        <div class="big-stat-desc" data-i18n="s3.bigstat">
+          전체 이탈 구간 중 <strong>80%가 '설명 없는 정지' 30초 이내</strong>에 발생.<br>
+          로그 데이터 분석 결과 이탈 유저의 대다수는 <strong>기기 결함으로 오인하여 주행을 포기</strong>한 것으로 확인됐다.
+        </div>
+      </div>
+
+      <!-- Context · User -->
+      <div class="ctx-label" style="margin-top:36px;">Context · User</div>
+
+      <div class="jtbd-wrap">
+        <div class="jtbd-axis">
+          <div class="jtbd-axis-arrow"></div>
+          <div class="jtbd-axis-label" data-i18n="s3.ur.axis">우선순위</div>
+        </div>
+        <div class="jtbd-body">
+          <div class="jtbd-label" data-i18n="s3.ur.label">USER RESEARCH — KEY JOBS TO BE DONE</div>
+
+          <!-- Row 1: 안전 확인 -->
+          <div class="jtbd-row">
+            <div class="jtbd-cat">
+              <svg class="jtbd-cat-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5"><path d="M12 22s8-4 8-10V5l-8-3-8 3v7c0 6 8 10 8 10z"/></svg>
+              <div class="jtbd-cat-name" data-i18n="s3.ur.c1">안전 확인</div>
+            </div>
+            <div class="jtbd-cards">
+              <div class="jtbd-card">
+                <div class="jtbd-card-title" data-i18n="s3.ur.c1t1">상태 파악</div>
+                <div class="jtbd-card-desc" data-i18n="s3.ur.c1d1">지금 차량이 정상인지 즉시 알고 싶다</div>
+              </div>
+              <div class="jtbd-card">
+                <div class="jtbd-card-title" data-i18n="s3.ur.c1t2">원인 이해</div>
+                <div class="jtbd-card-desc" data-i18n="s3.ur.c1d2">왜 멈췄는지 이유를 알고 싶다</div>
+              </div>
+            </div>
+          </div>
+
+          <!-- Row 2: 상황 대응 -->
+          <div class="jtbd-row">
+            <div class="jtbd-cat">
+              <svg class="jtbd-cat-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5"><circle cx="12" cy="12" r="10"/><polygon points="16.24 7.76 14.12 14.12 7.76 16.24 9.88 9.88 16.24 7.76"/></svg>
+              <div class="jtbd-cat-name" data-i18n="s3.ur.c2">상황 대응</div>
+            </div>
+            <div class="jtbd-cards">
+              <div class="jtbd-card">
+                <div class="jtbd-card-title" data-i18n="s3.ur.c2t1">대기 예측</div>
+                <div class="jtbd-card-desc" data-i18n="s3.ur.c2d1">언제 다시 출발할지 알고 싶다</div>
+              </div>
+              <div class="jtbd-card">
+                <div class="jtbd-card-title" data-i18n="s3.ur.c2t2">능동적 선택</div>
+                <div class="jtbd-card-desc" data-i18n="s3.ur.c2d2">대기·경로변경·관제 중 스스로 선택하고 싶다</div>
+              </div>
+              <div class="jtbd-card">
+                <div class="jtbd-card-title" data-i18n="s3.ur.c2t3">진행 확인</div>
+                <div class="jtbd-card-desc" data-i18n="s3.ur.c2d3">지금 어떤 조치가 이뤄지는지 확인하고 싶다</div>
+              </div>
+            </div>
+          </div>
+
+          <!-- Row 3: 신뢰 회복 -->
+          <div class="jtbd-row">
+            <div class="jtbd-cat">
+              <svg class="jtbd-cat-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5"><path d="M20.84 4.61a5.5 5.5 0 0 0-7.78 0L12 5.67l-1.06-1.06a5.5 5.5 0 0 0-7.78 7.78l1.06 1.06L12 21.23l7.78-7.78 1.06-1.06a5.5 5.5 0 0 0 0-7.78z"/></svg>
+              <div class="jtbd-cat-name" data-i18n="s3.ur.c3">신뢰 회복</div>
+            </div>
+            <div class="jtbd-cards">
+              <div class="jtbd-card">
+                <div class="jtbd-card-title" data-i18n="s3.ur.c3t1">경험 전달</div>
+                <div class="jtbd-card-desc" data-i18n="s3.ur.c3d1">불편한 경험을 서비스에 알리고 싶다</div>
+              </div>
+              <div class="jtbd-card">
+                <div class="jtbd-card-title" data-i18n="s3.ur.c3t2">지속 신뢰</div>
+                <div class="jtbd-card-desc" data-i18n="s3.ur.c3d2">이 경험 이후에도 자율주행을 계속 믿고 싶다</div>
+              </div>
+            </div>
+          </div>
+
+        </div>
+      </div>
+
+      <div class="cs-callout">
+        <p data-i18n="s3.conclusion">
+          <strong>원인 분석 결론:</strong><br>
+          사용자는 문제 발생 자체보다, <strong>시스템의 상태와 의도를 이해하지 못할 때</strong> 더 큰 불안을 느낀다.
+          이탈의 원인은 기술 불안이 아닌 <strong>정보 비대칭과 인지 공백</strong>이다.
+        </p>
+      </div>
+    </section>
+
+    <!-- 04 PROBLEM DEFINITION -->
+    <section class="cs-section" id="s4">
+      <div class="cs-section-num">04</div>
+      <h2 class="cs-section-title" data-i18n="s4.title">문제 정의 <em>·</em> Problem</h2>
+
+      <div class="prob-statement-card">
+        <div class="prob-icon-wrap">
+          <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5"><circle cx="12" cy="12" r="10"/><text x="12" y="17" text-anchor="middle" fill="currentColor" stroke="none" font-size="13" font-weight="700" font-family="sans-serif">?</text></svg>
+        </div>
+        <div class="prob-stmt-label">Problem Statement</div>
+        <p class="prob-quote" data-i18n="s4.problem">사용자는 차량의 상태와 의도를 이해하지 못해 불안을 느끼고,<br>이로 인해 서비스 신뢰가 저하된다.</p>
+      </div>
+
+      <div class="prob-metrics">
+        <p class="prob-metrics-q" data-i18n="s4.metrics.q">핵심 지표를 어떻게<br>개선할 수 있을까?</p>
+        <div class="prob-pills">
+          <div class="prob-pill">
+            <div class="prob-pill-icon">↓</div>
+            <span data-i18n="s4.m1">예외 상황 Mid-ride Drop-off Rate 감소</span>
+          </div>
+          <div class="prob-pill">
+            <div class="prob-pill-icon">↑</div>
+            <span data-i18n="s4.m2">신뢰 기반 14일 재이용률 +25%</span>
+          </div>
+        </div>
+      </div>
+    </section>
+
+    <!-- 05 HYPOTHESIS -->
+    <section class="cs-section" id="s5">
+      <div class="cs-section-num">05</div>
+      <h2 class="cs-section-title" data-i18n="s5.title">가설 <em>·</em> Hypothesis</h2>
+
+      <div class="hypothesis-card">
+        <p class="hypothesis-text" data-i18n="s5.hyp">
+          심야 이용자에게 정지 원인(<em>Why</em>)과 예상 시간(<em>When</em>)을 포함한
+          <em>4요소 정보</em>를 즉시 제공하면,
+          고장 오인으로 인한 중도 이탈이 줄어들어
+          <em>재호출률이 25% 상승</em>할 것이다.
+        </p>
+        <div class="hyp-meta">
+          <span class="hyp-chip" data-i18n="hyp.c1">실시간 정보 → 대기 포기 14–20% 감소 (선행 연구)</span>
+          <span class="hyp-chip" data-i18n="hyp.c2">AV 설명 제공 시 Trust +20–30%↑</span>
+          <span class="hyp-chip" data-i18n="hyp.c3">업계 벤치: 정보 비대칭 해소 시 Retention +20%대</span>
+        </div>
+      </div>
+
+      <div class="cs-two-col">
+        <div class="cs-col-card">
+          <h4 data-i18n="s5.test.title">검증 조건</h4>
+          <ul>
+            <li data-i18n="s5.t1">타겟: 심야(22시–05시) 이용자</li>
+            <li data-i18n="s5.t2">트리거: 센서 오류·원격 승인 예외 상황</li>
+            <li data-i18n="s5.t3">검증 지표: Mid-ride Drop-off Rate (A/B)</li>
+            <li data-i18n="s5.t4">후속 측정: 30분 내 재호출률</li>
+          </ul>
+        </div>
+        <div class="cs-col-card accent-border">
+          <h4 class="accent" data-i18n="s5.target.title">목표 수치</h4>
+          <ul>
+            <li data-i18n="s5.v1">Re-call Rate <strong style="color:var(--text)">+25%</strong></li>
+            <li data-i18n="s5.v2">Mid-ride Drop-off Rate 유의미한 감소</li>
+            <li data-i18n="s5.v3">신뢰 기반 14일 재이용률 증가</li>
+          </ul>
+        </div>
+      </div>
+
+      <!-- 3 strategies -->
+      <h3 style="font-family:'Lexend',sans-serif;font-size:12px;font-weight:600;color:var(--text-3);letter-spacing:0.14em;text-transform:uppercase;margin:36px 0 18px;" data-i18n="s6.strat.title">3가지 실행 전략</h3>
+
+      <div class="strategies">
+        <div class="strat-card">
+          <div class="strat-num">전략 01</div>
+          <div class="strat-name" data-i18n="st1.name">상황 설명 (Explain)</div>
+          <div class="strat-desc" data-i18n="st1.desc">Why + When + System을 구조화하여 즉시 전달. 사용자가 상황을 '이해'하게 만드는 것이 1차 목표.</div>
+        </div>
+        <div class="strat-card">
+          <div class="strat-num">전략 02</div>
+          <div class="strat-name" data-i18n="st2.name">선택권 제공 (Control)</div>
+          <div class="strat-desc" data-i18n="st2.desc">Primary: 그대로 대기 / Secondary: 경로 변경 · 관제 연결. 통제감 회복으로 불안감 감소.</div>
+        </div>
+        <div class="strat-card">
+          <div class="strat-num">전략 03</div>
+          <div class="strat-name" data-i18n="st3.name">자동 개입 (Fallback)</div>
+          <div class="strat-desc" data-i18n="st3.desc">일정 시간 초과 시 관제센터 자동 개입. 사용자 요청 없이도 시스템이 문제를 해결 중임을 시각화.</div>
+        </div>
+      </div>
+    </section>
+
+    <!-- 06 ACTION -->
+    <section class="cs-section" id="s6">
+      <div class="cs-section-num">06</div>
+      <h2 class="cs-section-title" data-i18n="s6.title">실행 <em>·</em> Execution</h2>
+
+      <!-- As-is / To-be -->
+      <div class="as-is-tobe">
+        <div class="cs-col-card">
+          <h4 data-i18n="s6.asis">As-is — 기존 상태</h4>
+          <ul>
+            <li data-i18n="s6.a1">예외 상황 발생 시 명확한 설명 없이 단순 정지 상태만 전달</li>
+            <li data-i18n="s6.a2">차량이 고장인지 정상인지 판단 불가</li>
+            <li data-i18n="s6.a3">재출발 시점 및 처리 상황 알 수 없음</li>
+            <li data-i18n="s6.a4">→ 불안·혼란 증가, 중도 이탈, CS 문의 폭증</li>
+          </ul>
+        </div>
+        <div class="arrow-col">
+          <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="var(--accent)" stroke-width="1.5" opacity=".6"><path d="M5 12h14M12 5l7 7-7 7"/></svg>
+        </div>
+        <div class="cs-col-card accent-border">
+          <h4 class="accent" data-i18n="s6.tobe">To-be — 개선 방향</h4>
+          <ul>
+            <li data-i18n="s6.t1"><strong style="color:var(--text)">Why</strong>: 정지 원인 명확히 설명</li>
+            <li data-i18n="s6.t2"><strong style="color:var(--text)">When</strong>: 재출발 예상 시간 제공</li>
+            <li data-i18n="s6.t3"><strong style="color:var(--text)">System</strong>: 관제센터 처리 상태 시각화</li>
+            <li data-i18n="s6.t4"><strong style="color:var(--text)">Action</strong>: 대기 / 경로 변경 / 관제 연결 선택지</li>
+          </ul>
+        </div>
+      </div>
+
+      <!-- Solution direction -->
+      <div class="cs-callout">
+        <p data-i18n="s6.direction">
+          <strong>솔루션 방향:</strong> 차량의 상태를 단순 알림이 아닌,
+          <strong>이해 불가능한 상태 → 이해 가능한 상태</strong>로 전환하는 Explainable UX 설계.
+          관제 개입 및 처리 과정을 시각화하여 "시스템이 문제를 해결 중이다"라는 신뢰를 제공한다.
+        </p>
+      </div>
+
+      <!-- 4-element framework -->
+      <h3 style="font-family:'Lexend',sans-serif;font-size:12px;font-weight:600;color:var(--text-3);letter-spacing:0.14em;text-transform:uppercase;margin:36px 0 18px;" data-i18n="s6.fw.title">정보 우선순위 프레임워크</h3>
+
+      <div class="framework">
+        <div class="fw-card">
+          <div class="fw-rank">1순위</div>
+          <div class="fw-key">Why</div>
+          <div class="fw-label" data-i18n="fw1.label">이유 — 왜 멈췄는지</div>
+          <div class="fw-example" data-i18n="fw1.ex">
+            <em>"센서 신호가 일시적으로 불안정합니다"</em><br>
+            없으면 즉시 '고장'으로 인식됨
+          </div>
+        </div>
+        <div class="fw-card">
+          <div class="fw-rank">2순위</div>
+          <div class="fw-key">When</div>
+          <div class="fw-label" data-i18n="fw2.label">시간 — 언제 끝나는지</div>
+          <div class="fw-example" data-i18n="fw2.ex">
+            <em>"약 20–40초 후 재출발 예정"</em><br>
+            기다릴 수 있게 만드는 핵심 정보
+          </div>
+        </div>
+        <div class="fw-card">
+          <div class="fw-rank">3순위</div>
+          <div class="fw-key">System</div>
+          <div class="fw-label" data-i18n="fw3.label">상태 — 지금 해결되고 있는지</div>
+          <div class="fw-example" data-i18n="fw3.ex">
+            <em>"관제센터 확인 중"</em><br>
+            "아무 일 안 하는 게 아니다"는 신호
+          </div>
+        </div>
+        <div class="fw-card">
+          <div class="fw-rank">4순위</div>
+          <div class="fw-key">Action</div>
+          <div class="fw-label" data-i18n="fw4.label">행동 — 내가 할 수 있는 것</div>
+          <div class="fw-example" data-i18n="fw4.ex">
+            <em>대기 / 경로 변경 / 관제 연결</em><br>
+            통제감 회복을 위한 선택지
+          </div>
+        </div>
+      </div>
+
+      <!-- UI 4-state flow -->
+      <h3 style="font-family:'Lexend',sans-serif;font-size:clamp(17px,1.9vw,22px);font-weight:600;color:var(--text);letter-spacing:-0.3px;line-height:1.2;margin:40px 0 32px;" data-i18n="s6.ui.title">UI 상태 플로우 — 4단계</h3>
+
+      <div class="ui-block-list">
+
+        <!-- State 01 -->
+        <div class="ui-block">
+          <div class="ui-block-header">
+            <div class="ui-block-num" data-i18n="ui1.n">State 01 · 정지 감지</div>
+            <div class="ui-block-name" data-i18n="ui1.title">센서 신호가 일시적으로 불안정합니다</div>
+          </div>
+          <div class="ui-block-meta">
+            <div class="ui-block-left">
+              <p class="ui-voice" style="font-family:'Lexend',sans-serif;font-size:15px;font-weight:600;color:var(--text);margin-bottom:6px;" data-i18n="ui1.body">안전을 위해 차량이 자동으로 정차했어요. 고장이 아닙니다.</p>
+              <p class="ui-block-left-sub" data-i18n="ui1.leftsub">사용자는 이 순간 아무 정보도 없다. 불안이 시작된다.</p>
+            </div>
+            <div class="ui-block-right">
+              <p data-i18n="ui1.rd1"><strong>상황 설명(Explain) 전략:</strong> Why + When + System을 구조화하여 즉시 전달. 사용자가 상황을 '이해'하게 만드는 것이 1차 목표.</p>
+              <p data-i18n="ui1.rd2">센서 신호 불안정 감지 → 안전 정차 자동 실행. <em>"고장이 아닙니다"</em>를 메인 메시지로 노출하고, 예상 대기 시간(약 20–40초)을 즉시 표시한다.</p>
+            </div>
+          </div>
+          <div class="ui-img-wrap">
+            <img src="KAKAO/state-01.png" alt="State 01 — 정지 감지">
+            <span class="ui-img-hint">Image</span>
+          </div>
+        </div>
+
+        <!-- State 02 -->
+        <div class="ui-block">
+          <div class="ui-block-header">
+            <div class="ui-block-num" data-i18n="ui2.n">State 02 · 관제 처리 중</div>
+            <div class="ui-block-name" data-i18n="ui2.title">센서 신호 점검 중입니다</div>
+          </div>
+          <div class="ui-block-meta">
+            <div class="ui-block-left">
+              <p class="ui-voice" style="font-family:'Lexend',sans-serif;font-size:15px;font-weight:600;color:var(--text);margin-bottom:6px;" data-i18n="ui2.lefttitle">관제센터가 즉시 처리합니다</p>
+              <p class="ui-block-left-sub" data-i18n="ui2.leftsub">시스템이 능동적으로 해결 중임을 실시간으로 보여준다.</p>
+            </div>
+            <div class="ui-block-right">
+              <p data-i18n="ui2.rd1"><strong>진행 상태 시각화:</strong> 데이터 전송 → 관제센터 확인 → 재출발 승인 단계를 Progress Indicator로 표시. 처리 중임을 알리는 것만으로 불안이 줄어든다.</p>
+              <p data-i18n="ui2.rd2"><em>개발팀과 합의한 로직:</em> 데이터 지연을 고려해 Why(왜 멈췄는지)를 최우선으로 노출. 대기 중에도 시스템이 작동 중임을 지속 피드백.</p>
+            </div>
+          </div>
+          <div class="ui-img-wrap">
+            <img src="KAKAO/state-02.png" alt="State 02 — 관제 처리 중">
+            <span class="ui-img-hint">Image</span>
+          </div>
+        </div>
+
+        <!-- State 03 -->
+        <div class="ui-block">
+          <div class="ui-block-header">
+            <div class="ui-block-num" data-i18n="ui3.n">State 03 · 관제사 연결</div>
+            <div class="ui-block-name" data-i18n="ui3.lefttitle">선택권을 사용자에게 돌려줍니다</div>
+          </div>
+          <div class="ui-block-meta">
+            <div class="ui-block-left">
+              <p class="ui-voice" style="font-family:'Lexend',sans-serif;font-size:15px;font-weight:600;color:var(--text);margin-bottom:6px;" data-i18n="ui3.title">이다현 상담원 · DRT 관제팀 응답 중</p>
+              <p class="ui-block-left-sub" data-i18n="ui3.leftsub">통제감 회복으로 불안을 감소시킨다.</p>
+            </div>
+            <div class="ui-block-right">
+              <p data-i18n="ui3.rd1"><strong>선택권 제공(Control) 전략:</strong> Primary — 그대로 대기 / Secondary — 경로 변경 또는 관제사 연결. 선택지 자체가 통제감을 준다.</p>
+              <p data-i18n="ui3.rd2">관제사가 보는 정보(차량 위치·상태·승객 정보)를 공개하여 신뢰를 형성. <em>디자인팀과 심야 안정감 컬러 시스템</em> 별도 협의 적용.</p>
+            </div>
+          </div>
+          <div class="ui-img-wrap">
+            <img src="KAKAO/state-03.png" alt="State 03 — 관제사 연결">
+            <span class="ui-img-hint">Image</span>
+          </div>
+        </div>
+
+        <!-- State 04 -->
+        <div class="ui-block">
+          <div class="ui-block-header">
+            <div class="ui-block-num" data-i18n="ui4.n">State 04 · 해결 완료</div>
+            <div class="ui-block-name" data-i18n="ui4.title">문제가 해결됐어요</div>
+          </div>
+          <div class="ui-block-meta">
+            <div class="ui-block-left">
+              <p class="ui-voice" style="font-family:'Lexend',sans-serif;font-size:15px;font-weight:600;color:var(--text);margin-bottom:6px;" data-i18n="ui4.body">센서 신호가 안정화되어 자동으로 재출발합니다.</p>
+              <p class="ui-block-left-sub" data-i18n="ui4.leftsub">3초 후 자동 재출발 · 불편 보상 자동 지급</p>
+            </div>
+            <div class="ui-block-right">
+              <p data-i18n="ui4.rd1"><strong>자동 개입(Fallback) 전략:</strong> 일정 시간 초과 시 관제센터 자동 개입. 사용자 요청 없이도 시스템이 문제를 해결 중임을 지속 시각화.</p>
+              <p data-i18n="ui4.rd2">전체 진행 단계 완료 확인 후 자동 재출발. <em>불편 보상 5원 자동 지급</em>으로 부정 경험을 긍정 기억으로 전환. 신뢰 회복의 마지막 단계.</p>
+            </div>
+          </div>
+          <div class="ui-img-wrap">
+            <img src="KAKAO/state-04.png" alt="State 04 — 해결 완료">
+            <span class="ui-img-hint">Image</span>
+          </div>
+        </div>
+
+      </div>
+
+      <!-- Execution Plan -->
+      <div class="exec-plan-wrap">
+
+        <div class="exec-plan-header">
+          <div class="exec-plan-htitle" data-i18n="ep.title">실행 계획<br>1–2 Weeks Sprint</div>
+          <div class="exec-plan-hdesc">
+            <p data-i18n="ep.desc1">자율주행 예외 상황 대응 UX를 실제 서비스로 구현하기 위한 단계별 실행 계획이다. 엣지 케이스 정의부터 배포까지 <strong>1–2주 스프린트로 압축</strong>하여 사용자 검증 중심의 빠른 이터레이션을 목표로 한다.</p>
+            <p data-i18n="ep.desc2">각 단계에서 기획 산출물(PRD · 기능정의서 · 정책서)과 디자인 산출물(와이어프레임 · Hi-fi)이 병렬로 생성되어, 개발 착수 시점에 전 문서가 완비된 상태를 유지한다.</p>
+          </div>
+        </div>
+
+        <div class="exec-list">
+
+          <div class="exec-item">
+            <div class="exec-item-left">
+              <div class="exec-item-num" data-i18n="ep.n1">01</div>
+              <div class="exec-item-title" data-i18n="ep.t1">주행 시 엣지 케이스 정의</div>
+              <div class="exec-item-sub" data-i18n="ep.s1">User research, PRD 작성, QA</div>
+            </div>
+            <div class="exec-item-img">image</div>
+          </div>
+
+          <div class="exec-item">
+            <div class="exec-item-left">
+              <div class="exec-item-num" data-i18n="ep.n2">02</div>
+              <div class="exec-item-title" data-i18n="ep.t2">타겟 세그먼트 유저 플로우 정의</div>
+              <div class="exec-item-sub" data-i18n="ep.s2">User Journey, CTA 이벤트 정의</div>
+            </div>
+            <div class="exec-item-img">image</div>
+          </div>
+
+          <div class="exec-item">
+            <div class="exec-item-left">
+              <div class="exec-item-num" data-i18n="ep.n3">03</div>
+              <div class="exec-item-title" data-i18n="ep.t3">화면 설계 / Hi-Fi 와이어프레임 설계</div>
+              <div class="exec-item-sub" data-i18n="ep.s3">Component 정의, 인터랙션 명세 작성</div>
+            </div>
+            <div class="exec-item-img">image</div>
+          </div>
+
+          <div class="exec-item">
+            <div class="exec-item-left">
+              <div class="exec-item-num" data-i18n="ep.n4">04</div>
+              <div class="exec-item-title" data-i18n="ep.t4">유저 테스트 / 피드백 수집</div>
+              <div class="exec-item-sub" data-i18n="ep.s4">Usability Test, 사용성 검증 및 인사이트 도출</div>
+            </div>
+            <div class="exec-item-img">image</div>
+          </div>
+
+          <div class="exec-item">
+            <div class="exec-item-left">
+              <div class="exec-item-num" data-i18n="ep.n5">05</div>
+              <div class="exec-item-title" data-i18n="ep.t5">피드백 반영 화면 설계 / 기능정의서 / 정책서 제작</div>
+              <div class="exec-item-sub" data-i18n="ep.s5">개발 핸드오프 문서 완성, 정책 확정</div>
+            </div>
+            <div class="exec-item-img">image</div>
+          </div>
+
+          <div class="exec-item">
+            <div class="exec-item-left">
+              <div class="exec-item-num" data-i18n="ep.n6">06</div>
+              <div class="exec-item-title" data-i18n="ep.t6">개발 착수</div>
+              <div class="exec-item-sub" data-i18n="ep.s6">Front-end · Back-end 스프린트 개발, QA 병행</div>
+            </div>
+            <div class="exec-item-img">image</div>
+          </div>
+
+          <div class="exec-item">
+            <div class="exec-item-left">
+              <div class="exec-item-num" data-i18n="ep.n7">07</div>
+              <div class="exec-item-title" data-i18n="ep.t7">배포</div>
+              <div class="exec-item-sub" data-i18n="ep.s7">단계적 롤아웃, 지표 모니터링, A/B 테스트</div>
+            </div>
+            <div class="exec-item-img">image</div>
+          </div>
+
+        </div>
+      </div>
+
+    </section>
+
+    <!-- 07 RESULTS -->
+    <section class="cs-section" id="s7">
+      <div class="cs-section-num">07</div>
+      <h2 class="cs-section-title" data-i18n="s7.title">결과 <em>·</em> Results</h2>
+
+      <div class="result-grid">
+        <div class="result-cell">
+          <div class="result-num">96%</div>
+          <div class="result-desc" data-i18n="r1.d">주행 완료율 (Ride Completion Rate)</div>
+          <div class="result-sub" data-i18n="r1.s">예외 상황 발생 시에도 목표 달성 · AV 긍정 경험 축적</div>
+        </div>
+        <div class="result-cell">
+          <div class="result-num">-35%</div>
+          <div class="result-desc" data-i18n="r2.d">CS 문의율 감소</div>
+          <div class="result-sub" data-i18n="r2.s">정의한 엣지케이스 대처가 작동 → 사용성 신뢰도 상승</div>
+        </div>
+        <div class="result-cell">
+          <div class="result-num">+25%</div>
+          <div class="result-desc" data-i18n="r3.d">14일 재이용률 향상</div>
+          <div class="result-sub" data-i18n="r3.s">신뢰 기반 반복 사용 유도 · 장기 LTV 확보</div>
+        </div>
+        <div class="result-cell">
+          <div class="result-num">↑Re</div>
+          <div class="result-desc" data-i18n="r4.d">Re-call Rate 증가</div>
+          <div class="result-sub" data-i18n="r4.s">문제 경험 이후에도 재사용 의지 유지 · 심리적 진입 장벽 완화</div>
+        </div>
+      </div>
+
+      <h3 style="font-family:'Lexend',sans-serif;font-size:12px;font-weight:600;color:var(--text-3);letter-spacing:0.14em;text-transform:uppercase;margin:36px 0 18px;" data-i18n="s7.mt">측정 지표</h3>
+      <table class="metrics-table">
+        <thead>
+          <tr>
+            <th data-i18n="mt.metric">지표</th>
+            <th data-i18n="mt.type">측정 방법</th>
+            <th data-i18n="mt.direction">방향</th>
+          </tr>
+        </thead>
+        <tbody>
+          <tr><td data-i18n="mt.r1">Mid-ride Drop-off Rate</td><td data-i18n="mt.r1t">A/B 테스트 대조군 비교</td><td style="color:#22C55E;">↓ 감소</td></tr>
+          <tr><td data-i18n="mt.r2">Ride Completion Rate</td><td data-i18n="mt.r2t">예외 상황 발생 세션 기준</td><td style="color:#22C55E;">↑ 증가</td></tr>
+          <tr><td data-i18n="mt.r3">CS Contact Rate</td><td data-i18n="mt.r3t">예외 상황 후 24시간 내</td><td style="color:#22C55E;">↓ 감소</td></tr>
+          <tr><td data-i18n="mt.r4">Re-call Rate</td><td data-i18n="mt.r4t">30분 내 재호출</td><td style="color:#22C55E;">↑ 증가</td></tr>
+          <tr><td data-i18n="mt.r5">14일 재이용률</td><td data-i18n="mt.r5t">코호트 분석</td><td style="color:#22C55E;">↑ 증가</td></tr>
+          <tr><td data-i18n="mt.r6">상황 이해도·불안 감소 체감</td><td data-i18n="mt.r6t">사용자 인터뷰 (정성)</td><td style="color:#22C55E;">↑ 개선</td></tr>
+        </tbody>
+      </table>
+    </section>
+
+    <!-- 08 LESSONS -->
+    <section class="cs-section" id="s8">
+      <div class="cs-section-num">08</div>
+      <h2 class="cs-section-title" data-i18n="s8.title">레슨런 <em>·</em> Lessons</h2>
+
+      <div class="lesson-list">
+        <div class="lesson-item">
+          <div class="lesson-icon">L1</div>
+          <div class="lesson-content">
+            <h4 data-i18n="l1.h">기술적으로 완벽한 시스템이라도, 사용자가 상태를 인지하지 못하면 '고장'으로 정의된다</h4>
+            <p data-i18n="l1.p">앞으로는 시스템 성능 수치보다 <strong style="color:var(--text)">사용자의 심리적 도달 시점</strong>을 우선 고려하여 기획하고자 합니다. UX의 역할은 기술을 설명하는 것이 아니라, 기술을 <strong style="color:var(--text)">경험으로 번역</strong>하는 것이다.</p>
+          </div>
+        </div>
+        <div class="lesson-item">
+          <div class="lesson-icon">L2</div>
+          <div class="lesson-content">
+            <h4 data-i18n="l2.h">데이터 기반 의사결정: 정량 + 정성 교차 분석이 진짜 원인을 찾는다</h4>
+            <p data-i18n="l2.p">이탈 지표(정량)와 인터뷰(정성)를 교차 분석하여 '기능 오류'가 아닌 <strong style="color:var(--text)">'인지의 부재'</strong>라는 진짜 원인을 찾아낸 것처럼, 표면적 현상 너머의 유효 레버를 찾는 과정을 업무 원칙으로 삼게 되었습니다.</p>
+          </div>
+        </div>
+      </div>
+    </section>
+
+  </div>
+
+  <!-- NEXT PROJECT -->
+  <div class="cs-next">
+    <div>
+      <div class="next-label" data-i18n="next.label">다음 케이스 스터디</div>
+      <a href="./case-study-remote.html" class="next-link" style="display:block;">
+        <div class="next-title">Remote Driving Service for AV →</div>
+      </a>
+    </div>
+    <a href="./case-study-remote.html" class="next-link next-arrow">↗</a>
+  </div>
+
+  <footer>
+    <p>© 2026 Sumin Lee</p>
+    <p><a href="./index.html" style="font-size:11px;color:var(--text-3);transition:color .2s;" onmouseover="this.style.color='var(--accent)'" onmouseout="this.style.color='var(--text-3)'" data-i18n="footer.back">← Projects</a></p>
+  </footer>
+
+  <script>
+  /* ── i18n ── */
+  const i18n = {
+    ko: {
+      'nav.work':'Projects','nav.about':'About','nav.contact':'Contact',
+      'hero.sub':'KakaoMobility · UX Service Growth Case · 2026',
+      'hero.eyebrow':'Explainable UX · Autonomous Vehicle',
+      'hero.h1':'자율주행 차량이 멈췄다.<br><span style="white-space:nowrap">사용자에게 <em>무엇을</em> 전달해야 하는가.</span>',
+      'hero.question':'기사 없는 자율주행 서비스에서 센서 오류·원격 승인 등 예외 상황 발생 시,<br>사용자의 인지 불일치를 해소하는 Explainable UX 설계 전략',
+      'meta.role.l':'Role','meta.role.v':'서비스 기획 · PM (역기획)',
+      'meta.period.l':'Period','meta.domain.l':'Domain','meta.domain.v':'모빌리티 · Robotaxi','meta.tools.l':'Tools',
+      's1.title':'배경 <em>·</em> Background',
+      's1.p1':'자율주행 모빌리티 서비스는 호출 → 탑승 → 이동 → 하차까지 <strong>끊김 없는 이동 경험</strong>이 핵심 가치이며, 서비스 신뢰도가 재사용률과 직결된다. 기사 없는 구조에서는 <strong>문제 상황 발생 시 \'설명 가능한 시스템\'이 곧 서비스 품질</strong>이 된다.',
+      's1.p2':'특히 심야 시간대는 고객센터 대응이 제한적이어서, <strong>설명 없는 정지로 인한 이탈이 발생할 경우 브랜드 신뢰도에 치명적인 타격</strong>을 주며, 장기적인 서비스 확장 전략의 병목이 되고 있었다.',
+      's1.bm':'비즈니스 모델','s1.bm1':'카카오T 앱 내 자율주행 택시 서비스 통합','s1.bm2':'기사 없는 구조: 서비스 신뢰도 = 재사용률','s1.bm3':'첫 탑승 경험의 품질이 장기 LTV를 결정',
+      's1.risk':'핵심 리스크 — 시스템은 정상, 사용자는 이해 불가','s1.r1':'센서 오류·판단 불확실성 → 갑작스러운 정지','s1.r2':'사용자 인지 불일치 → 차량 정상, 사용자는 "고장"으로 인식','s1.r3':'신뢰 붕괴 → 이유 모르는 정지 → 불안 → 이탈',
+      's2.title':'목표 <em>·</em> Goal',
+      's2.inp':'Input (선행 지표)','s2.i1':'<strong style="color:var(--text)">주행 완료율 96%</strong> — 예외 상황에서도 주행 완료','s2.i2':'CS 문의율 35% 감소','s2.i3':'주행 중 이탈률 감소','s2.i4':'재호출률 증가',
+      's2.out':'Output (성과 지표)','s2.o1':'14일 재이용률 +25% 향상','s2.o2':'7일 재이용률 +18%','s2.o3':'신뢰 기반 장기 LTV 확보',
+      's3.title':'Data Analysis',
+      's3.bigstat':'전체 이탈 구간 중 <strong>80%가 \'설명 없는 정지\' 30초 이내</strong>에 발생.<br>로그 데이터 분석 결과 이탈 유저의 대다수는 <strong>기기 결함으로 오인하여 주행을 포기</strong>한 것으로 확인됐다.',
+      's3.quant':'정량 분석','s3.q1':'센서 오류·원격 승인 상황에서 Mid-ride Drop-off Rate 급증','s3.q2':'불확실 상황 발생 시 CS Contact Rate 폭증','s3.q3':'설명 없이 정지하는 경우 Ride Completion Rate 하락','s3.q4':'문제 경험 이후 Re-call Rate 감소',
+      's3.qual':'정성 분석 — 사용자 인터뷰',
+      's3.ur.label':'USER RESEARCH — KEY JOBS TO BE DONE',
+      's3.ur.axis':'우선순위',
+      's3.ur.c1':'안전 확인',
+      's3.ur.c1t1':'상태 파악','s3.ur.c1d1':'지금 차량이 정상인지 즉시 알고 싶다',
+      's3.ur.c1t2':'원인 이해','s3.ur.c1d2':'왜 멈췄는지 이유를 알고 싶다',
+      's3.ur.c2':'상황 대응',
+      's3.ur.c2t1':'대기 예측','s3.ur.c2d1':'언제 다시 출발할지 알고 싶다',
+      's3.ur.c2t2':'능동적 선택','s3.ur.c2d2':'대기·경로변경·관제 중 스스로 선택하고 싶다',
+      's3.ur.c2t3':'진행 확인','s3.ur.c2d3':'지금 어떤 조치가 이뤄지는지 확인하고 싶다',
+      's3.ur.c3':'신뢰 회복',
+      's3.ur.c3t1':'경험 전달','s3.ur.c3d1':'불편한 경험을 서비스에 알리고 싶다',
+      's3.ur.c3t2':'지속 신뢰','s3.ur.c3d2':'이 경험 이후에도 자율주행을 계속 믿고 싶다',
+      's3.p1':'왜 멈췄는지 모르겠어서 불안해요.','s3.p2':'고장 난 건지 정상인지 판단이 안돼요.','s3.p3':'언제 다시 출발하는지 몰라 답답합니다.','s3.p4':'제가 뭘 해야 하는 상황인지 모르겠어요.',
+      's3.conclusion':'<strong>원인 분석 결론:</strong><br>사용자는 문제 발생 자체보다, <strong>시스템의 상태와 의도를 이해하지 못할 때</strong> 더 큰 불안을 느낀다. 이탈의 원인은 기술 불안이 아닌 <strong>정보 비대칭과 인지 공백</strong>이다.',
+      's4.title':'문제 정의 <em>·</em> Problem',
+      's4.seg.title':'사용자 세그먼트',
+      's4.seg1':'출퇴근 이용자','s4.seg1d':'루틴 이용, 이탈 비용이 큼','s4.seg2':'심야 이용자','s4.seg2d':'상황 이해도↓ 통제감↓ 불안 민감도↑','s4.seg3':'초행길 이용자','s4.seg3d':'낯선 환경, 판단 기준 부재','s4.seg4':'기술 비친숙 사용자','s4.seg4d':'AV 메커니즘 이해 낮음',
+      's4.problem':'사용자는 차량의 상태와 의도를 이해하지 못해 불안을 느끼고,<br>이로 인해 서비스 신뢰가 저하된다.',
+      's4.metrics.q':'핵심 지표를 어떻게<br>개선할 수 있을까?',
+      's4.m1':'예외 상황 Mid-ride Drop-off Rate 감소',
+      's4.m2':'신뢰 기반 14일 재이용률 +25%',
+      's5.title':'가설 <em>·</em> Hypothesis',
+      's5.hyp':'심야 이용자에게 정지 원인(<em>Why</em>)과 예상 시간(<em>When</em>)을 포함한 <em>4요소 정보</em>를 즉시 제공하면, 고장 오인으로 인한 중도 이탈이 줄어들어 <em>재호출률이 25% 상승</em>할 것이다.',
+      'hyp.c1':'실시간 정보 → 대기 포기 14–20% 감소 (선행 연구)','hyp.c2':'AV 설명 제공 시 Trust +20–30%↑','hyp.c3':'업계 벤치: 정보 비대칭 해소 시 Retention +20%대',
+      's5.test.title':'검증 조건','s5.t1':'타겟: 심야(22시–05시) 이용자','s5.t2':'트리거: 센서 오류·원격 승인 예외 상황','s5.t3':'검증 지표: Mid-ride Drop-off Rate (A/B)','s5.t4':'후속 측정: 30분 내 재호출률',
+      's5.target.title':'목표 수치','s5.v1':'Re-call Rate +25%','s5.v2':'Mid-ride Drop-off Rate 유의미한 감소','s5.v3':'신뢰 기반 14일 재이용률 증가',
+      's6.title':'실행 <em>·</em> Execution',
+      's6.asis':'As-is — 기존 상태','s6.a1':'예외 상황 발생 시 명확한 설명 없이 단순 정지 상태만 전달','s6.a2':'차량이 고장인지 정상인지 판단 불가','s6.a3':'재출발 시점 및 처리 상황 알 수 없음','s6.a4':'→ 불안·혼란 증가, 중도 이탈, CS 문의 폭증',
+      's6.tobe':'To-be — 개선 방향','s6.t1':'Why: 정지 원인 명확히 설명','s6.t2':'When: 재출발 예상 시간 제공','s6.t3':'System: 관제센터 처리 상태 시각화','s6.t4':'Action: 대기 / 경로 변경 / 관제 연결 선택지',
+      's6.direction':'<strong>솔루션 방향:</strong> 차량의 상태를 단순 알림이 아닌, <strong>이해 불가능한 상태 → 이해 가능한 상태</strong>로 전환하는 Explainable UX 설계. 관제 개입 및 처리 과정을 시각화하여 "시스템이 문제를 해결 중이다"라는 신뢰를 제공한다.',
+      's6.fw.title':'정보 우선순위 프레임워크',
+      'fw1.label':'이유 — 왜 멈췄는지','fw1.ex':'<em>"센서 신호가 일시적으로 불안정합니다"</em><br>없으면 즉시 "고장"으로 인식됨',
+      'fw2.label':'시간 — 언제 끝나는지','fw2.ex':'<em>"약 20–40초 후 재출발 예정"</em><br>기다릴 수 있게 만드는 핵심 정보',
+      'fw3.label':'상태 — 지금 해결되고 있는지','fw3.ex':'<em>"관제센터 확인 중"</em><br>"아무 일 안 하는 게 아니다"는 신호',
+      'fw4.label':'행동 — 내가 할 수 있는 것','fw4.ex':'<em>대기 / 경로 변경 / 관제 연결</em><br>통제감 회복을 위한 선택지',
+      's6.strat.title':'3가지 실행 전략',
+      'st1.name':'상황 설명 (Explain)','st1.desc':'Why + When + System을 구조화하여 즉시 전달. 사용자가 상황을 "이해"하게 만드는 것이 1차 목표.',
+      'st2.name':'선택권 제공 (Control)','st2.desc':'Primary: 그대로 대기 / Secondary: 경로 변경 · 관제 연결. 통제감 회복으로 불안감 감소.',
+      'st3.name':'자동 개입 (Fallback)','st3.desc':'일정 시간 초과 시 관제센터 자동 개입. 사용자 요청 없이도 시스템이 문제를 해결 중임을 시각화.',
+      's6.ui.title':'UI 상태 플로우 — 4단계',
+      'ui1.n':'State 01 · 정지 감지','ui1.badge':'일시 정지','ui1.title':'센서 신호가 일시적으로 불안정합니다','ui1.body':'안전을 위해 차량이 자동으로 정차했어요. 고장이 아닙니다.','ui1.leftsub':'사용자는 이 순간 아무 정보도 없다. 불안이 시작된다.','ui1.rd1':'<strong>상황 설명(Explain) 전략:</strong> Why + When + System을 구조화하여 즉시 전달. 사용자가 상황을 \'이해\'하게 만드는 것이 1차 목표.','ui1.rd2':'센서 신호 불안정 감지 → 안전 정차 자동 실행. <em>"고장이 아닙니다"</em>를 메인 메시지로 노출하고, 예상 대기 시간(약 20–40초)을 즉시 표시한다.',
+      'ui2.n':'State 02 · 관제 처리 중','ui2.badge':'관제센터 처리 중','ui2.title':'센서 신호 점검 중입니다','ui2.lefttitle':'관제센터가 즉시 처리합니다','ui2.leftsub':'시스템이 능동적으로 해결 중임을 실시간으로 보여준다.','ui2.rd1':'<strong>진행 상태 시각화:</strong> 데이터 전송 → 관제센터 확인 → 재출발 승인 단계를 Progress Indicator로 표시. 처리 중임을 알리는 것만으로 불안이 줄어든다.','ui2.rd2':'<em>개발팀과 합의한 로직:</em> 데이터 지연을 고려해 Why(왜 멈췄는지)를 최우선으로 노출. 대기 중에도 시스템이 작동 중임을 지속 피드백.',
+      'ui3.n':'State 03 · 관제사 연결','ui3.badge':'통화 연결됨 · 00:14','ui3.title':'이다현 상담원<br>DRT 관제팀 · 응답 중','ui3.lefttitle':'선택권을 사용자에게 돌려줍니다','ui3.leftsub':'통제감 회복으로 불안을 감소시킨다.','ui3.rd1':'<strong>선택권 제공(Control) 전략:</strong> Primary — 그대로 대기 / Secondary — 경로 변경 또는 관제사 연결. 선택지 자체가 통제감을 준다.','ui3.rd2':'관제사가 보는 정보(차량 위치·상태·승객 정보)를 공개하여 신뢰를 형성. <em>디자인팀과 심야 안정감 컬러 시스템</em> 별도 협의 적용.',
+      'ui4.n':'State 04 · 해결 완료','ui4.badge':'해결 완료','ui4.title':'문제가 해결됐어요','ui4.body':'센서 신호가 안정화되어 자동으로 재출발합니다.','ui4.leftsub':'3초 후 자동 재출발 · 불편 보상 자동 지급','ui4.rd1':'<strong>자동 개입(Fallback) 전략:</strong> 일정 시간 초과 시 관제센터 자동 개입. 사용자 요청 없이도 시스템이 문제를 해결 중임을 지속 시각화.','ui4.rd2':'전체 진행 단계 완료 확인 후 자동 재출발. <em>불편 보상 5원 자동 지급</em>으로 부정 경험을 긍정 기억으로 전환. 신뢰 회복의 마지막 단계.',
+      'ep.title':'실행 계획<br>1–2 Weeks Sprint',
+      'ep.desc1':'자율주행 예외 상황 대응 UX를 실제 서비스로 구현하기 위한 단계별 실행 계획이다. 엣지 케이스 정의부터 배포까지 <strong>1–2주 스프린트로 압축</strong>하여 사용자 검증 중심의 빠른 이터레이션을 목표로 한다.',
+      'ep.desc2':'각 단계에서 기획 산출물(PRD · 기능정의서 · 정책서)과 디자인 산출물(와이어프레임 · Hi-fi)이 병렬로 생성되어, 개발 착수 시점에 전 문서가 완비된 상태를 유지한다.',
+      'ep.n1':'01','ep.t1':'주행 시 엣지 케이스 정의','ep.s1':'User research, PRD 작성, QA',
+      'ep.n2':'02','ep.t2':'타겟 세그먼트 유저 플로우 정의','ep.s2':'User Journey, CTA 이벤트 정의',
+      'ep.n3':'03','ep.t3':'화면 설계 / Hi-Fi 와이어프레임 설계','ep.s3':'Component 정의, 인터랙션 명세 작성',
+      'ep.n4':'04','ep.t4':'유저 테스트 / 피드백 수집','ep.s4':'Usability Test, 사용성 검증 및 인사이트 도출',
+      'ep.n5':'05','ep.t5':'피드백 반영 화면 설계 / 기능정의서 / 정책서 제작','ep.s5':'개발 핸드오프 문서 완성, 정책 확정',
+      'ep.n6':'06','ep.t6':'개발 착수','ep.s6':'Front-end · Back-end 스프린트 개발, QA 병행',
+      'ep.n7':'07','ep.t7':'배포','ep.s7':'단계적 롤아웃, 지표 모니터링, A/B 테스트',
+      's7.title':'결과 <em>·</em> Results',
+      'r1.d':'주행 완료율 (Ride Completion Rate)','r1.s':'예외 상황 발생 시에도 목표 달성 · AV 긍정 경험 축적',
+      'r2.d':'CS 문의율 감소','r2.s':'정의한 엣지케이스 대처가 작동 → 사용성 신뢰도 상승',
+      'r3.d':'14일 재이용률 향상','r3.s':'신뢰 기반 반복 사용 유도 · 장기 LTV 확보',
+      'r4.d':'Re-call Rate 증가','r4.s':'문제 경험 이후에도 재사용 의지 유지 · 심리적 진입 장벽 완화',
+      's7.mt':'측정 지표',
+      'mt.metric':'지표','mt.type':'측정 방법','mt.direction':'방향',
+      'mt.r1':'Mid-ride Drop-off Rate','mt.r1t':'A/B 테스트 대조군 비교',
+      'mt.r2':'Ride Completion Rate','mt.r2t':'예외 상황 발생 세션 기준',
+      'mt.r3':'CS Contact Rate','mt.r3t':'예외 상황 후 24시간 내',
+      'mt.r4':'Re-call Rate','mt.r4t':'30분 내 재호출',
+      'mt.r5':'14일 재이용률','mt.r5t':'코호트 분석',
+      'mt.r6':'상황 이해도·불안 감소 체감','mt.r6t':'사용자 인터뷰 (정성)',
+      's8.title':'레슨런 <em>·</em> Lessons',
+      'l1.h':'기술적으로 완벽한 시스템이라도, 사용자가 상태를 인지하지 못하면 "고장"으로 정의된다',
+      'l1.p':'앞으로는 시스템 성능 수치보다 <strong style="color:var(--text)">사용자의 심리적 도달 시점</strong>을 우선 고려하여 기획하고자 합니다. UX의 역할은 기술을 설명하는 것이 아니라, 기술을 <strong style="color:var(--text)">경험으로 번역</strong>하는 것이다.',
+      'l2.h':'데이터 기반 의사결정: 정량 + 정성 교차 분석이 진짜 원인을 찾는다',
+      'l2.p':'이탈 지표(정량)와 인터뷰(정성)를 교차 분석하여 "기능 오류"가 아닌 <strong style="color:var(--text)">"인지의 부재"</strong>라는 진짜 원인을 찾아낸 것처럼, 표면적 현상 너머의 유효 레버를 찾는 과정을 업무 원칙으로 삼게 되었습니다.',
+      'next.label':'다음 케이스 스터디',
+      'footer.back':'← Projects'
+    },
+    en: {
+      'nav.work':'Projects','nav.about':'About','nav.contact':'Contact',
+      'hero.sub':'KakaoMobility · UX Service Growth Case · 2026',
+      'hero.eyebrow':'Explainable UX · Autonomous Vehicle',
+      'hero.h1':'<span style="white-space:nowrap">The self-driving car stopped.</span><br><span style="white-space:nowrap"><em>What</em> do we tell the passenger?</span>',
+      'hero.question':'Designing an Explainable UX strategy to resolve user cognitive dissonance during AV exceptions — sensor errors and remote authorization — in a driverless service.',
+      'meta.role.l':'Role','meta.role.v':'Service Planning · PM (Reverse Engineering)',
+      'meta.period.l':'Period','meta.domain.l':'Domain','meta.domain.v':'Mobility · Robotaxi','meta.tools.l':'Tools',
+      's1.title':'Background',
+      's1.p1':'The core value of AV mobility is a seamless experience from booking through arrival. In a driverless structure, <strong>when something goes wrong, an "explainable system" IS the service quality</strong>.',
+      's1.p2':'Late-night hours have limited customer support capacity, making unexplained stops especially damaging. <strong>User drop-off due to a lack of explanation becomes a critical bottleneck for long-term service expansion.</strong>',
+      's1.bm':'Business Model','s1.bm1':'AV taxi integrated in KakaoT app','s1.bm2':'Driverless structure: service trust = reuse rate','s1.bm3':'Quality of first ride determines long-term LTV',
+      's1.risk':'Key Risk — System is Normal, User Cannot Understand','s1.r1':'Sensor errors → sudden stops, unexpected route changes','s1.r2':'Cognitive mismatch → vehicle functioning normally, user perceives "malfunction"','s1.r3':'Trust collapse → unexplained stop → anxiety → service abandonment',
+      's2.title':'Goal',
+      's2.inp':'Input (Leading Metrics)','s2.i1':'Ride Completion Rate 96% — even during exceptions','s2.i2':'CS contact rate −35%','s2.i3':'Mid-ride Drop-off Rate decrease','s2.i4':'Re-call Rate increase',
+      's2.out':'Output (Outcome Metrics)','s2.o1':'14-day re-use rate +25%','s2.o2':'7-day re-use rate +18%','s2.o3':'Trust-based long-term LTV secured',
+      's3.title':'Data Analysis',
+      's3.bigstat':'<strong>80% of all drop-offs occurred within 30 seconds of an unexplained stop.</strong><br>Log data analysis confirmed that most departing users had misidentified the stop as a hardware failure and abandoned the ride.',
+      's3.quant':'Quantitative Analysis','s3.q1':'Mid-ride Drop-off Rate spikes during sensor error / remote auth events','s3.q2':'CS Contact Rate surges during uncertainty events','s3.q3':'Ride Completion Rate drops when stop occurs without explanation','s3.q4':'Re-call Rate decreases after a problem experience',
+      's3.qual':'Qualitative — User Interviews',
+      's3.ur.label':'USER RESEARCH — KEY JOBS TO BE DONE',
+      's3.ur.axis':'Priority',
+      's3.ur.c1':'Safety Confirmation',
+      's3.ur.c1t1':'Status Check','s3.ur.c1d1':'I want to know immediately if the vehicle is operating normally',
+      's3.ur.c1t2':'Root Cause','s3.ur.c1d2':'I want to know why the vehicle stopped',
+      's3.ur.c2':'Situation Response',
+      's3.ur.c2t1':'Wait Estimate','s3.ur.c2d1':'I want to know when we will depart again',
+      's3.ur.c2t2':'Active Choice','s3.ur.c2d2':'I want to choose between waiting, rerouting, or contacting support',
+      's3.ur.c2t3':'Progress Check','s3.ur.c2d3':'I want to see what action is being taken right now',
+      's3.ur.c3':'Trust Recovery',
+      's3.ur.c3t1':'Feedback','s3.ur.c3d1':'I want to report my experience to the service',
+      's3.ur.c3t2':'Continued Trust','s3.ur.c3d2':'I want to keep trusting autonomous driving after this experience',
+      's3.p1':'Why did it stop? I have no idea and it makes me anxious.','s3.p2':'I cannot tell if there is a malfunction or if everything is normal.','s3.p3':'I have no idea when it will start moving again — it is so frustrating.','s3.p4':'I do not know what I am supposed to do in this situation.',
+      's3.conclusion':'<strong>Conclusion:</strong><br>Users experience more anxiety from <strong>not understanding the system\'s state and intent</strong> than from the problem itself. The real cause of drop-off is <strong>information asymmetry and cognitive gaps</strong>, not technology distrust.',
+      's4.title':'Finding the Problem',
+      's4.seg.title':'User Segments',
+      's4.seg1':'Commuters','s4.seg1d':'Routine use; high cost of dropping off','s4.seg2':'Late-night users','s4.seg2d':'Low situational awareness, low sense of control, high anxiety','s4.seg3':'Unfamiliar-route users','s4.seg3d':'No familiar reference points to judge normalcy','s4.seg4':'Tech-unfamiliar users','s4.seg4d':'Low understanding of AV mechanisms',
+      's4.problem':'Users feel anxious because they cannot understand the vehicle\'s state and intent — eroding service trust.',
+      's4.metrics.q':'How do we improve<br>our key metrics?',
+      's4.m1':'Reduce mid-ride drop-off rate in exception scenarios',
+      's4.m2':'Increase trust-based 14-day re-use rate by +25%',
+      's5.title':'Hypothesis',
+      's5.hyp':'If late-night users are immediately given <em>4 structured pieces of information</em> — the reason (<em>Why</em>), the timeline (<em>When</em>), system status, and available actions — mid-ride drop-off caused by malfunction misperception will decrease and <em>re-call rate will increase by 25%</em>.',
+      'hyp.c1':'Real-time information reduces wait abandonment by 14–20% (prior research)','hyp.c2':'AV explanations increase trust by +20–30%','hyp.c3':'Industry benchmark: resolving info asymmetry improves retention by ~20%',
+      's5.test.title':'Test Conditions','s5.t1':'Target: late-night (22:00–05:00) users','s5.t2':'Trigger: sensor error / remote authorization exceptions','s5.t3':'Primary metric: Mid-ride Drop-off Rate (A/B test)','s5.t4':'Follow-up: re-call rate within 30 minutes',
+      's5.target.title':'Target Outcomes','s5.v1':'Re-call Rate +25%','s5.v2':'Significant reduction in Mid-ride Drop-off Rate','s5.v3':'14-day re-use rate increase based on trust',
+      's6.title':'Execution',
+      's6.asis':'As-is — Current State','s6.a1':'On exception: only a stop state is communicated — no explanation','s6.a2':'User cannot determine if vehicle is broken or operating normally','s6.a3':'No information on when restart will occur or what is being done','s6.a4':'→ Increased anxiety, mid-ride drop-off, CS contact surge',
+      's6.tobe':'To-be — Improved State','s6.t1':'Why: clearly explain the cause of the stop','s6.t2':'When: provide estimated restart time','s6.t3':'System: visualize control center processing status','s6.t4':'Action: offer choices — wait / reroute / connect to operator',
+      's6.direction':'<strong>Solution Direction:</strong> Transform the vehicle\'s state from an <strong>incomprehensible state → a comprehensible state</strong> via Explainable UX. Visualize control center intervention and resolution process to establish trust that "the system is solving the problem."',
+      's6.fw.title':'Information Priority Framework',
+      'fw1.label':'Why — Why did it stop?','fw1.ex':'<em>"Sensor signal is temporarily unstable."</em><br>Without this, users immediately perceive "breakdown"',
+      'fw2.label':'When — When will it end?','fw2.ex':'<em>"Expected restart in approximately 20–40 seconds."</em><br>The key piece of information that makes waiting possible',
+      'fw3.label':'System — Is it being resolved?','fw3.ex':'<em>"Control center verifying..."</em><br>Signals "something is being done"',
+      'fw4.label':'Action — What can I do?','fw4.ex':'<em>Wait / Reroute / Connect to operator</em><br>Restores user\'s sense of control',
+      's6.strat.title':'3 Execution Strategies',
+      'st1.name':'Explain','st1.desc':'Deliver Why + When + System immediately in structured form. Making users "understand" the situation is the primary objective.',
+      'st2.name':'Control','st2.desc':'Primary: Wait / Secondary: Reroute · Connect to operator. Restoring sense of control reduces anxiety.',
+      'st3.name':'Fallback','st3.desc':'Auto-escalate to control center after a set duration. Visualize that the system is resolving the problem even without user request.',
+      's6.ui.title':'UI State Flow — 4 Stages',
+      'ui1.n':'State 01 · Stop Detected','ui1.badge':'Temporarily Paused','ui1.title':'Sensor signal is temporarily unstable','ui1.body':'The vehicle automatically stopped for safety. This is not a malfunction.','ui1.leftsub':'At this moment, users have no information. Anxiety begins.','ui1.rd1':'<strong>Explain Strategy:</strong> Deliver Why + When + System in a structured way immediately. Making users "understand" the situation is the primary goal.','ui1.rd2':'Unstable sensor signal detected → automatic safe stop. <em>"Not a malfunction"</em> displayed as the primary message, along with expected wait time (~20–40 sec).',
+      'ui2.n':'State 02 · Control Processing','ui2.badge':'Control Center Processing','ui2.title':'Checking sensor signal','ui2.lefttitle':'Control center is on it immediately','ui2.leftsub':'Show the user that the system is actively resolving in real time.','ui2.rd1':'<strong>Progress Visualization:</strong> Display stages — Data Sent → Control Verifying → Restart Approved — via progress indicator. Simply showing it\'s being handled reduces anxiety.','ui2.rd2':'<em>Logic agreed with engineering:</em> Prioritize Why display factoring in data latency. Continuously feed back that the system is working even while the user waits.',
+      'ui3.n':'State 03 · Operator Connected','ui3.badge':'Call Connected · 00:14','ui3.title':'Agent: Lee Dahyun<br>DRT Control Team · Responding','ui3.lefttitle':'Give control back to the user','ui3.leftsub':'Restoring a sense of control reduces anxiety.','ui3.rd1':'<strong>Control Strategy:</strong> Primary — Wait as-is / Secondary — Reroute or connect to operator. The presence of choices alone restores a sense of agency.','ui3.rd2':'Build trust by showing what the operator can see (vehicle location, status, passenger info). <em>Separate collaboration with design team</em> to apply a calming late-night color system.',
+      'ui4.n':'State 04 · Resolved','ui4.badge':'Resolved','ui4.title':'The issue has been resolved','ui4.body':'Sensor signal has stabilized. The vehicle will restart automatically.','ui4.leftsub':'Auto-restart in 3 sec · Compensation auto-applied','ui4.rd1':'<strong>Fallback Strategy:</strong> Control center automatically intervenes after a set threshold. Continuously visualize that the system is resolving without requiring user action.','ui4.rd2':'Vehicle restarts automatically after all steps complete. <em>₩5 delay compensation auto-applied</em> to convert a negative experience into a positive memory — the final trust recovery step.',
+      'ep.title':'Execution Plan<br>1–2 Weeks Sprint',
+      'ep.desc1':'A step-by-step execution plan to bring the AV exception-handling UX to production. Compressed into <strong>1–2 week sprints</strong>, the goal is rapid iteration anchored in continuous user validation.',
+      'ep.desc2':'Each phase generates planning deliverables (PRD · feature spec · policy doc) and design deliverables (wireframes · Hi-fi) in parallel, ensuring all documentation is complete before development begins.',
+      'ep.n1':'01','ep.t1':'Define In-Ride Edge Cases','ep.s1':'User research, PRD writing, QA',
+      'ep.n2':'02','ep.t2':'Define Target Segment User Flow','ep.s2':'User Journey mapping, CTA event definition',
+      'ep.n3':'03','ep.t3':'Screen Design / Hi-Fi Wireframing','ep.s3':'Component definition, interaction specs',
+      'ep.n4':'04','ep.t4':'User Testing / Feedback Collection','ep.s4':'Usability testing, insight synthesis',
+      'ep.n5':'05','ep.t5':'Revised Design / Feature Spec / Policy Doc','ep.s5':'Dev handoff documentation, policy sign-off',
+      'ep.n6':'06','ep.t6':'Development Kickoff','ep.s6':'Front-end · Back-end sprint, QA in parallel',
+      'ep.n7':'07','ep.t7':'Deployment','ep.s7':'Phased rollout, metric monitoring, A/B testing',
+      's7.title':'Results',
+      'r1.d':'Ride Completion Rate','r1.s':'Target achieved even during exceptions · Positive AV experience accumulated',
+      'r2.d':'CS Contact Rate Reduction','r2.s':'Defined edge case responses working → usability trust increased',
+      'r3.d':'14-Day Re-use Rate Increase','r3.s':'Trust-based repeat use · Long-term LTV secured',
+      'r4.d':'Re-call Rate Increase','r4.s':'Willingness to reuse maintained after problem experience · Reduced psychological barrier',
+      's7.mt':'Key Metrics',
+      'mt.metric':'Metric','mt.type':'Measurement Method','mt.direction':'Direction',
+      'mt.r1':'Mid-ride Drop-off Rate','mt.r1t':'A/B test vs. control group',
+      'mt.r2':'Ride Completion Rate','mt.r2t':'Sessions with exception events',
+      'mt.r3':'CS Contact Rate','mt.r3t':'Within 24h of exception event',
+      'mt.r4':'Re-call Rate','mt.r4t':'Re-request within 30 minutes',
+      'mt.r5':'14-Day Re-use Rate','mt.r5t':'Cohort analysis',
+      'mt.r6':'Situational understanding & anxiety reduction','mt.r6t':'User interviews (qualitative)',
+      's8.title':'Lessons Learned',
+      'l1.h':'Even a technically perfect system is defined as "broken" if users cannot understand its state',
+      'l1.p':'Going forward, I plan to prioritize <strong style="color:var(--text)">the user\'s psychological arrival point</strong> over system performance metrics. The role of UX is not to explain technology — it is to <strong style="color:var(--text)">translate technology into experience</strong>.',
+      'l2.h':'Data-driven decisions: cross-analyzing quantitative + qualitative data uncovers the real cause',
+      'l2.p':'Just as I found <strong style="color:var(--text)">"cognitive absence"</strong> rather than "functional error" as the true cause by cross-analyzing drop-off data and interviews, I\'ve made finding the effective lever beyond surface phenomena a core work principle.',
+      'next.label':'Next Case Study',
+      'footer.back':'← Projects'
+    }
+  };
+
+  let currentLang = 'ko';
+  function setLang(lang) {
+    currentLang = lang;
+    document.documentElement.lang = lang;
+    const els = document.querySelectorAll('[data-i18n]');
+    els.forEach(el => el.classList.add('t-fade','fading'));
+    setTimeout(() => {
+      els.forEach(el => {
+        if (i18n[lang][el.dataset.i18n] !== undefined) el.innerHTML = i18n[lang][el.dataset.i18n];
+        el.classList.remove('fading');
+      });
+    }, 220);
+    document.querySelectorAll('.lang-btn').forEach(b => b.classList.toggle('active', b.dataset.lang === lang));
+  }
+  document.getElementById('langToggle').addEventListener('click', e => {
+    const btn = e.target.closest('.lang-btn');
+    if (btn && btn.dataset.lang !== currentLang) setLang(btn.dataset.lang);
+  });
+
+  /* Nav scroll */
+  const nav = document.getElementById('nav');
+  window.addEventListener('scroll', () => nav.classList.toggle('scrolled', window.scrollY > 40), {passive:true});
+
+  /* Cursor */
+  const dot = document.getElementById('cur-dot'), ring = document.getElementById('cur-ring');
+  let mx=0,my=0,rx=0,ry=0;
+  window.addEventListener('mousemove', e => { mx=e.clientX; my=e.clientY; });
+  (function anim() { dot.style.left=mx+'px'; dot.style.top=my+'px'; rx+=(mx-rx)*.12; ry+=(my-ry)*.12; ring.style.left=rx+'px'; ring.style.top=ry+'px'; requestAnimationFrame(anim); })();
+  document.querySelectorAll('a,button').forEach(el => {
+    el.addEventListener('mouseenter', () => document.body.classList.add('cursor-link'));
+    el.addEventListener('mouseleave', () => document.body.classList.remove('cursor-link'));
+  });
+
+  /* Scroll reveal */
+  const obs = new IntersectionObserver(es => es.forEach(e => { if(e.isIntersecting) e.target.classList.add('visible'); }), {threshold:0.06});
+  document.querySelectorAll('.cs-section').forEach(el => obs.observe(el));
+
+  /* ── Floating TOC ─────────────────────── */
+  (function() {
+    const toc = document.getElementById('csToc');
+    if (!toc) return;
+    const sections = document.querySelectorAll('.cs-section[id]');
+    const links = [];
+    sections.forEach(sec => {
+      const titleEl = sec.querySelector('.cs-section-title');
+      if (!titleEl) return;
+      const full = titleEl.textContent;
+      const parts = full.split('·');
+      const label = (parts.length > 1 ? parts[parts.length - 1] : full).trim().split('—')[0].trim();
+      const a = document.createElement('a');
+      a.href = '#' + sec.id;
+      a.className = 'cs-toc-link';
+      a.dataset.target = sec.id;
+      a.innerHTML = '<span class="cs-toc-tick"></span><span>' + label + '</span>';
+      toc.appendChild(a);
+      links.push({ el: a, sec });
+    });
+    const spy = new IntersectionObserver(entries => {
+      entries.forEach(e => {
+        const link = links.find(l => l.sec === e.target);
+        if (link) link.el.classList.toggle('active', e.isIntersecting);
+      });
+    }, { rootMargin: '-20% 0px -65% 0px', threshold: 0 });
+    sections.forEach(s => spy.observe(s));
+    toc.addEventListener('click', e => {
+      const a = e.target.closest('.cs-toc-link');
+      if (!a) return;
+      e.preventDefault();
+      document.getElementById(a.dataset.target)?.scrollIntoView({ behavior: 'smooth' });
+    });
+
+    /* Hide TOC while hero cover is visible */
+    const hero = document.querySelector('.cs-hero');
+    if (hero) {
+      toc.style.opacity = '0';
+      toc.style.visibility = 'hidden';
+      const heroObs = new IntersectionObserver(entries => {
+        const vis = !entries[0].isIntersecting;
+        toc.style.opacity = vis ? '1' : '0';
+        toc.style.visibility = vis ? 'visible' : 'hidden';
+        toc.style.pointerEvents = vis ? 'auto' : 'none';
+      }, { threshold: 0.05 });
+      heroObs.observe(hero);
+    }
+  })();
+  </script>
+</body>
+</html>

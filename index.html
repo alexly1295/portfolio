@@ -1,0 +1,866 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Sumin Lee — Product Manager</title>
+  <link rel="icon" type="image/png" href="./favicon.png" />
+  <link rel="preconnect" href="https://fonts.googleapis.com" />
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+  <link href="https://fonts.googleapis.com/css2?family=Lexend:wght@300;400;500;600;700&family=Inter:wght@300;400;500;600&display=swap" rel="stylesheet" />
+  <style>
+    :root {
+      --bg:        #0B0C11;
+      --bg-2:      #111318;
+      --bg-card:   #15161C;
+      --bg-card-h: #1C1D25;
+      --accent:    #E8182E;
+      --navy:      #21304E;
+      --concrete:  #CCCAC6;
+      --text:      #F0ECE6;
+      --text-2:    #CCCAC6;
+      --text-3:    #5A5A66;
+      --border:    rgba(255,255,255,0.07);
+      --border-h:  rgba(255,255,255,0.13);
+    }
+    *, *::before, *::after { margin:0; padding:0; box-sizing:border-box; }
+    html { scroll-behavior: smooth; }
+    body {
+      background-color: var(--bg);
+      background-image:
+        radial-gradient(ellipse 90% 60% at -4% -8%,  rgba(28,42,80,.60) 0%, transparent 52%),
+        radial-gradient(ellipse 55% 40% at 102% 105%, rgba(14,8,14,.85) 0%, transparent 48%),
+        radial-gradient(ellipse 40% 30% at 50%  110%, rgba(232,24,46,.04) 0%, transparent 60%);
+      color: var(--text);
+      font-family: 'Inter', sans-serif;
+      font-size: 16px;
+      line-height: 1.6;
+      overflow-x: hidden;
+      -webkit-font-smoothing: antialiased;
+      cursor: none;
+    }
+    a { color: inherit; text-decoration: none; cursor: none; }
+
+    /* GRAIN */
+    #grain {
+      position: fixed; inset: 0; z-index: 998; pointer-events: none;
+      opacity: .038;
+      background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='256' height='256'%3E%3Cfilter id='n'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.85' numOctaves='4' stitchTiles='stitch'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23n)'/%3E%3C/svg%3E");
+      background-repeat: repeat; background-size: 256px 256px;
+    }
+
+    /* CURSOR */
+    #cur-dot {
+      position: fixed; width: 6px; height: 6px; background: var(--text);
+      border-radius: 50%; pointer-events: none; z-index: 9999;
+      transform: translate(-50%,-50%);
+      transition: width .15s, height .15s, background .15s;
+      will-change: left, top;
+    }
+    #cur-ring {
+      position: fixed; width: 34px; height: 34px;
+      border: 1px solid rgba(240,236,230,.22); border-radius: 50%;
+      pointer-events: none; z-index: 9998;
+      transform: translate(-50%,-50%);
+      transition: width .3s, height .3s, border-color .3s, opacity .3s;
+      will-change: left, top;
+    }
+    body.cursor-hover #cur-dot { width:10px; height:10px; background:var(--accent); }
+    body.cursor-hover #cur-ring { width:52px; height:52px; border-color:rgba(232,24,46,.35); }
+    body.cursor-link  #cur-dot  { width:44px; height:44px; background:rgba(232,24,46,.12); border:1px solid rgba(232,24,46,.4); }
+    body.cursor-link  #cur-ring { opacity:0; }
+
+    /* TARGETING RETICLE */
+    #cur-reticle {
+      position: fixed; pointer-events: none; z-index: 9997;
+      width: 58px; height: 58px;
+      opacity: 0;
+      transform: translate(-50%,-50%) scale(.72) rotate(12deg);
+      transition: opacity .22s, transform .28s cubic-bezier(.25,.46,.45,.94);
+    }
+    #cur-reticle span {
+      position: absolute; width: 13px; height: 13px;
+      border-color: rgba(240,236,230,.9); border-style: solid; border-width: 0;
+    }
+    #cur-reticle span:nth-child(1) { top:0; left:0;   border-top-width:1.5px; border-left-width:1.5px; }
+    #cur-reticle span:nth-child(2) { top:0; right:0;  border-top-width:1.5px; border-right-width:1.5px; }
+    #cur-reticle span:nth-child(3) { bottom:0; left:0; border-bottom-width:1.5px; border-left-width:1.5px; }
+    #cur-reticle span:nth-child(4) { bottom:0; right:0; border-bottom-width:1.5px; border-right-width:1.5px; }
+    body.cursor-target #cur-reticle { opacity:1; transform:translate(-50%,-50%) scale(1) rotate(0deg); }
+    body.cursor-target #cur-ring    { opacity:0; }
+    body.cursor-target #cur-dot     { width:4px; height:4px; background:rgba(240,236,230,.7); }
+
+    /* LABEL */
+    .label {
+      display: flex; align-items: center; gap: 14px;
+      font-size: 10px; font-weight: 500; letter-spacing: 0.22em;
+      text-transform: uppercase; color: var(--text-3);
+    }
+    .label::before {
+      content: ''; display: block; width: 3px; height: 14px;
+      background: var(--accent); border-radius: 2px; flex-shrink: 0;
+    }
+
+    /* NAV */
+    nav {
+      position: fixed; inset: 0 0 auto; z-index: 200;
+      padding: 22px 64px;
+      display: flex; justify-content: space-between; align-items: center;
+      transition: background .4s, border-color .4s;
+      border-bottom: 1px solid transparent;
+    }
+    nav.scrolled {
+      background: rgba(11,12,17,.88); backdrop-filter: blur(20px);
+      border-color: var(--border);
+    }
+    .nav-logo { display: flex; align-items: center; }
+    .nav-logo img {
+      width: 30px; height: 30px; border-radius: 50%;
+      opacity: .82; transition: opacity .2s;
+    }
+    .nav-logo:hover img { opacity: 1; }
+
+    .nav-right { display: flex; align-items: center; gap: 40px; }
+    .nav-links { display: flex; gap: 40px; list-style: none; }
+    .nav-links a {
+      font-size: 13px; letter-spacing: 0.06em; color: var(--text-2);
+      transition: color .2s; position: relative;
+    }
+    .nav-links a::after {
+      content: ''; position: absolute; left: 0; bottom: -3px;
+      width: 0; height: 1px; background: var(--accent); transition: width .3s;
+    }
+    .nav-links a:hover { color: var(--text); }
+    .nav-links a:hover::after { width: 100%; }
+
+    /* LANG TOGGLE */
+    .lang-toggle {
+      display: flex; align-items: center; gap: 4px;
+      border: 1px solid var(--border); border-radius: 100px;
+      padding: 3px 4px;
+    }
+    .lang-btn {
+      background: none; border: none; outline: none; cursor: none;
+      font-family: 'Lexend', sans-serif;
+      font-size: 10px; font-weight: 600; letter-spacing: 0.1em;
+      color: var(--text-3); padding: 4px 10px; border-radius: 100px;
+      transition: background .2s, color .2s;
+    }
+    .lang-btn.active {
+      background: var(--accent); color: #fff;
+    }
+    .lang-btn:hover:not(.active) { color: var(--text); }
+
+    /* HERO */
+    .hero {
+      position: relative; width: 100%; height: 100vh;
+      min-height: 600px; overflow: hidden;
+    }
+    .hero-photo {
+      position: absolute; inset: 0; width: 100%; height: 100%;
+      object-fit: cover; object-position: center top;
+      filter: grayscale(100%) contrast(1.05) brightness(0.72);
+      transition: transform .6s ease;
+    }
+    .hero-overlay {
+      position: absolute; inset: 0;
+      background:
+        linear-gradient(to top, rgba(11,12,17,.95) 0%, rgba(11,12,17,.3) 45%, rgba(11,12,17,.1) 100%),
+        linear-gradient(to right, rgba(11,12,17,.4) 0%, transparent 60%);
+      pointer-events: none;
+    }
+    .hero-glow {
+      position: absolute; width: 500px; height: 500px; border-radius: 50%;
+      background: radial-gradient(circle, rgba(232,24,46,.06) 0%, transparent 70%);
+      pointer-events: none; transform: translate(-50%,-50%);
+      transition: left 1s cubic-bezier(.25,.46,.45,.94), top 1s cubic-bezier(.25,.46,.45,.94);
+    }
+    .hero-text-left {
+      position: absolute; bottom: 100px; left: 64px; z-index: 2;
+      opacity: 0; transform: translateY(20px);
+      animation: fadeUp .9s .2s forwards;
+    }
+    .hero-eyebrow {
+      font-size: 10px; font-weight: 500; letter-spacing: 0.22em;
+      text-transform: uppercase; color: var(--text-3); margin-bottom: 14px;
+      display: flex; align-items: center; gap: 10px;
+    }
+    .hero-eyebrow::before {
+      content: ''; display: block; width: 3px; height: 12px;
+      background: var(--accent); border-radius: 2px;
+    }
+    .hero-title {
+      font-family: 'Lexend', sans-serif;
+      font-size: clamp(14px, 1.35vw, 19px);
+      font-weight: 500; line-height: 1.65; letter-spacing: 0.01em; color: var(--text);
+    }
+    .hero-title .line { display: block; opacity: 0; transform: translateY(18px); }
+    .hero-title .line:nth-child(1) { animation: fadeUp .8s .3s forwards; }
+    .hero-title .line:nth-child(2) { animation: fadeUp .8s .44s forwards; }
+    .hero-title em { font-style: normal; color: var(--accent); }
+
+    .hero-text-right {
+      position: absolute; bottom: 100px; right: 64px; z-index: 2; text-align: right;
+      opacity: 0; transform: translateY(20px); animation: fadeUp .9s .4s forwards;
+    }
+    .hero-role {
+      font-size: clamp(13px, 1.2vw, 16px); font-weight: 400;
+      color: var(--text-2); line-height: 1.65; letter-spacing: 0.02em;
+    }
+    .hero-role strong { color: var(--text); font-weight: 500; }
+
+    .hero-strip {
+      position: absolute; bottom: 0; left: 0; right: 0; height: 76px;
+      background: rgba(11,12,17,.78); backdrop-filter: blur(12px);
+      border-top: 1px solid var(--border);
+      display: flex; align-items: center; padding: 0 64px;
+      opacity: 0; animation: fadeUp .6s .7s forwards; z-index: 3;
+    }
+    .strip-item {
+      flex: 1; display: flex; flex-direction: column; justify-content: center;
+      padding: 0 20px; border-right: 1px solid var(--border);
+    }
+    .strip-item:first-child { padding-left: 0; }
+    .strip-item:last-child  { border-right: none; }
+    .strip-label { font-size: 9px; letter-spacing: 0.18em; text-transform: uppercase; color: var(--text-3); margin-bottom: 2px; }
+    .strip-val   { font-family: 'Lexend', sans-serif; font-size: 13px; font-weight: 500; color: var(--text); }
+    .strip-val.accent { color: var(--accent); }
+
+    .hero-scroll {
+      position: absolute; bottom: 68px; left: 50%;
+      transform: translateX(-50%); z-index: 4;
+      display: flex; flex-direction: column; align-items: center; gap: 6px;
+      opacity: 0; animation: fadeUp .6s .9s forwards;
+    }
+    .hero-scroll span { font-size: 9px; letter-spacing: 0.2em; text-transform: uppercase; color: var(--text-3); }
+    .scroll-line {
+      width: 1px; height: 36px;
+      background: linear-gradient(to bottom, var(--accent), transparent);
+      animation: scrollPulse 2s ease-in-out infinite;
+    }
+    @keyframes scrollPulse {
+      0%,100% { opacity:.3; transform:scaleY(1); }
+      50%      { opacity:1;  transform:scaleY(1.15); }
+    }
+    @keyframes fadeUp { to { opacity:1; transform:translateY(0); } }
+
+    /* SECTIONS */
+    .section { padding: 112px 64px; border-top: 1px solid var(--border); }
+    .section-head { margin-bottom: 64px; }
+
+    /* PROJECTS */
+    .projects-grid {
+      display: grid; grid-template-columns: repeat(2,1fr);
+      gap: 2px; background: var(--border);
+    }
+    .project-card {
+      background: var(--bg-card); display: block; overflow: hidden;
+      position: relative; transition: background .3s;
+    }
+    .project-card:hover { background: var(--bg-card-h); }
+    .project-card::after {
+      content: ''; position: absolute; inset: 0; opacity: 0;
+      transition: opacity .4s; pointer-events: none;
+    }
+    .project-card[data-glow="gold"]::after   { background: radial-gradient(ellipse 80% 50% at 50% 100%, rgba(245,197,24,.08) 0%, transparent 70%); }
+    .project-card[data-glow="blue"]::after   { background: radial-gradient(ellipse 80% 50% at 50% 100%, rgba(74,158,255,.08)  0%, transparent 70%); }
+    .project-card[data-glow="cyan"]::after   { background: radial-gradient(ellipse 80% 50% at 50% 100%, rgba(232,24,46,.08)   0%, transparent 70%); }
+    .project-card[data-glow="orange"]::after { background: radial-gradient(ellipse 80% 50% at 50% 100%, rgba(255,107,53,.08)  0%, transparent 70%); }
+    .project-card:hover::after { opacity: 1; }
+
+    .card-img { width: 100%; aspect-ratio: 16/9; position: relative; overflow: hidden; }
+    .card-img-inner {
+      width: 100%; height: 100%; display: flex; align-items: center; justify-content: center;
+      transition: transform .7s cubic-bezier(.25,.46,.45,.94);
+      position: relative;
+    }
+    .card-img-inner img {
+      position: absolute; inset: 0; width: 100%; height: 100%;
+      object-fit: cover; opacity: .35; transition: opacity .4s;
+    }
+    .project-card:hover .card-img-inner img { opacity: .7; }
+    .project-card:hover .card-img-inner { transform: scale(1.06); }
+    .card-ghost {
+      font-family: 'Lexend', sans-serif; font-size: 96px; font-weight: 700;
+      letter-spacing: -4px; text-transform: uppercase; opacity: .04; user-select: none;
+    }
+    .card-badges {
+      position: absolute; inset: 0; padding: 18px 20px;
+      display: flex; justify-content: space-between; align-items: flex-start;
+    }
+    .badge {
+      font-size: 10px; font-weight: 500; letter-spacing: 0.12em; text-transform: uppercase;
+      padding: 5px 11px; border-radius: 100px;
+      background: rgba(0,0,0,.55); backdrop-filter: blur(8px); color: var(--text);
+    }
+    .badge-year { color: var(--text-2); }
+    .card-body { padding: 26px 30px 30px; }
+    .card-accent-line { width: 22px; height: 3px; border-radius: 2px; margin-bottom: 16px; transition: width .3s; }
+    .project-card:hover .card-accent-line { width: 40px; }
+    .card-co { font-size: 10px; font-weight: 500; letter-spacing: 0.16em; text-transform: uppercase; color: var(--text-3); margin-bottom: 8px; }
+    .card-title { font-family: 'Lexend', sans-serif; font-size: 19px; font-weight: 600; line-height: 1.3; letter-spacing: -0.4px; margin-bottom: 10px; }
+    .card-q { font-size: 13px; color: var(--text-2); line-height: 1.65; margin-bottom: 22px; }
+    .card-footer { display: flex; justify-content: space-between; align-items: center; padding-top: 18px; border-top: 1px solid var(--border); }
+    .card-metrics { font-size: 11px; color: var(--text-3); letter-spacing: 0.04em; }
+    .card-arrow { font-size: 20px; color: var(--text-3); transition: color .25s, transform .25s; }
+    .project-card:hover .card-arrow { transform: translate(4px,-4px); }
+    .project-card[data-glow="gold"]:hover   .card-arrow { color: #F5C518; }
+    .project-card[data-glow="blue"]:hover   .card-arrow { color: #4A9EFF; }
+    .project-card[data-glow="cyan"]:hover   .card-arrow { color: #E8182E; }
+    .project-card[data-glow="orange"]:hover .card-arrow { color: #FF6B35; }
+
+    .bg-kakao  { background: linear-gradient(135deg,#0A0A0F,#18150A); position:relative; }
+    .bg-remote { background: linear-gradient(135deg,#08080F,#080D18); position:relative; }
+    .bg-plana  { background: linear-gradient(135deg,#050C12,#07101A); position:relative; }
+    .bg-pick   { background: linear-gradient(135deg,#0D0806,#180D08); position:relative; }
+    .bg-kakao::after  { content:''; position:absolute; inset:0; background:radial-gradient(ellipse 70% 80% at 90% 100%,rgba(245,197,24,.15) 0%,transparent 65%); }
+    .bg-remote::after { content:''; position:absolute; inset:0; background:radial-gradient(ellipse 70% 80% at 90% 100%,rgba(74,158,255,.12)  0%,transparent 65%); }
+    .bg-plana::after  { content:''; position:absolute; inset:0; background:radial-gradient(ellipse 70% 80% at 90% 100%,rgba(232,24,46,.12)   0%,transparent 65%); }
+    .bg-pick::after   { content:''; position:absolute; inset:0; background:radial-gradient(ellipse 70% 80% at 90% 100%,rgba(255,107,53,.12)  0%,transparent 65%); }
+
+    /* ABOUT */
+    .about-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 96px; }
+    .about-story h2 { font-family:'Lexend',sans-serif; font-size:clamp(34px,3.8vw,54px); font-weight:700; letter-spacing:-2px; line-height:1.1; margin-bottom:40px; }
+    .about-story p  { font-size:15px; line-height:1.85; color:var(--text-2); margin-bottom:18px; }
+    .about-story p strong { color:var(--text); font-weight:500; }
+
+    .timeline-label { font-size:10px; font-weight:500; letter-spacing:0.2em; text-transform:uppercase; color:var(--text-3); margin-bottom:28px; }
+    .timeline-item {
+      display:grid; grid-template-columns:1fr auto; gap:16px;
+      align-items:start; padding:18px 0; border-bottom:1px solid var(--border);
+      transition: padding-left .25s;
+    }
+    .timeline-item:first-of-type { border-top:1px solid var(--border); }
+    .timeline-item:hover { padding-left:8px; }
+    .t-company { font-family:'Lexend',sans-serif; font-size:15px; font-weight:600; margin-bottom:3px; }
+    .t-role    { font-size:12px; color:var(--text-3); }
+    .t-period  { font-size:11px; color:var(--text-3); white-space:nowrap; padding-top:2px; }
+
+    .skills-block { margin-top:52px; }
+    .skills-label { font-size:10px; font-weight:500; letter-spacing:0.2em; text-transform:uppercase; color:var(--text-3); margin-bottom:28px; }
+    .skills-cols  { display:grid; grid-template-columns:1fr 1fr; gap:24px; }
+    .skill-group-name { font-size:10px; font-weight:500; letter-spacing:0.16em; text-transform:uppercase; color:var(--accent); margin-bottom:12px; }
+    .skill-chips { display:flex; flex-wrap:wrap; gap:6px; }
+    .chip {
+      font-size:11px; padding:5px 13px;
+      background:rgba(255,255,255,.04); border:1px solid var(--border); border-radius:100px;
+      color:var(--text-2); transition:border-color .2s,color .2s,background .2s;
+    }
+    .chip:hover { border-color:var(--border-h); color:var(--text); background:rgba(255,255,255,.07); }
+
+    /* CONTACT */
+    .contact-wrap { text-align:center; }
+    .contact-wrap h2 { font-family:'Lexend',sans-serif; font-size:clamp(52px,8vw,112px); font-weight:700; letter-spacing:-5px; line-height:1; margin:36px 0 16px; }
+    .contact-sub { font-size:15px; color:var(--text-2); }
+    .contact-links { display:flex; justify-content:center; gap:48px; margin-top:52px; }
+    .contact-link {
+      font-size:14px; color:var(--text-2); letter-spacing:0.04em;
+      transition:color .2s; display:flex; align-items:center; gap:10px; position:relative;
+    }
+    .contact-link::after { content:''; position:absolute; left:0; bottom:-4px; width:0; height:1px; background:var(--accent); transition:width .3s; }
+    .contact-link:hover { color:var(--accent); }
+    .contact-link:hover::after { width:100%; }
+    .contact-link svg { opacity:.5; transition:opacity .2s; }
+    .contact-link:hover svg { opacity:1; }
+
+    /* FOOTER */
+    footer { padding:28px 64px; border-top:1px solid var(--border); display:flex; justify-content:space-between; align-items:center; }
+    footer p { font-size:11px; color:var(--text-3); }
+
+    /* REVEAL */
+    .reveal { opacity:0; transform:translateY(28px); transition:opacity .75s,transform .75s; }
+    .reveal.visible { opacity:1; transform:none; }
+    .reveal-delay-1 { transition-delay:.1s; }
+
+    /* LANG TRANSITION */
+    .t-fade { transition: opacity .25s; }
+    .t-fade.fading { opacity: 0; }
+
+    /* RESPONSIVE */
+    @media (max-width: 768px) {
+      .projects-grid { grid-template-columns: 1fr; }
+      .about-grid { grid-template-columns: 1fr; gap: 56px; }
+      .skills-cols { grid-template-columns: 1fr 1fr; }
+      .section { padding: 72px 28px; }
+      nav { padding: 18px 28px; }
+      footer { padding: 20px 28px; }
+      .hero-strip { padding: 0 28px; height: auto; min-height: 76px; flex-wrap: wrap; gap: 0; }
+      .strip-item { flex: 0 0 50%; border-right: none; border-bottom: 1px solid var(--border); padding: 14px 0; }
+      .strip-item:nth-child(odd) { padding-right: 16px; }
+    }
+    @media (max-width: 480px) {
+      body { cursor: auto; }
+      #cur-dot, #cur-ring, #cur-reticle { display: none; }
+      .nav-links { gap: 24px; }
+    }
+  </style>
+</head>
+<body>
+
+  <div id="grain" aria-hidden="true"></div>
+  <div id="cur-dot"></div>
+  <div id="cur-ring"></div>
+  <div id="cur-reticle"><span></span><span></span><span></span><span></span></div>
+
+  <!-- NAV -->
+  <nav id="nav">
+    <a href="#" class="nav-logo">
+      <img src="./favicon.png" alt="Sumin Lee" onerror="this.style.opacity='.3'" />
+    </a>
+    <div class="nav-right">
+      <ul class="nav-links">
+        <li><a href="./work.html" data-i18n="nav.work">Projects</a></li>
+        <li><a href="./contact.html" data-i18n="nav.about">About</a></li>
+      </ul>
+      <div class="lang-toggle" id="langToggle">
+        <button class="lang-btn active" data-lang="ko">KR</button>
+        <button class="lang-btn"        data-lang="en">EN</button>
+      </div>
+    </div>
+  </nav>
+
+  <!-- HERO -->
+  <section class="hero" id="hero">
+    <img class="hero-photo" src="./hero.jpg" alt="Sumin Lee" onerror="this.style.display='none'" />
+    <div class="hero-overlay"></div>
+    <div class="hero-glow" id="heroGlow"></div>
+
+    <div class="hero-text-left">
+      <div class="hero-eyebrow">이수민 · Sumin Lee</div>
+      <h1 class="hero-title">
+        <span class="line" data-i18n="hero.line1">복잡한 시스템<em>.</em></span>
+        <span class="line" data-i18n="hero.line2">빠른 결과<em>.</em></span>
+      </h1>
+    </div>
+
+    <div class="hero-text-right">
+      <p class="hero-role" data-i18n="hero.role">
+        <strong>서비스 기획자 · PM</strong><br>
+        문제 정의 · 의사결정<br>
+        UX 전략 · 모빌리티 도메인
+      </p>
+    </div>
+
+    <div class="hero-scroll">
+      <span data-i18n="hero.scroll">스크롤</span>
+      <div class="scroll-line"></div>
+    </div>
+
+    <div class="hero-strip">
+      <div class="strip-item">
+        <div class="strip-label">Social</div>
+        <div class="strip-val" style="display:flex;gap:14px;">
+          <a href="https://www.upwork.com/freelancers/~010fb6c1b929dbe32b?mp_source=share" target="_blank" rel="noopener" style="color:var(--text-2);transition:color .2s;" onmouseover="this.style.color='var(--accent)'" onmouseout="this.style.color='var(--text-2)'">Upwork</a>
+          <a href="https://www.linkedin.com/in/alexly12" target="_blank" rel="noopener" style="color:var(--text-2);transition:color .2s;" onmouseover="this.style.color='var(--accent)'" onmouseout="this.style.color='var(--text-2)'">LinkedIn</a>
+        </div>
+      </div>
+      <div class="strip-item">
+        <div class="strip-label">Location</div>
+        <div class="strip-val" style="display:flex;flex-direction:column;gap:1px;">
+          <span>Korea, Seoul</span>
+          <span id="strip-clock" style="font-size:11px;color:var(--text-3);font-family:'Inter',sans-serif;font-weight:400;"></span>
+        </div>
+      </div>
+      <div class="strip-item">
+        <div class="strip-label">Available</div>
+        <div class="strip-val" id="strip-date"></div>
+      </div>
+      <div class="strip-item">
+        <div class="strip-label">Expertise</div>
+        <div class="strip-val" style="font-size:12px;line-height:1.4;">User Experience<br><span style="color:var(--text-3);font-size:11px;">Strategy · Planning</span></div>
+      </div>
+    </div>
+  </section>
+
+  <!-- PROJECTS -->
+  <section class="section" id="work">
+    <div class="section-head reveal">
+      <div class="label" data-i18n="section.work">Selected Projects</div>
+    </div>
+    <div class="projects-grid">
+
+      <!-- 01 Kakao -->
+      <a href="./case-study-kakao.html" class="project-card reveal" data-glow="gold">
+        <div class="card-img">
+          <div class="card-img-inner bg-kakao"><img src="./thumb-kakao.jpg" alt="AV Adoption Growth" /><span class="card-ghost">AV</span></div>
+          <div class="card-badges">
+            <span class="badge">PM Growth Study</span>
+            <span class="badge badge-year">2026</span>
+          </div>
+        </div>
+        <div class="card-body">
+          <div class="card-accent-line" style="background:#F5C518;"></div>
+          <div class="card-co" data-i18n="p1.co">KakaoMobility · 역기획</div>
+          <h3 class="card-title">AV Adoption Growth Case</h3>
+          <p class="card-q" data-i18n="p1.q">Q. 어떻게 해야 자율주행 차량의 재이용률 / 서비스구독률을 높일 수 있을까?</p>
+          <div class="card-footer">
+            <span class="card-metrics">Ride Completion 96% · CS −35%</span>
+            <span class="card-arrow">↗</span>
+          </div>
+        </div>
+      </a>
+
+      <!-- 02 PickAround -->
+      <a href="./case-study-pickaround.html" class="project-card reveal reveal-delay-1" data-glow="orange">
+        <div class="card-img">
+          <div class="card-img-inner bg-pick"><img src="./thumb-pickaround.jpg" alt="PickAround" /><span class="card-ghost">B2C</span></div>
+          <div class="card-badges">
+            <span class="badge">Product Owner</span>
+            <span class="badge badge-year">2025</span>
+          </div>
+        </div>
+        <div class="card-body">
+          <div class="card-accent-line" style="background:#FF6B35;"></div>
+          <div class="card-co" data-i18n="p4.co">Noterindas · Product Owner</div>
+          <h3 class="card-title">PickAround · Seafood B2C Service</h3>
+          <p class="card-q" data-i18n="p4.q">Q. 어떻게 해야 수산물 모둠·단회 구매율을 높이고 30일 재구매율을 올릴 수 있을까?</p>
+          <div class="card-footer">
+            <span class="card-metrics">Repeat Rate +12%p · NPS +34% · MRR $200K</span>
+            <span class="card-arrow">↗</span>
+          </div>
+        </div>
+      </a>
+
+      <!-- 03 PLANA -->
+      <a href="./case-study-plana.html" class="project-card reveal" data-glow="cyan">
+        <div class="card-img">
+          <div class="card-img-inner bg-plana"><img src="./thumb-plana.jpg" alt="Flypad UX" /><span class="card-ghost">UAM</span></div>
+          <div class="card-badges">
+            <span class="badge">UAM · Cockpit UX</span>
+            <span class="badge badge-year">2023</span>
+          </div>
+        </div>
+        <div class="card-body">
+          <div class="card-accent-line" style="background:#E8182E;"></div>
+          <div class="card-co">PLANA · UX Design Manager</div>
+          <h3 class="card-title">Flypad UX for UAM Pilots</h3>
+          <p class="card-q" data-i18n="p3.q">단일 조종사 UAM 운항의 인지 부하를 줄이는 적응형 코크핏 인터페이스 설계</p>
+          <div class="card-footer">
+            <span class="card-metrics">Situational Awareness Errors −25%</span>
+            <span class="card-arrow">↗</span>
+          </div>
+        </div>
+      </a>
+
+      <!-- 04 Remote Driving -->
+      <a href="./case-study-remote.html" class="project-card reveal reveal-delay-1" data-glow="blue">
+        <div class="card-img">
+          <div class="card-img-inner bg-remote"><img src="./thumb-remote.jpg" alt="Remote Driving Service" /><span class="card-ghost">OS</span></div>
+          <div class="card-badges">
+            <span class="badge" data-i18n="p2.badge">UX Research · 논문</span>
+            <span class="badge badge-year">2023</span>
+          </div>
+        </div>
+        <div class="card-body">
+          <div class="card-accent-line" style="background:#4A9EFF;"></div>
+          <div class="card-co" data-i18n="p2.co">Intermedia Lab · 발표논문</div>
+          <h3 class="card-title">Remote Driving Service for AV</h3>
+          <p class="card-q" data-i18n="p2.q">레벨 4 자율주행 차량의 원격주행 서비스 제안 및 음성 AI 도움을 통한 초보 운전자 주행 UX</p>
+          <div class="card-footer">
+            <span class="card-metrics">Safe Route 85% · Glance −30% · Reaction −30%</span>
+            <span class="card-arrow">↗</span>
+          </div>
+        </div>
+      </a>
+
+    </div>
+  </section>
+
+  <!-- ABOUT -->
+  <section class="section" id="about">
+    <div class="section-head reveal">
+      <div class="label">About</div>
+    </div>
+    <div class="about-grid">
+      <div class="about-story reveal">
+        <img src="./about-photo.jpg" alt="Sumin Lee"
+             style="width:160px;height:160px;border-radius:50%;object-fit:cover;object-position:center top;margin-bottom:32px;display:block;border:1px solid rgba(255,255,255,.1);" />
+        <h2 data-i18n="about.h2">복잡한 문제를<br>구조화해 빠르게 해결합니다.</h2>
+        <p data-i18n="about.p1">
+          학부에서 <strong>금속공예</strong>를 전공하며 물성과 구조, 사용 경험이 만들어내는 감각에 관심을 갖기 시작했습니다. 이후 <strong>서울대학교 대학원</strong>에서 모빌리티 UX를 연구하며 physical과 digital이 만나는 지점을 꾸준히 탐구해 왔습니다.
+        </p>
+        <p data-i18n="about.p2">
+          네덜란드에서 1년간 거주하며 다른 이동 환경을 직접 경험했고, 이동이 단순한 편의가 아니라 <strong>사람들의 일상과 지역의 접근성을 바꾸는 사회 인프라</strong>임을 체감했습니다.
+        </p>
+        <p data-i18n="about.p3">
+          저는 "예쁜 결과물"보다 <strong>문제를 정의하고 실효성 있게 해결하는 일</strong>에 더 흥미를 느낍니다. 리서치와 데이터 분석, Product Owner 경험을 거치며 커리어는 자연스럽게 기획자 / PM으로 수렴되었습니다.
+        </p>
+      </div>
+
+      <div class="reveal reveal-delay-1">
+        <div class="timeline-label" data-i18n="about.career">커리어</div>
+        <div class="timeline-item">
+          <div><div class="t-company">Noterindas</div><div class="t-role">Product Owner</div></div>
+          <div class="t-period">2024.12 – 2025.12</div>
+        </div>
+        <div class="timeline-item">
+          <div><div class="t-company">PLANA</div><div class="t-role">UX Design Manager</div></div>
+          <div class="t-period">2022.06 – 2023.10</div>
+        </div>
+        <div class="timeline-item">
+          <div><div class="t-company">Intermedia Lab</div><div class="t-role">Research Assistant</div></div>
+          <div class="t-period">2021.03 – 2022.03</div>
+        </div>
+        <div class="timeline-item">
+          <div><div class="t-company">Cerma</div><div class="t-role">Product Designer</div></div>
+          <div class="t-period">2020.12 – 2021.07</div>
+        </div>
+        <div class="timeline-item">
+          <div><div class="t-company">Finconcierge</div><div class="t-role">Product Designer</div></div>
+          <div class="t-period">2018.09 – 2019.03</div>
+        </div>
+
+        <div class="skills-block">
+          <div class="skills-label" data-i18n="about.skills">스킬</div>
+          <div class="skills-cols">
+            <div>
+              <div class="skill-group-name">Product</div>
+              <div class="skill-chips">
+                <span class="chip" data-i18n="sk.strategy">전략 기획</span>
+                <span class="chip">PRD</span>
+                <span class="chip">OKR / Sprint</span>
+                <span class="chip">GA4</span>
+                <span class="chip">Amplitude</span>
+                <span class="chip">SQL</span>
+                <span class="chip">Python</span>
+              </div>
+            </div>
+            <div>
+              <div class="skill-group-name">UX / Design</div>
+              <div class="skill-chips">
+                <span class="chip" data-i18n="sk.research">리서치</span>
+                <span class="chip">IA</span>
+                <span class="chip">Figma</span>
+                <span class="chip" data-i18n="sk.proto">프로토타이핑</span>
+                <span class="chip" data-i18n="sk.ds">디자인 시스템</span>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+
+  </section>
+
+  <!-- CONTACT -->
+  <section class="section" id="contact">
+    <div class="contact-wrap reveal">
+      <div class="label" style="justify-content:center;">Contact</div>
+      <h2 data-i18n="contact.h2">Let's Build<br>Together.</h2>
+      <p class="contact-sub" data-i18n="contact.sub">모빌리티 · 서비스 기획 · 프로젝트 협업 문의 환영합니다.</p>
+      <div class="contact-links">
+        <a href="mailto:alexly1295@gmail.com" class="contact-link">
+          <svg width="16" height="16" fill="none" stroke="currentColor" stroke-width="1.5" viewBox="0 0 24 24"><rect x="2" y="4" width="20" height="16" rx="2"/><path d="m2 7 10 7 10-7"/></svg>
+          alexly1295@gmail.com
+        </a>
+        <a href="https://linkedin.com/in/alexly12" target="_blank" class="contact-link">
+          <svg width="16" height="16" fill="currentColor" viewBox="0 0 24 24"><path d="M16 8a6 6 0 016 6v7h-4v-7a2 2 0 00-2-2 2 2 0 00-2 2v7h-4v-7a6 6 0 016-6zM2 9h4v12H2z"/><circle cx="4" cy="4" r="2"/></svg>
+          linkedin.com/in/alexly12
+        </a>
+      </div>
+    </div>
+  </section>
+
+  <footer>
+    <p>© 2026 Sumin Lee. All rights reserved.</p>
+    <p>alexly12.com</p>
+  </footer>
+
+  <script>
+  /* ── i18n translations ─────────────────────────────────── */
+  const i18n = {
+    ko: {
+      'nav.work':    'Projects',
+      'nav.about':   'About',
+      'nav.contact': 'Contact',
+      'hero.line1':  '복잡한 시스템<em>.</em>',
+      'hero.line2':  '빠른 결과<em>.</em>',
+      'hero.role':   '<strong>서비스 기획자 · PM</strong><br>문제 정의 · 의사결정<br>UX 전략 · 모빌리티 도메인',
+      'hero.scroll': '스크롤',
+      'strip.nps':     'NPS',
+      'strip.revenue': '월 매출',
+      'strip.errors':  '인지오류 감소',
+      'strip.domain':  '도메인',
+      'section.work':  'Selected Projects',
+      'p1.co': 'KakaoMobility · 역기획',
+      'p1.q':  'Q. 어떻게 해야 자율주행 차량의 재이용률 / 서비스구독률을 높일 수 있을까?',
+      'p2.badge': 'UX Research · 논문',
+      'p2.co': 'Intermedia Lab · 발표논문',
+      'p2.q':  '레벨 4 자율주행 차량의 원격주행 서비스 제안 및 음성 AI 도움을 통한 초보 운전자 주행 UX',
+      'p3.q':  '단일 조종사 UAM 운항의 인지 부하를 줄이는 적응형 코크핏 인터페이스 설계',
+      'p4.co': 'Noterindas · Product Owner',
+      'p4.q':  'Q. 어떻게 해야 수산물 모둠·단회 구매율을 높이고 30일 재구매율을 올릴 수 있을까?',
+      'about.h2':     '이동이라는<br>문제를 풉니다.',
+      'about.p1':     '학부에서 <strong>금속공예</strong>를 전공하며 물성과 구조, 사용 경험이 만들어내는 감각에 관심을 갖기 시작했습니다. 이후 <strong>서울대학교 대학원</strong>에서 모빌리티 UX를 연구하며 physical과 digital이 만나는 지점을 꾸준히 탐구해 왔습니다.',
+      'about.p2':     '네덜란드에서 1년간 거주하며 다른 이동 환경을 직접 경험했고, 이동이 단순한 편의가 아니라 <strong>사람들의 일상과 지역의 접근성을 바꾸는 사회 인프라</strong>임을 체감했습니다.',
+      'about.p3':     '저는 "예쁜 결과물"보다 <strong>문제를 정의하고 실효성 있게 해결하는 일</strong>에 더 흥미를 느낍니다. 리서치와 데이터 분석, Product Owner 경험을 거치며 커리어는 자연스럽게 기획자 / PM으로 수렴되었습니다.',
+      'about.career': '커리어',
+      'about.skills': '스킬',
+      'sk.strategy': '전략 기획',
+      'sk.research': '리서치',
+      'sk.proto':    '프로토타이핑',
+      'sk.ds':       '디자인 시스템',
+      'contact.h2':  'Let\'s Build<br>Together.',
+      'contact.sub': '모빌리티 · 서비스 기획 · 프로젝트 협업 문의 환영합니다.',
+    },
+    en: {
+      'nav.work':    'Projects',
+      'nav.about':   'About',
+      'nav.contact': 'Contact',
+      'hero.line1':  'Complex Systems<em>.</em>',
+      'hero.line2':  'Fast Results<em>.</em>',
+      'hero.role':   '<strong>Product Manager</strong><br>Problem Definition · Decision Making<br>UX Strategy · Mobility Domain',
+      'hero.scroll': 'Scroll',
+      'strip.nps':     'NPS',
+      'strip.revenue': 'Monthly Revenue',
+      'strip.errors':  'Situational Errors',
+      'strip.domain':  'Domain',
+      'section.work':  'Selected Projects',
+      'p1.co': 'KakaoMobility · Reverse Engineering',
+      'p1.q':  'Q. How can we increase AV re-usage rate and service subscription rate?',
+      'p2.badge': 'UX Research · Publication',
+      'p2.co': 'Intermedia Lab · Published Paper',
+      'p2.q':  'Proposing a remote driving service for Level 4 AVs with voice AI assistance for novice drivers',
+      'p3.q':  'Designing an adaptive cockpit interface to reduce cognitive load in single-pilot UAM operations',
+      'p4.co': 'Noterindas · Product Owner',
+      'p4.q':  'Q. How can we increase bundle/single-item purchase rates and improve the 30-day repurchase rate?',
+      'about.h2':     'Solving the<br>Mobility Problem.',
+      'about.p1':     'My background in <strong>Metal Crafts</strong> sparked an early interest in materiality, structure, and the sensory dimensions of use. I explored this further at <strong>Seoul National University Graduate School</strong>, researching mobility UX and the intersection of physical and digital experiences.',
+      'about.p2':     'Living in the Netherlands for a year gave me firsthand exposure to a different mobility ecosystem — reinforcing my belief that movement is not merely a convenience, but <strong>a social infrastructure that shapes daily life and regional accessibility</strong>.',
+      'about.p3':     'I\'m more drawn to <strong>defining problems and delivering practical solutions</strong> than to polished outputs. Through research, data analysis, and hands-on Product Owner experience, my career has naturally converged toward service planning and PM roles.',
+      'about.career': 'Career',
+      'about.skills': 'Skills',
+      'sk.strategy': 'Strategy Planning',
+      'sk.research': 'User Research',
+      'sk.proto':    'Prototyping',
+      'sk.ds':       'Design System',
+      'contact.h2':  'Let\'s Build<br>Together.',
+      'contact.sub': 'Open to mobility, service planning & project collaboration.',
+    }
+  };
+
+  let currentLang = 'ko';
+
+  function setLang(lang) {
+    currentLang = lang;
+    document.documentElement.lang = lang;
+
+    // fade out
+    const els = document.querySelectorAll('[data-i18n]');
+    els.forEach(el => el.classList.add('t-fade', 'fading'));
+
+    setTimeout(() => {
+      els.forEach(el => {
+        const key = el.dataset.i18n;
+        if (i18n[lang][key] !== undefined) {
+          el.innerHTML = i18n[lang][key];
+        }
+        el.classList.remove('fading');
+      });
+    }, 220);
+
+    // update toggle buttons
+    document.querySelectorAll('.lang-btn').forEach(btn => {
+      btn.classList.toggle('active', btn.dataset.lang === lang);
+    });
+  }
+
+  document.getElementById('langToggle').addEventListener('click', e => {
+    const btn = e.target.closest('.lang-btn');
+    if (btn && btn.dataset.lang !== currentLang) setLang(btn.dataset.lang);
+  });
+
+  /* ── NAV scroll ────────────────────────────────────────── */
+  const nav = document.getElementById('nav');
+  window.addEventListener('scroll', () => nav.classList.toggle('scrolled', scrollY > 40), { passive: true });
+
+  /* ── Custom cursor ─────────────────────────────────────── */
+  const dot      = document.getElementById('cur-dot');
+  const ring     = document.getElementById('cur-ring');
+  const reticle  = document.getElementById('cur-reticle');
+  let rx = innerWidth/2, ry = innerHeight/2, mx = rx, my = ry;
+  let rtx = mx, rty = my;
+  document.addEventListener('mousemove', e => {
+    mx = e.clientX; my = e.clientY;
+    dot.style.left = mx+'px'; dot.style.top = my+'px';
+  });
+  (function lerp(){
+    rx+=(mx-rx)*.12; ry+=(my-ry)*.12;
+    ring.style.left=rx+'px'; ring.style.top=ry+'px';
+    rtx+=(mx-rtx)*.12; rty+=(my-rty)*.12;
+    reticle.style.left=rtx+'px'; reticle.style.top=rty+'px';
+    requestAnimationFrame(lerp);
+  })();
+
+  document.querySelectorAll('.lang-btn,.pill,.chip,.timeline-item').forEach(el => {
+    el.addEventListener('mouseenter', ()=> document.body.classList.add('cursor-hover'));
+    el.addEventListener('mouseleave', ()=> document.body.classList.remove('cursor-hover'));
+  });
+  /* project cards → targeting reticle */
+  document.querySelectorAll('.project-card').forEach(el => {
+    el.addEventListener('mouseenter', ()=> { document.body.classList.remove('cursor-link'); document.body.classList.add('cursor-target'); });
+    el.addEventListener('mouseleave', ()=> document.body.classList.remove('cursor-target'));
+  });
+  /* other links → link cursor */
+  document.querySelectorAll('a:not(.project-card)').forEach(el => {
+    el.addEventListener('mouseenter', ()=> document.body.classList.add('cursor-link'));
+    el.addEventListener('mouseleave', ()=> document.body.classList.remove('cursor-link'));
+  });
+
+  /* ── Hero parallax ─────────────────────────────────────── */
+  const heroEl    = document.getElementById('hero');
+  const heroGlow  = document.getElementById('heroGlow');
+  const heroPhoto = heroEl.querySelector('.hero-photo');
+  const heroLeft  = heroEl.querySelector('.hero-text-left');
+  const heroRight = heroEl.querySelector('.hero-text-right');
+  document.addEventListener('mousemove', e => {
+    if (e.clientY < heroEl.getBoundingClientRect().bottom) {
+      const cx = e.clientX/innerWidth-.5, cy = e.clientY/innerHeight-.5;
+      if(heroPhoto) heroPhoto.style.transform=`scale(1.03) translate(${cx*8}px,${cy*6}px)`;
+      if(heroLeft)  heroLeft.style.transform =`translate(${cx*12}px,${cy*8}px)`;
+      if(heroRight) heroRight.style.transform=`translate(${cx*-8}px,${cy*6}px)`;
+      heroGlow.style.left=e.clientX+'px'; heroGlow.style.top=e.clientY+'px';
+    }
+  });
+  heroEl.addEventListener('mouseleave', ()=>{
+    if(heroPhoto) heroPhoto.style.transform='';
+    if(heroLeft)  heroLeft.style.transform='';
+    if(heroRight) heroRight.style.transform='';
+  });
+
+  /* ── Stat counter ──────────────────────────────────────── */
+  function animateCount(el) {
+    const target=parseInt(el.dataset.count), prefix=el.dataset.prefix||'', suffix=el.dataset.suffix||'';
+    const dur=1400, start=performance.now();
+    (function tick(now){
+      const p=Math.min((now-start)/dur,1), ease=1-Math.pow(1-p,3);
+      el.textContent=prefix+Math.round(ease*target)+suffix;
+      if(p<1) requestAnimationFrame(tick);
+    })(performance.now());
+  }
+  const cntObs = new IntersectionObserver(entries=>{
+    entries.forEach(e=>{ if(e.isIntersecting){ animateCount(e.target); cntObs.unobserve(e.target); } });
+  },{threshold:.5});
+  document.querySelectorAll('.strip-val[data-count]').forEach(el=>cntObs.observe(el));
+
+  /* ── Strip clock & date ────────────────────────────────── */
+  function updateStripTime() {
+    const now = new Date();
+    const time = now.toLocaleTimeString('en-GB', { timeZone: 'Asia/Seoul', hour: '2-digit', minute: '2-digit', second: '2-digit' });
+    const date = now.toLocaleDateString('en-US', { timeZone: 'Asia/Seoul', month: 'long', day: 'numeric', year: 'numeric' });
+    const clock = document.getElementById('strip-clock');
+    const dateEl = document.getElementById('strip-date');
+    if (clock) clock.textContent = time;
+    if (dateEl) dateEl.textContent = date;
+  }
+  updateStripTime();
+  setInterval(updateStripTime, 1000);
+
+  /* ── Scroll reveal ─────────────────────────────────────── */
+  const revObs = new IntersectionObserver(entries=>{
+    entries.forEach(e=>{ if(e.isIntersecting) e.target.classList.add('visible'); });
+  },{threshold:.1,rootMargin:'0px 0px -40px 0px'});
+  document.querySelectorAll('.reveal').forEach(el=>revObs.observe(el));
+  </script>
+</body>
+</html>

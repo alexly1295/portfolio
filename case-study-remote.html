@@ -1,0 +1,1144 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Voice Driving OS — Sumin Lee</title>
+  <link rel="icon" type="image/png" href="./favicon.png" />
+  <link rel="preconnect" href="https://fonts.googleapis.com" />
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+  <link href="https://fonts.googleapis.com/css2?family=Lexend:wght@300;400;500;600;700&family=Inter:wght@300;400;500;600&display=swap" rel="stylesheet" />
+  <style>
+    :root {
+      --bg:#0B0C11; --bg-2:#111318; --bg-card:#15161C; --bg-card-h:#1C1D25;
+      --accent:#4A9EFF; --accent-dim:rgba(74,158,255,.10); --accent-glow:rgba(74,158,255,.22);
+      --text:#F0ECE6; --text-2:#CCCAC6; --text-3:#5A5A66;
+      --border:rgba(255,255,255,0.07); --border-h:rgba(255,255,255,0.13);
+    }
+    *,*::before,*::after{margin:0;padding:0;box-sizing:border-box;}
+    html{scroll-behavior:smooth;}
+    body{
+      background-color:var(--bg);
+      background-image:
+        radial-gradient(ellipse 80% 55% at -5% -5%,rgba(28,42,80,.55) 0%,transparent 50%),
+        radial-gradient(ellipse 55% 40% at 105% 105%,rgba(4,8,20,.95) 0%,transparent 48%),
+        radial-gradient(ellipse 60% 40% at 60% 0%,rgba(74,158,255,.025) 0%,transparent 55%);
+      color:var(--text);font-family:'Inter',sans-serif;font-size:16px;line-height:1.6;
+      overflow-x:hidden;-webkit-font-smoothing:antialiased;cursor:none;
+    }
+    a{color:inherit;text-decoration:none;cursor:none;}
+    #grain{position:fixed;inset:0;z-index:998;pointer-events:none;opacity:.038;
+      background-image:url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='256' height='256'%3E%3Cfilter id='n'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.85' numOctaves='4' stitchTiles='stitch'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23n)'/%3E%3C/svg%3E");
+      background-repeat:repeat;background-size:256px 256px;}
+    #cur-dot{position:fixed;width:6px;height:6px;background:var(--text);border-radius:50%;pointer-events:none;z-index:9999;transform:translate(-50%,-50%);transition:width .15s,height .15s,background .15s;}
+    #cur-ring{position:fixed;width:34px;height:34px;border:1px solid rgba(240,236,230,.22);border-radius:50%;pointer-events:none;z-index:9998;transform:translate(-50%,-50%);transition:width .3s,height .3s,border-color .3s,opacity .3s;}
+    body.cursor-link #cur-dot{width:44px;height:44px;background:var(--accent-dim);border:1px solid var(--accent-glow);}
+    body.cursor-link #cur-ring{opacity:0;}
+
+    nav{position:fixed;inset:0 0 auto;z-index:200;padding:22px 64px;display:flex;justify-content:space-between;align-items:center;transition:background .4s,border-color .4s;border-bottom:1px solid transparent;}
+    nav.scrolled{background:rgba(11,12,17,.88);backdrop-filter:blur(20px);border-color:var(--border);}
+    .nav-back{display:flex;align-items:center;gap:10px;font-size:12px;letter-spacing:0.1em;text-transform:uppercase;color:var(--text-3);transition:color .2s;}
+    .nav-back:hover{color:var(--text);}
+    .nav-back:hover svg{transform:translateX(-3px);}
+    .nav-back svg{transition:transform .2s;}
+    .nav-right{display:flex;align-items:center;gap:40px;}
+    .nav-links{display:flex;gap:36px;list-style:none;}
+    .nav-links a{font-size:13px;letter-spacing:.06em;color:var(--text-2);transition:color .2s;position:relative;}
+    .nav-links a::after{content:'';position:absolute;left:0;bottom:-3px;width:0;height:1px;background:var(--accent);transition:width .3s;}
+    .nav-links a:hover{color:var(--text);}
+    .nav-links a:hover::after{width:100%;}
+    .lang-toggle{display:flex;align-items:center;gap:4px;border:1px solid var(--border);border-radius:100px;padding:3px 4px;}
+    .lang-btn{background:none;border:none;outline:none;cursor:none;font-family:'Lexend',sans-serif;font-size:10px;font-weight:600;letter-spacing:0.1em;color:var(--text-3);padding:4px 10px;border-radius:100px;transition:background .2s,color .2s;}
+    .lang-btn.active{background:var(--accent);color:#0B0C11;}
+    .lang-btn:hover:not(.active){color:var(--text);}
+
+    .cs-hero{min-height:100vh;display:flex;flex-direction:column;justify-content:flex-end;padding:0 64px 80px;position:relative;overflow:hidden;}
+    .cs-hero-bg{position:absolute;inset:0;background:radial-gradient(ellipse 70% 60% at 100% 0%,rgba(74,158,255,.05) 0%,transparent 55%),radial-gradient(ellipse 50% 40% at 0% 100%,rgba(28,42,80,.4) 0%,transparent 50%);}
+    .cs-hero-img{position:absolute;inset:0;width:100%;height:100%;object-fit:cover;opacity:.18;z-index:0;pointer-events:none;}
+    .cs-hero-num{font-family:'Lexend',sans-serif;font-size:180px;font-weight:700;letter-spacing:-12px;color:rgba(74,158,255,.04);line-height:1;position:absolute;right:40px;bottom:60px;user-select:none;pointer-events:none;}
+    .cs-eyebrow{display:inline-flex;align-items:center;gap:8px;font-size:10px;font-weight:500;letter-spacing:0.22em;text-transform:uppercase;color:var(--accent);margin-bottom:28px;opacity:0;animation:fadeUp .7s .2s forwards;}
+    .cs-eyebrow::before{content:'';width:3px;height:12px;background:var(--accent);border-radius:2px;}
+    .cs-sub{font-size:13px;letter-spacing:0.06em;text-transform:uppercase;color:var(--text-3);margin-bottom:14px;opacity:0;animation:fadeUp .6s .18s forwards;}
+    .cs-hero h1{font-family:'Lexend',sans-serif;font-size:clamp(28px,4.4vw,64px);font-weight:700;letter-spacing:-2px;line-height:1.05;max-width:940px;margin-bottom:28px;opacity:0;animation:fadeUp .9s .3s forwards;}
+    .cs-hero h1 em{font-style:normal;color:var(--accent);}
+    .cs-hero-q{font-size:clamp(14px,1.35vw,18px);color:var(--text-2);max-width:680px;line-height:1.75;font-weight:300;opacity:0;animation:fadeUp .8s .45s forwards;}
+    .cs-hero-meta{display:flex;gap:48px;flex-wrap:wrap;margin-top:56px;padding-top:40px;border-top:1px solid var(--border);opacity:0;animation:fadeUp .7s .6s forwards;}
+    .meta-label{font-size:9px;letter-spacing:0.22em;text-transform:uppercase;color:var(--text-3);margin-bottom:6px;}
+    .meta-val{font-family:'Lexend',sans-serif;font-size:14px;font-weight:500;color:var(--text);}
+    @keyframes fadeUp{to{opacity:1;transform:translateY(0);}}
+
+    .cs-body{max-width:920px;margin:0 auto;padding:0 64px 160px;}
+    @media(max-width:900px){.cs-body{padding:0 28px 100px;}nav{padding:18px 28px;}.cs-hero{padding:0 28px 60px;}}
+
+    .cs-section{padding:80px 0;border-top:1px solid var(--border);opacity:0;transform:translateY(28px);transition:opacity .75s,transform .75s;}
+    .cs-section.visible{opacity:1;transform:none;}
+    .cs-num{font-family:'Lexend',sans-serif;font-size:11px;font-weight:500;letter-spacing:0.22em;text-transform:uppercase;color:var(--accent);margin-bottom:8px;}
+    .cs-title{font-family:'Lexend',sans-serif;font-size:clamp(22px,2.8vw,34px);font-weight:700;letter-spacing:-1px;line-height:1.1;margin-bottom:40px;color:var(--text);}
+    .cs-title em{font-style:normal;color:var(--accent);}
+
+    .cs-p{font-size:15px;color:var(--text-2);line-height:1.85;margin-bottom:20px;}
+    .cs-p:last-child{margin-bottom:0;}
+    .cs-p strong{color:var(--text);font-weight:500;}
+
+    .cs-callout{border-left:3px solid var(--accent);padding:20px 24px;background:rgba(74,158,255,.04);border-radius:0 8px 8px 0;margin:32px 0;}
+    .cs-callout p{font-size:15px;color:var(--text);line-height:1.8;}
+    .cs-callout strong{color:var(--accent);}
+
+    /* BIG STAT */
+    .big-stat{display:flex;align-items:center;gap:32px;padding:40px;background:var(--bg-card);border:1px solid var(--border);border-radius:16px;margin:36px 0;position:relative;overflow:hidden;}
+    .big-stat::before{content:'';position:absolute;inset:0;background:radial-gradient(ellipse 60% 70% at 0% 50%,rgba(74,158,255,.07) 0%,transparent 60%);}
+    .big-num{font-family:'Lexend',sans-serif;font-size:clamp(56px,7vw,96px);font-weight:700;letter-spacing:-4px;color:var(--accent);line-height:1;flex-shrink:0;}
+    .big-desc{font-size:15px;color:var(--text-2);line-height:1.75;}
+    .big-desc strong{color:var(--text);font-weight:500;}
+
+    /* TWO COL */
+    .two-col{display:grid;grid-template-columns:1fr 1fr;gap:24px;margin:28px 0;}
+    @media(max-width:640px){.two-col{grid-template-columns:1fr;}}
+    .col-card{background:var(--bg-card);border:1px solid var(--border);border-radius:12px;padding:28px;}
+    .col-card h4{font-family:'Lexend',sans-serif;font-size:12px;font-weight:600;letter-spacing:0.1em;text-transform:uppercase;color:var(--text-3);margin-bottom:16px;}
+    .col-card h4.acc{color:var(--accent);}
+    .col-card ul{list-style:none;display:flex;flex-direction:column;gap:10px;}
+    .col-card ul li{font-size:14px;color:var(--text-2);line-height:1.65;padding-left:16px;position:relative;}
+    .col-card ul li::before{content:'';position:absolute;left:0;top:9px;width:5px;height:5px;border-radius:50%;background:var(--border-h);}
+    .col-card.acc-border{border-color:rgba(74,158,255,.22);background:rgba(74,158,255,.025);}
+    .col-card.acc-border ul li::before{background:var(--accent);opacity:.6;}
+
+    /* QUOTE GRID */
+    .quote-grid{display:grid;grid-template-columns:1fr 1fr;gap:14px;margin:24px 0;}
+    @media(max-width:640px){.quote-grid{grid-template-columns:1fr;}}
+    .q-card{background:var(--bg-card);border:1px solid var(--border);border-radius:10px;padding:18px 18px 18px 22px;position:relative;}
+    .q-card::before{content:'"';position:absolute;top:6px;left:12px;font-family:'Lexend',sans-serif;font-size:32px;color:var(--accent);opacity:.3;line-height:1;}
+    .q-text{font-size:14px;color:var(--text-2);line-height:1.7;padding-top:10px;}
+
+    /* STAT GRID */
+    .stat-grid{display:grid;grid-template-columns:repeat(3,1fr);gap:2px;background:var(--border);margin:36px 0;}
+    @media(max-width:640px){.stat-grid{grid-template-columns:1fr 1fr;}}
+    .stat-cell{background:var(--bg-card);padding:26px 22px;}
+    .stat-num{font-family:'Lexend',sans-serif;font-size:34px;font-weight:700;letter-spacing:-2px;color:var(--accent);line-height:1;margin-bottom:8px;}
+    .stat-label{font-size:12px;color:var(--text-3);line-height:1.5;}
+
+    /* HYPOTHESIS */
+    .hyp-card{background:var(--bg-card);border:1px solid rgba(74,158,255,.2);border-radius:12px;padding:36px;margin:28px 0;position:relative;overflow:hidden;}
+    .hyp-card::before{content:'"';position:absolute;top:-10px;left:20px;font-family:'Lexend',sans-serif;font-size:120px;font-weight:700;color:rgba(74,158,255,.05);line-height:1;pointer-events:none;}
+    .hyp-text{font-family:'Lexend',sans-serif;font-size:clamp(15px,1.7vw,20px);font-weight:500;line-height:1.65;color:var(--text);letter-spacing:-0.2px;position:relative;z-index:1;}
+    .hyp-text em{color:var(--accent);font-style:normal;}
+    .hyp-chips{display:flex;flex-wrap:wrap;gap:8px;margin-top:20px;padding-top:18px;border-top:1px solid var(--border);}
+    .hyp-chip{font-size:11px;padding:4px 12px;border:1px solid rgba(74,158,255,.2);border-radius:100px;color:var(--text-3);}
+
+    /* SUB-HYPOTHESIS */
+    .sub-hyps{display:flex;flex-direction:column;gap:16px;margin:28px 0;}
+    .sub-hyp{background:var(--bg-card);border:1px solid var(--border);border-radius:10px;padding:22px 24px;display:grid;grid-template-columns:56px 1fr;gap:16px;align-items:start;}
+    .sub-num{font-family:'Lexend',sans-serif;font-size:11px;font-weight:700;color:var(--accent);padding-top:2px;letter-spacing:0.06em;}
+    .sub-title{font-family:'Lexend',sans-serif;font-size:14px;font-weight:600;color:var(--text);margin-bottom:6px;}
+    .sub-body{font-size:13px;color:var(--text-2);line-height:1.7;}
+
+    /* OS FLOW — ui-block style (matches Kakao UI State Flow) */
+    .ui-block-list{display:flex;flex-direction:column;gap:0;margin:0;}
+    .ui-block{padding:52px 0 0;border-top:1px solid var(--border);}
+    .ui-block-header{margin-bottom:32px;}
+    .ui-block-num{font-family:'Lexend',sans-serif;font-size:10px;font-weight:700;letter-spacing:.2em;text-transform:uppercase;color:var(--accent);margin-bottom:10px;}
+    .ui-block-name{font-family:'Lexend',sans-serif;font-size:clamp(20px,2.2vw,28px);font-weight:700;color:var(--text);line-height:1.15;}
+    .ui-block-meta{display:grid;grid-template-columns:1fr 1fr;gap:52px;margin-bottom:32px;}
+    @media(max-width:640px){.ui-block-meta{grid-template-columns:1fr;gap:20px;}}
+    .ui-block-left-sub{font-size:13px;color:var(--text-3);line-height:1.7;margin-top:8px;}
+    .ui-block-right p{font-size:14px;color:var(--text-2);line-height:1.9;margin-bottom:14px;}
+    .ui-block-right p:last-child{margin-bottom:0;}
+    .ui-block-right strong{color:var(--text);font-weight:500;}
+    .ui-block-right em{color:var(--accent);font-style:normal;}
+    .ui-voice::before{content:'\201C';color:var(--accent);font-size:1.25em;line-height:0;vertical-align:-0.1em;margin-right:3px;}
+    .ui-voice::after{content:'\201D';color:var(--accent);font-size:1.25em;line-height:0;vertical-align:-0.1em;margin-left:3px;}
+    .ui-img-wrap{background:var(--bg-card-h);border:1px solid var(--border);border-radius:16px;overflow:hidden;margin:32px 0 60px;aspect-ratio:4/3;display:flex;align-items:center;justify-content:center;position:relative;}
+    @media(min-width:900px){.ui-img-wrap{aspect-ratio:16/9;}}
+    .ui-img-wrap img{max-width:100%;max-height:100%;width:auto;height:auto;object-fit:contain;display:block;}
+    .ui-img-hint{font-size:11px;color:var(--border-h);letter-spacing:.12em;text-transform:uppercase;user-select:none;pointer-events:none;position:absolute;}
+    .ui-img-wrap img~.ui-img-hint{display:none;}
+
+    /* ACTION PILLARS */
+    .pillars{display:grid;grid-template-columns:repeat(3,1fr);gap:16px;margin:32px 0;}
+    @media(max-width:640px){.pillars{grid-template-columns:1fr;}}
+    .pillar{background:var(--bg-card);border:1px solid var(--border);border-radius:12px;padding:26px;transition:border-color .25s;}
+    .pillar:hover{border-color:rgba(74,158,255,.3);}
+    .pillar-icon{font-size:22px;margin-bottom:12px;}
+    .pillar-num{font-size:10px;font-weight:600;letter-spacing:0.18em;text-transform:uppercase;color:var(--accent);margin-bottom:6px;}
+    .pillar-name{font-family:'Lexend',sans-serif;font-size:16px;font-weight:700;color:var(--text);margin-bottom:10px;}
+    .pillar-desc{font-size:13px;color:var(--text-2);line-height:1.7;}
+    .pillar-items{list-style:none;display:flex;flex-direction:column;gap:7px;margin-top:14px;}
+    .pillar-items li{font-size:12px;color:var(--text-3);line-height:1.6;padding-left:12px;position:relative;}
+    .pillar-items li::before{content:'·';position:absolute;left:2px;color:var(--accent);}
+
+    /* RESULTS TABLE */
+    .result-cats{display:flex;flex-direction:column;gap:24px;margin:36px 0;}
+    .result-cat-title{font-family:'Lexend',sans-serif;font-size:11px;font-weight:600;letter-spacing:0.16em;text-transform:uppercase;color:var(--text-3);margin-bottom:12px;padding-bottom:8px;border-bottom:1px solid var(--border);}
+    .result-rows{display:flex;flex-direction:column;gap:0;background:var(--border);}
+    .result-row{display:grid;grid-template-columns:2fr 1fr 1fr 1fr;gap:2px;}
+    @media(max-width:640px){.result-row{grid-template-columns:1.5fr 1fr 1fr;}}
+    .result-cell{background:var(--bg-card);padding:14px 18px;font-size:13px;color:var(--text-2);}
+    .result-cell.label{color:var(--text);font-weight:500;}
+    .result-cell.before{color:var(--text-3);}
+    .result-cell.after{color:var(--accent);font-weight:600;font-family:'Lexend',sans-serif;}
+    .result-header .result-cell{font-size:10px;letter-spacing:0.14em;text-transform:uppercase;color:var(--text-3);font-weight:500;background:rgba(255,255,255,.02);}
+    .result-grid{display:grid;grid-template-columns:repeat(2,1fr);gap:2px;background:var(--border);margin:36px 0;}
+    .res-cell{background:var(--bg-card);padding:28px;position:relative;overflow:hidden;}
+    .res-cell::before{content:'';position:absolute;bottom:0;left:0;right:0;height:2px;background:linear-gradient(to right,var(--accent),transparent);}
+    .res-num{font-family:'Lexend',sans-serif;font-size:44px;font-weight:700;letter-spacing:-3px;color:var(--accent);line-height:1;margin-bottom:10px;}
+    .res-desc{font-size:13px;color:var(--text-2);line-height:1.6;}
+    .res-sub{font-size:11px;color:var(--text-3);margin-top:4px;}
+
+    /* LESSONS */
+    .lesson-list{display:flex;flex-direction:column;gap:28px;margin:28px 0;}
+    .lesson{display:grid;grid-template-columns:40px 1fr;gap:18px;align-items:start;}
+    .l-icon{width:40px;height:40px;border-radius:50%;background:rgba(74,158,255,.1);border:1px solid rgba(74,158,255,.25);display:flex;align-items:center;justify-content:center;font-family:'Lexend',sans-serif;font-size:12px;font-weight:700;color:var(--accent);flex-shrink:0;}
+    .l-body h4{font-family:'Lexend',sans-serif;font-size:15px;font-weight:600;color:var(--text);margin-bottom:8px;margin-top:10px;}
+    .l-body p{font-size:14px;color:var(--text-2);line-height:1.8;}
+    .l-body p strong{color:var(--text);}
+
+    /* NEXT */
+    .cs-next{border-top:1px solid var(--border);padding:64px;display:flex;justify-content:space-between;align-items:center;}
+    .next-label{font-size:10px;letter-spacing:0.22em;text-transform:uppercase;color:var(--text-3);margin-bottom:12px;}
+    .next-title{font-family:'Lexend',sans-serif;font-size:22px;font-weight:600;color:var(--text);transition:color .2s;}
+    .next-link:hover .next-title{color:var(--accent);}
+    .next-arrow{font-size:28px;color:var(--text-3);transition:color .3s,transform .3s;}
+    .next-link:hover .next-arrow{color:var(--accent);transform:translate(6px,-6px);}
+    footer{padding:28px 64px;border-top:1px solid var(--border);display:flex;justify-content:space-between;align-items:center;}
+    footer p{font-size:11px;color:var(--text-3);}
+    .t-fade{transition:opacity .25s;}
+    .t-fade.fading{opacity:0;}
+
+    /* PROBLEM SECTION REDESIGN */
+    .prob-statement-card{background:var(--bg-card);border:1px solid var(--border);border-radius:16px;padding:52px 48px;text-align:center;margin:32px 0;}
+    .prob-icon-wrap{width:48px;height:48px;border:1px solid var(--accent);border-radius:50%;display:flex;align-items:center;justify-content:center;margin:0 auto 14px;color:var(--accent);}
+    .prob-stmt-label{font-size:10px;font-weight:600;letter-spacing:.22em;text-transform:uppercase;color:var(--text-3);margin-bottom:22px;}
+    .prob-quote{font-family:'Lexend',sans-serif;font-size:clamp(15px,1.8vw,22px);font-weight:500;line-height:1.65;color:var(--text);max-width:720px;margin:0 auto;}
+    .prob-metrics{display:grid;grid-template-columns:1fr 1fr;gap:32px;align-items:center;margin-top:48px;padding-top:40px;border-top:1px solid var(--border);}
+    @media(max-width:640px){.prob-metrics{grid-template-columns:1fr;}}
+    .prob-metrics-q{font-family:'Lexend',sans-serif;font-size:clamp(16px,1.7vw,21px);font-weight:600;color:var(--text);line-height:1.35;}
+    .prob-pills{display:flex;flex-direction:column;gap:10px;}
+    .prob-pill{display:flex;align-items:center;gap:12px;background:var(--bg-card-h);border:1px solid var(--border);border-radius:100px;padding:12px 20px;font-size:13px;color:var(--text-2);}
+    .prob-pill-icon{width:26px;height:26px;border-radius:50%;border:1px solid var(--border-h);display:flex;align-items:center;justify-content:center;flex-shrink:0;font-size:11px;color:var(--text-3);}
+
+    /* ── FLOATING TOC ───────────────────── */
+    .cs-toc{position:fixed;right:28px;top:50%;transform:translateY(-50%);z-index:150;display:flex;flex-direction:column;gap:0;pointer-events:auto;align-items:flex-start;width:max-content;transition:opacity .35s,visibility .35s;}
+    .strategies{display:grid;grid-template-columns:repeat(3,1fr);gap:2px;background:var(--border);margin:28px 0;}
+    @media(max-width:640px){.strategies{grid-template-columns:1fr;}}
+    .strat-card{background:var(--bg-card);padding:28px;}
+    .strat-num{font-size:10px;font-weight:600;letter-spacing:.18em;text-transform:uppercase;color:var(--accent);margin-bottom:10px;}
+    .strat-name{font-family:'Lexend',sans-serif;font-size:16px;font-weight:600;color:var(--text);margin-bottom:8px;}
+    .strat-desc{font-size:13px;color:var(--text-2);line-height:1.65;}
+    .cs-toc-link{display:flex;align-items:center;gap:10px;padding:5px 0;color:var(--text-3);font-size:11px;font-family:'Inter',sans-serif;letter-spacing:.03em;white-space:nowrap;text-decoration:none;cursor:none;transition:color .25s,opacity .25s;opacity:.4;}
+    .cs-toc-link:hover{color:var(--text-2);opacity:.85;}
+    .cs-toc-link.active{color:var(--accent);opacity:1;font-weight:500;}
+    .cs-toc-tick{width:1.5px;height:12px;background:currentColor;border-radius:2px;flex-shrink:0;transition:height .25s,width .25s;}
+    .cs-toc-link.active .cs-toc-tick{height:20px;width:2px;}
+    @media(max-width:1260px){.cs-toc{display:none;}}
+
+    /* ref tag */
+    sup{font-size:10px;color:var(--accent);opacity:.6;}
+    /* ctx-label */
+    .ctx-label{font-size:10px;font-weight:600;letter-spacing:.18em;text-transform:uppercase;color:var(--text-3);display:flex;align-items:center;gap:12px;margin:32px 0 16px;}
+    .ctx-label::after{content:'';flex:1;height:1px;background:var(--border);}
+    /* ctx charts */
+    .ctx-two-col{display:grid;grid-template-columns:1fr 1fr;gap:14px;margin:0 0 24px;}
+    @media(max-width:700px){.ctx-two-col{grid-template-columns:1fr;}}
+    .ctx-chart{display:flex;flex-direction:column;gap:12px;padding:24px 28px;background:var(--bg-card);border:1px solid var(--border);border-radius:12px;}
+    .ctx-chart-title{font-family:'Lexend',sans-serif;font-size:13px;font-weight:600;color:var(--text);line-height:1.3;}
+    .ctx-chart-sub{font-size:11px;color:var(--text-3);}
+    .hbar-rows{display:flex;flex-direction:column;gap:12px;margin-top:4px;}
+    .hbar-row{display:flex;align-items:center;gap:10px;}
+    .hbar-label{font-size:12px;color:var(--text-2);width:128px;flex-shrink:0;line-height:1.35;}
+    .hbar-track{flex:1;height:9px;background:rgba(255,255,255,.06);border-radius:4px;overflow:hidden;}
+    .hbar-fill{height:100%;border-radius:4px;background:var(--text-3);}
+    .hbar-fill.acc{background:var(--accent);}
+    .hbar-fill.amb{background:#F59E0B;}
+    .hbar-pct{font-family:'Lexend',sans-serif;font-size:11px;font-weight:600;color:var(--text-2);min-width:32px;text-align:right;}
+    .hbar-pct.acc{color:var(--accent);}
+    .hbar-tag{font-size:9px;font-weight:700;letter-spacing:.08em;text-transform:uppercase;color:var(--accent);background:rgba(74,158,255,.12);padding:2px 8px;border-radius:100px;flex-shrink:0;}
+    .ctx-chart-note{font-size:11px;color:var(--text-3);line-height:1.65;border-top:1px solid var(--border);padding-top:10px;}
+    .ctx-chart-legend{display:flex;gap:16px;}
+    .ctx-legend-item{display:flex;align-items:center;gap:6px;font-size:11px;color:var(--text-3);}
+    .ctx-legend-dot{width:10px;height:10px;border-radius:2px;flex-shrink:0;}
+    .ctx-quant-label{font-size:10px;font-weight:600;letter-spacing:.18em;text-transform:uppercase;color:var(--text-3);margin:0 0 14px;display:flex;align-items:center;gap:12px;}
+    .ctx-quant-label::after{content:'';flex:1;height:1px;background:var(--border);}
+  </style>
+</head>
+<body>
+  <div id="grain" aria-hidden="true"></div>
+  <div id="cur-dot"></div>
+  <div id="cur-ring"></div>
+  <nav class="cs-toc" id="csToc"></nav>
+
+  <nav id="nav">
+    <a href="./work.html" class="nav-back" onclick="if(history.length>1){history.back();return false;}">
+      <svg width="16" height="16" viewBox="0 0 16 16" fill="none" stroke="currentColor" stroke-width="1.5"><path d="M10 12L6 8l4-4"/></svg>
+    </a>
+    <div class="nav-right">
+      <ul class="nav-links">
+        <li><a href="./work.html" data-i18n="nav.work">Projects</a></li>
+        <li><a href="./contact.html" data-i18n="nav.about">About</a></li>
+      </ul>
+      <div class="lang-toggle" id="langToggle">
+        <button class="lang-btn active" data-lang="ko">KR</button>
+        <button class="lang-btn" data-lang="en">EN</button>
+      </div>
+    </div>
+  </nav>
+
+  <!-- HERO -->
+  <section class="cs-hero">
+    <div class="cs-hero-bg"></div>
+    <img class="cs-hero-img" src="./thumb-remote.jpg" alt="" />
+    <div class="cs-hero-num" aria-hidden="true">02</div>
+    <p class="cs-sub" data-i18n="hero.sub">UX Research · 발표논문 · 2022</p>
+    <div class="cs-eyebrow" data-i18n="hero.eyebrow">Voice Driving OS · AV Safety · Cognitive Load</div>
+    <h1 data-i18n="hero.h1">초보 운전자의 <em>인지 흐름</em>을 설계하면<br>주행이 끝까지 완주된다</h1>
+    <p class="cs-hero-q" data-i18n="hero.q">
+      운전 전 준비부터 주행 중 안내·위기 대응·주행 후 피드백까지,
+      음성 중심 Driving OS와 원격주행 지원을 하나로 연결해
+      초보 운전자의 인지부하를 줄이고 주행 완주율·안전성을 높인 서비스 설계
+    </p>
+    <div class="cs-hero-meta">
+      <div><div class="meta-label" data-i18n="meta.role.l">Role</div><div class="meta-val" data-i18n="meta.role.v">서비스 기획 · UX Research</div></div>
+      <div><div class="meta-label" data-i18n="meta.period.l">Period</div><div class="meta-val">2022</div></div>
+      <div><div class="meta-label" data-i18n="meta.domain.l">Domain</div><div class="meta-val" data-i18n="meta.domain.v">모빌리티 · AV 보조주행</div></div>
+      <div><div class="meta-label" data-i18n="meta.tools.l">Tools</div><div class="meta-val">NASA-TLX · Glance Time · A/B Test</div></div>
+    </div>
+  </section>
+
+  <div class="cs-body">
+
+    <!-- 01 BACKGROUND -->
+    <section class="cs-section" id="s1">
+      <div class="cs-num">01</div>
+      <h2 class="cs-title" data-i18n="s1.title">배경 <em>·</em> Background</h2>
+
+      <p class="cs-p" data-i18n="s1.p1">
+        자율주행 레벨 3–4로 이행하는 과도기에서, 시스템이 단독으로 커버하지 못하는 엣지케이스가 필연적으로 발생한다.
+        이 서비스는 그 공백을 메우는 <strong>사람–시스템 협업형 안전망</strong>으로 설계됐다.
+      </p>
+      <p class="cs-p" data-i18n="s1.p2">
+        원격 지원은 '대체 기능'이 아니라 서비스를 <strong>끊기지 않고 연속적으로 운영</strong>하는 데 필요한 구조다.
+        초보 운전자가 서비스 이탈 없이 주행을 완주하게 만드는 것이 곧 장기 리텐션과 서비스 신뢰의 기반이다.
+      </p>
+
+      <div class="two-col">
+        <div class="col-card">
+          <h4 data-i18n="s1.bm.title">비즈니스 맥락</h4>
+          <ul>
+            <li data-i18n="s1.bm1">AV 레벨 3–4 이행기에서 엣지케이스 대응 구조 필수</li>
+            <li data-i18n="s1.bm2">원격 지원 = 서비스 연속성 확보를 위한 안전망</li>
+            <li data-i18n="s1.bm3">초보 운전자의 주행 성공 경험 → 서비스 채택률·리텐션↑</li>
+          </ul>
+        </div>
+        <div class="col-card">
+          <h4 data-i18n="s1.risk.title">타겟 & 리스크</h4>
+          <ul>
+            <li data-i18n="s1.risk1">타겟: 운전 경험 0–2년 초보자 + 장롱면허 운전자</li>
+            <li data-i18n="s1.risk2">서비스 채택률 저하·주행 실패에 따른 서비스 공포·불신</li>
+            <li data-i18n="s1.risk3">원격주행이 안전망이 아닌 대체 기능으로 인식될 경우 자율성 트레이드오프 이슈 발생</li>
+          </ul>
+        </div>
+      </div>
+    </section>
+
+    <!-- 02 GOAL -->
+    <section class="cs-section" id="s2">
+      <div class="cs-num">02</div>
+      <h2 class="cs-title" data-i18n="s2.title">목표 <em>·</em> Goal</h2>
+
+      <div class="stat-grid">
+        <div class="stat-cell"><div class="stat-num">85%</div><div class="stat-label" data-i18n="kpi1">Safe Route Completion Rate<br>목표 (Baseline 70%)</div></div>
+        <div class="stat-cell"><div class="stat-num">−30%</div><div class="stat-label" data-i18n="kpi2">Glance Time &<br>Reaction Time 단축</div></div>
+        <div class="stat-cell"><div class="stat-num">15pt</div><div class="stat-label" data-i18n="kpi3">NASA-TLX<br>인지부하 감소 목표</div></div>
+      </div>
+
+      <div class="two-col">
+        <div class="col-card acc-border">
+          <h4 class="acc" data-i18n="s2.inp">Input (검증 지표)</h4>
+          <ul>
+            <li data-i18n="s2.i1">Safe Route Completion Rate 85% 달성</li>
+            <li data-i18n="s2.i2">주행 중 인지부하(NASA-TLX) 15점 감소</li>
+            <li data-i18n="s2.i3">주행 안내 해석 시간 25% 단축</li>
+            <li data-i18n="s2.i4">Glance Time 30% 감소, Reaction Time 30% 단축</li>
+          </ul>
+        </div>
+        <div class="col-card acc-border">
+          <h4 class="acc" data-i18n="s2.out">Output (비즈니스 지표)</h4>
+          <ul>
+            <li data-i18n="s2.o1">초보/신규 유저 서비스 채택률 <strong style="color:var(--text)">+10%p</strong></li>
+            <li data-i18n="s2.o2">사고·위험 이벤트 <strong style="color:var(--text)">20%</strong> 감소</li>
+            <li data-i18n="s2.o3">오류율 <strong style="color:var(--text)">30%</strong> 감소</li>
+            <li data-i18n="s2.o4">30일 리텐션 <strong style="color:var(--text)">+5–8%p</strong> (40% → 45–48%)</li>
+          </ul>
+        </div>
+      </div>
+    </section>
+
+    <!-- 03 ROOT CAUSE -->
+    <section class="cs-section" id="s3">
+      <div class="cs-num">03</div>
+      <h2 class="cs-title" data-i18n="s3.title">원인 분석 <em>·</em> Data Analysis</h2>
+
+      <div class="two-col" style="margin:36px 0;">
+        <div class="big-stat" style="margin:0;flex-direction:column;align-items:flex-start;gap:10px;">
+          <div class="big-num" style="font-weight:400;">80%</div>
+          <div class="big-desc" data-i18n="s3.bigstat1">초보 운전자가 복잡한 교차로 진입 전 <strong>5초 이내에 시선이 내비게이션에 고정</strong>되며 감속·오조작 발생</div>
+        </div>
+        <div class="big-stat" style="margin:0;flex-direction:column;align-items:flex-start;justify-content:center;gap:0;">
+          <!-- 배경 장식 따옴표 -->
+          <span aria-hidden="true" style="position:absolute;top:-10px;left:16px;font-family:'Lexend',sans-serif;font-size:140px;font-weight:700;color:var(--accent);opacity:.08;line-height:1;pointer-events:none;user-select:none;">"</span>
+          <p style="position:relative;font-family:'Lexend',sans-serif;font-size:clamp(17px,2vw,26px);font-weight:500;color:var(--text);line-height:1.75;letter-spacing:-0.3px;" data-i18n="s3.quote">
+            전방 주시를 해야하는데<br>내비게이션이랑 동시에 보는게 어려워요
+          </p>
+        </div>
+      </div>
+
+      <div class="ctx-label">Context · Product &nbsp;—&nbsp; <span style="font-weight:500;letter-spacing:.04em;text-transform:none;">구간별 오류 분포 &amp; 시선 분배 분석</span></div>
+      <div class="ctx-two-col">
+
+        <!-- 차트 1: 오류 발생 구간 분포 -->
+        <div class="ctx-chart">
+          <div>
+            <div class="ctx-chart-title">오류 발생 구간 분포</div>
+            <div class="ctx-chart-sub">주행 로그 N=2,400 세션 분석</div>
+          </div>
+          <div class="hbar-rows">
+            <div class="hbar-row">
+              <div class="hbar-label">복잡 교차로 진입</div>
+              <div class="hbar-track"><div class="hbar-fill acc" style="width:62%"></div></div>
+              <div class="hbar-pct acc">62%</div>
+              <div class="hbar-tag">최다 발생</div>
+            </div>
+            <div class="hbar-row">
+              <div class="hbar-label">로터리 구간</div>
+              <div class="hbar-track"><div class="hbar-fill amb" style="width:18%"></div></div>
+              <div class="hbar-pct">18%</div>
+            </div>
+            <div class="hbar-row">
+              <div class="hbar-label">고속도로 진입</div>
+              <div class="hbar-track"><div class="hbar-fill amb" style="width:15%"></div></div>
+              <div class="hbar-pct">15%</div>
+            </div>
+            <div class="hbar-row">
+              <div class="hbar-label">일반 도로</div>
+              <div class="hbar-track"><div class="hbar-fill" style="width:5%"></div></div>
+              <div class="hbar-pct">5%</div>
+            </div>
+          </div>
+          <div class="ctx-chart-note">교차로 진입 직전 5초 구간에서 내비 고정 → 감속·오조작 반복 패턴</div>
+
+          <!-- 보조 미니 스탯 -->
+          <div style="display:grid;grid-template-columns:1fr 1fr;gap:10px;margin-top:16px;">
+            <div style="background:var(--bg-2);border:1px solid var(--border);border-radius:10px;padding:12px 14px;">
+              <div style="font-size:22px;font-weight:700;color:var(--accent);line-height:1.1;">3.2<span style="font-size:13px;font-weight:500;">회</span></div>
+              <div style="font-size:11px;color:var(--text-3);margin-top:4px;line-height:1.4;">교차로 진입 시<br>평균 내비 응시 횟수</div>
+            </div>
+            <div style="background:var(--bg-2);border:1px solid var(--border);border-radius:10px;padding:12px 14px;">
+              <div style="font-size:22px;font-weight:700;color:var(--accent);line-height:1.1;">78<span style="font-size:13px;font-weight:500;">%</span></div>
+              <div style="font-size:11px;color:var(--text-3);margin-top:4px;line-height:1.4;">오류 발생 건이<br>내비 응시와 동시 발생</div>
+            </div>
+          </div>
+        </div>
+
+        <!-- 차트 2: 시선 분배 비교 (초보 vs 숙련) -->
+        <div class="ctx-chart">
+          <div>
+            <div class="ctx-chart-title">시선 분배 비교 · 초보 vs 숙련 운전자</div>
+            <div class="ctx-chart-sub">위험 구간 주행 중 시선 비율 (%) — 실험 관찰 데이터</div>
+          </div>
+          <div class="ctx-chart-legend">
+            <div class="ctx-legend-item"><div class="ctx-legend-dot" style="background:var(--accent)"></div>초보</div>
+            <div class="ctx-legend-item"><div class="ctx-legend-dot" style="background:#2C3042"></div>숙련</div>
+          </div>
+          <svg viewBox="0 0 480 240" xmlns="http://www.w3.org/2000/svg" style="width:100%;overflow:visible;">
+            <!-- baseline -->
+            <line x1="36" y1="190" x2="460" y2="190" stroke="rgba(255,255,255,0.07)" stroke-width="1"/>
+            <!-- gridlines -->
+            <line x1="36" y1="104" x2="460" y2="104" stroke="rgba(255,255,255,0.04)" stroke-width="1" stroke-dasharray="3,4"/>
+            <line x1="36" y1="19"  x2="460" y2="19"  stroke="rgba(255,255,255,0.04)" stroke-width="1" stroke-dasharray="3,4"/>
+            <!-- y labels -->
+            <text x="30" y="194" font-size="9" fill="#5A5A66" text-anchor="end" font-family="Inter,sans-serif">0</text>
+            <text x="30" y="108" font-size="9" fill="#5A5A66" text-anchor="end" font-family="Inter,sans-serif">50%</text>
+            <text x="30" y="23"  font-size="9" fill="#5A5A66" text-anchor="end" font-family="Inter,sans-serif">80%</text>
+            <!-- scale: 0-80% = 171px (y19→y190), 1% = 2.1375px -->
+            <!-- Group 1: 전방 주시 (초보38%, 숙련68%) -->
+            <rect x="36"  y="109" width="36" height="81"  fill="#4A9EFF" rx="3"/>
+            <text x="54"  y="104" font-size="10" fill="#4A9EFF" text-anchor="middle" font-family="Inter,sans-serif" font-weight="600">38%</text>
+            <rect x="78"  y="45"  width="36" height="145" fill="#2C3042" rx="3"/>
+            <text x="96"  y="40"  font-size="10" fill="#7A7A88" text-anchor="middle" font-family="Inter,sans-serif">68%</text>
+            <text x="75"  y="210" font-size="10" fill="#5A5A66" text-anchor="middle" font-family="Inter,sans-serif">전방 주시</text>
+            <!-- Group 2: 내비 화면 (초보42%, 숙련18%) -->
+            <rect x="150" y="100" width="36" height="90"  fill="#4A9EFF" rx="3"/>
+            <text x="168" y="95"  font-size="10" fill="#4A9EFF" text-anchor="middle" font-family="Inter,sans-serif" font-weight="600">42%</text>
+            <rect x="192" y="152" width="36" height="38"  fill="#2C3042" rx="3"/>
+            <text x="210" y="147" font-size="10" fill="#7A7A88" text-anchor="middle" font-family="Inter,sans-serif">18%</text>
+            <!-- KEY badge -->
+            <rect x="150" y="194" width="78" height="14" fill="rgba(74,158,255,0.15)" rx="3"/>
+            <text x="189" y="204" font-size="9" fill="#4A9EFF" text-anchor="middle" font-family="Inter,sans-serif" font-weight="700">KEY</text>
+            <text x="189" y="222" font-size="10" fill="#5A5A66" text-anchor="middle" font-family="Inter,sans-serif">내비 화면</text>
+            <!-- Group 3: 좌우 미러 (초보12%, 숙련10%) -->
+            <rect x="264" y="164" width="36" height="26"  fill="#4A9EFF" rx="3"/>
+            <text x="282" y="159" font-size="10" fill="#4A9EFF" text-anchor="middle" font-family="Inter,sans-serif" font-weight="600">12%</text>
+            <rect x="306" y="169" width="36" height="21"  fill="#2C3042" rx="3"/>
+            <text x="324" y="164" font-size="10" fill="#7A7A88" text-anchor="middle" font-family="Inter,sans-serif">10%</text>
+            <text x="299" y="210" font-size="10" fill="#5A5A66" text-anchor="middle" font-family="Inter,sans-serif">좌우 미러</text>
+            <!-- Group 4: 기타 (초보8%, 숙련4%) -->
+            <rect x="378" y="173" width="36" height="17"  fill="#4A9EFF" rx="3"/>
+            <text x="396" y="168" font-size="10" fill="#4A9EFF" text-anchor="middle" font-family="Inter,sans-serif" font-weight="600">8%</text>
+            <rect x="420" y="181" width="36" height="9"   fill="#2C3042" rx="3"/>
+            <text x="438" y="176" font-size="10" fill="#7A7A88" text-anchor="middle" font-family="Inter,sans-serif">4%</text>
+            <text x="417" y="210" font-size="10" fill="#5A5A66" text-anchor="middle" font-family="Inter,sans-serif">기타</text>
+          </svg>
+          <div class="ctx-chart-note">초보: 내비 42% 응시 vs 숙련: 18% — 시각 의존도 <strong>2.3× 차이</strong></div>
+        </div>
+      </div>
+
+      <!-- 정성 인터뷰 추가 질문 -->
+      <div style="margin-top:20px;padding:20px 24px;background:var(--bg-card);border:1px solid var(--border);border-radius:14px;">
+        <div style="font-size:10px;font-weight:700;letter-spacing:.16em;text-transform:uppercase;color:var(--accent);margin-bottom:14px;" data-i18n="s3.iq.label">유저 (정성) 인터뷰 추가 방향</div>
+        <div style="display:flex;flex-direction:column;gap:10px;">
+          <div style="display:flex;gap:10px;align-items:flex-start;">
+            <span style="color:var(--accent);font-size:12px;flex-shrink:0;margin-top:1px;">Q.</span>
+            <span style="font-size:14px;color:var(--text-2);line-height:1.65;" data-i18n="s3.iq1">운전하면서 무서울 때가 정확히 언제세요?</span>
+          </div>
+          <div style="display:flex;gap:10px;align-items:flex-start;">
+            <span style="color:var(--accent);font-size:12px;flex-shrink:0;margin-top:1px;">Q.</span>
+            <span style="font-size:14px;color:var(--text-2);line-height:1.65;" data-i18n="s3.iq2">왜 내비랑 동시에 못보세요?</span>
+          </div>
+          <div style="display:flex;gap:10px;align-items:flex-start;">
+            <span style="color:var(--accent);font-size:12px;flex-shrink:0;margin-top:1px;">Q.</span>
+            <span style="font-size:14px;color:var(--text-2);line-height:1.65;" data-i18n="s3.iq3">어떤 부분이 불안하세요?</span>
+          </div>
+        </div>
+      </div>
+
+      <div class="ctx-label" style="margin-top:36px;">Context · User &nbsp;—&nbsp; <span style="font-weight:500;letter-spacing:.04em;text-transform:none;" data-i18n="s3.qual.title">정성 분석 · 사용자 인터뷰 공통 보이스</span></div>
+
+      <div class="quote-grid">
+        <div class="q-card"><p class="q-text" data-i18n="q1">"내비 화면을 보는 순간 차선 타이밍을 놓친다."</p></div>
+        <div class="q-card"><p class="q-text" data-i18n="q2">"지금 뭘 해야 하는지보다 화면 해석이 먼저 된다."</p></div>
+        <div class="q-card"><p class="q-text" data-i18n="q3">"안내가 많아도 우선순위를 모르겠다."</p></div>
+        <div class="q-card"><p class="q-text" data-i18n="q4">"운전 중에는 화면을 자주 보는 것 자체가 불안하다."</p></div>
+      </div>
+
+      <div class="col-card" style="margin-top:16px;">
+        <h4 data-i18n="s3.res.title">인지부하 연구 근거</h4>
+        <ul>
+          <li data-i18n="s3.r1">음성 안내는 시각 중심 안내 대비 시선 분산을 <strong style="color:var(--text)">20–40%</strong> 줄이나, 여전히 인지 부담이 잔존<sup>[1][2][3]</sup></li>
+          <li data-i18n="s3.r2">초보 vs 숙련 운전자는 위험 상황에서 주의 배분이 현저히 달라, 초보는 "위험 자극 + 화면 해석" 중첩으로 혼란이 배가<sup>[4][5]</sup></li>
+          <li data-i18n="s3.r3">원격 지원 개입 시 안전 완료율 <strong style="color:var(--text)">80% 이상</strong> 유지 사례 연구<sup>[6][4]</sup></li>
+        </ul>
+      </div>
+
+      <div class="cs-callout">
+        <p data-i18n="s3.conclusion">
+          <strong>핵심 인사이트:</strong>
+          초보 운전자의 '시각 정보 해석 부하'가 주행 포기의 핵심 원인.
+          문제는 정보의 양이 아니라 <strong>정보가 전달되는 감각 채널과 타이밍</strong>이다.
+        </p>
+      </div>
+    </section>
+
+    <!-- 04 PROBLEM DEFINITION -->
+    <section class="cs-section" id="s4">
+      <div class="cs-num">04</div>
+      <h2 class="cs-title" data-i18n="s4.title">문제 정의 <em>·</em> Problem</h2>
+
+      <div class="prob-statement-card">
+        <div class="prob-icon-wrap">
+          <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5"><circle cx="12" cy="12" r="10"/><text x="12" y="17" text-anchor="middle" fill="currentColor" stroke="none" font-size="13" font-weight="700" font-family="sans-serif">?</text></svg>
+        </div>
+        <div class="prob-stmt-label">Problem Statement</div>
+        <p class="prob-quote" data-i18n="s4.statement">시각 중심의 정보 전달 구조가 초보자의 실시간 판단 속도를 따라가지 못해<br>주행 단절이 발생한다.</p>
+      </div>
+
+      <div class="prob-metrics">
+        <p class="prob-metrics-q" data-i18n="s4.metrics.q">핵심 지표를 어떻게<br>개선할 수 있을까?</p>
+        <div class="prob-pills">
+          <div class="prob-pill">
+            <div class="prob-pill-icon">↑</div>
+            <span data-i18n="s4.m1">주행 완주율 +15%p 이상 향상</span>
+          </div>
+          <div class="prob-pill">
+            <div class="prob-pill-icon">↑</div>
+            <span data-i18n="s4.m2">First-pass Success Rate +20% 이상</span>
+          </div>
+        </div>
+      </div>
+    </section>
+
+    <!-- 05 HYPOTHESIS -->
+    <section class="cs-section" id="s5">
+      <div class="cs-num">05</div>
+      <h2 class="cs-title" data-i18n="s5.title">가설 <em>·</em> Hypothesis</h2>
+
+      <div class="hyp-card">
+        <p class="hyp-text" data-i18n="s5.hyp">
+          <em>음성 중심 선제 안내</em>와 <em>원격 지원</em>을 결합하면,
+          판단 지연으로 인한 이탈이 줄어들어
+          <em>완주율이 15%p 이상 상승</em>할 것이다.
+        </p>
+        <div class="hyp-chips">
+          <span class="hyp-chip" data-i18n="h.c1">음성 안내 → 시선 분산 20–40% 감소</span>
+          <span class="hyp-chip" data-i18n="h.c2">원격 개입 시 안전 완료율 80%↑</span>
+          <span class="hyp-chip" data-i18n="h.c3">First-pass Success Rate +20–30% 예상</span>
+        </div>
+      </div>
+
+      <h3 style="font-family:'Lexend',sans-serif;font-size:12px;font-weight:600;color:var(--text-3);letter-spacing:0.14em;text-transform:uppercase;margin:32px 0 16px;" data-i18n="s5.sub.title">가설 분해</h3>
+
+      <div class="sub-hyps">
+        <div class="sub-hyp">
+          <div class="sub-num">H1</div>
+          <div>
+            <div class="sub-title" data-i18n="h1.title">음성 인터페이스 가설</div>
+            <div class="sub-body" data-i18n="h1.body">음성 안내는 화면 조작보다 시선 이탈 시간을 줄여 정보 확인 부담을 낮출 것이다. 기존 연구에 따르면 시각 UI 대비 시선 분산을 20–40% 감소시키지만, 완전한 인지 부담 제거는 아니다.<sup>[2][1]</sup></div>
+          </div>
+        </div>
+        <div class="sub-hyp">
+          <div class="sub-num">H2</div>
+          <div>
+            <div class="sub-title" data-i18n="h2.title">원격관제 가설</div>
+            <div class="sub-body" data-i18n="h2.body">원격 관제는 시스템이 단독 처리하기 어려운 예외 상황에서 개입해, 주행 중단을 줄이고 안전한 완료를 돕는다. 원격 지원 개입 시 안전 완료율 80% 이상 유지 사례 존재.<sup>[6][4]</sup></div>
+          </div>
+        </div>
+        <div class="sub-hyp">
+          <div class="sub-num">H3</div>
+          <div>
+            <div class="sub-title" data-i18n="h3.title">사용성·신뢰 가설</div>
+            <div class="sub-body" data-i18n="h3.body">음성 + 원격관제 결합 시 초보 운전자의 태스크 성공률과 신뢰도가 오를 것이다. 실제 실험에서 First-pass Success Rate +20–30% 상승, System Trust Score 15점 이상 향상 사례 존재.<sup>[3][1]</sup></div>
+          </div>
+        </div>
+      </div>
+
+      <h3 style="font-family:'Lexend',sans-serif;font-size:12px;font-weight:600;color:var(--text-3);letter-spacing:0.14em;text-transform:uppercase;margin:36px 0 18px;" data-i18n="s5.strat.title">3가지 실행 전략</h3>
+      <div class="strategies">
+        <div class="strat-card">
+          <div class="strat-num">전략 01</div>
+          <div class="strat-name" data-i18n="st1.name">음성 선제 안내 (Voice-First)</div>
+          <div class="strat-desc" data-i18n="st1.desc">상황 발생 전에 음성으로 다음 행동을 예고. 시선 이탈 없이 판단 부담을 줄이는 것이 1차 목표.</div>
+        </div>
+        <div class="strat-card">
+          <div class="strat-num">전략 02</div>
+          <div class="strat-name" data-i18n="st2.name">맥락 감지 UI 전환 (Simplify)</div>
+          <div class="strat-desc" data-i18n="st2.desc">고위험 상황 감지 시 화면을 핵심 정보만 남기고 자동 축소. 인지 과부하를 방지해 집중력을 유지시킨다.</div>
+        </div>
+        <div class="strat-card">
+          <div class="strat-num">전략 03</div>
+          <div class="strat-name" data-i18n="st3.name">원격 개입 안전망 (Fallback)</div>
+          <div class="strat-desc" data-i18n="st3.desc">판단 불가 상황에서 관제 강사가 즉시 개입. 시스템 자동화의 한계를 사람이 보완하는 최후 안전망.</div>
+        </div>
+      </div>
+    </section>
+
+    <!-- 06 ACTION -->
+    <section class="cs-section" id="s6">
+      <div class="cs-num">06</div>
+      <h2 class="cs-title" data-i18n="s6.title">실행 <em>·</em> Execution</h2>
+
+      <p class="cs-p" data-i18n="s6.intro">
+        운전 상황에 따라 정보의 우선순위와 개입 수준이 달라진다는 점에 주목해,
+        <strong>주행 맥락을 실시간 감지해 선제적 안내를 제공</strong>하고,
+        고위험 상황에서는 <strong>원격주행으로 안전성을 보완</strong>하는 구조로 설계했다.
+      </p>
+
+      <!-- A/B Experiment image -->
+      <div style="margin-top:28px;">
+        <div style="font-size:10px;font-weight:600;letter-spacing:.16em;text-transform:uppercase;color:var(--text-3);margin-bottom:12px;">A/B Experiment Structure</div>
+        <div style="width:100%;background:var(--bg-card);border:1px solid var(--border);border-radius:14px;overflow:hidden;">
+          <img src="./REMOTE/ab-experiment.jpg" alt="A/B Experiment Structure" style="width:100%;height:auto;display:block;" />
+        </div>
+      </div>
+
+      <!-- OS Flow -->
+      <h3 style="font-family:'Lexend',sans-serif;font-size:12px;font-weight:600;color:var(--text-3);letter-spacing:0.14em;text-transform:uppercase;margin:32px 0 16px;" data-i18n="s6.os.title">Driving OS — 3단계 흐름</h3>
+
+      <div class="ui-block-list">
+
+        <!-- Phase 01 — Before -->
+        <div class="ui-block">
+          <div class="ui-block-header">
+            <div class="ui-block-num" data-i18n="os1.tag">Phase 01 · 운전 전</div>
+            <div class="ui-block-name" data-i18n="os1.title">출발 전, 경로와 상태를 먼저 파악합니다</div>
+          </div>
+          <div class="ui-block-meta">
+            <div class="ui-block-left">
+              <p class="ui-voice" style="font-family:'Lexend',sans-serif;font-size:15px;font-weight:600;color:var(--text);margin-bottom:6px;" data-i18n="os1.i1">오늘 경로에 복잡 교차로 2개가 포함되어 있어요. 출발 전 확인해주세요.</p>
+              <p class="ui-block-left-sub" data-i18n="os1.i2">사용자는 경로 위험도를 미리 알고 마음의 준비를 하고 출발할 수 있다.</p>
+            </div>
+            <div class="ui-block-right">
+              <p data-i18n="os1.rd1"><strong>체크리스트 확인 · 목적지 입력:</strong> 출발 전 차량 상태와 목적지를 음성으로 함께 확인. 인지 부하를 운전 시작 전에 분산시킨다.</p>
+              <p data-i18n="os1.rd2"><em>경로 난이도 사전 확인</em> — 고속도로 진입 여부, 복잡 교차로 수를 미리 알림. 초보 운전자가 심리적으로 준비된 상태로 출발하도록 설계.</p>
+            </div>
+          </div>
+          <div class="ui-img-wrap" style="padding:0;background:none;border:none;">
+            <img src="./REMOTE/phase-01.jpg" alt="Phase 01 UI" style="width:100%;height:auto;display:block;border-radius:12px;" />
+          </div>
+        </div>
+
+        <!-- Phase 02 — During -->
+        <div class="ui-block">
+          <div class="ui-block-header">
+            <div class="ui-block-num" data-i18n="os2.tag">Phase 02 · 운전 중</div>
+            <div class="ui-block-name" data-i18n="os2.title">상황에 따라 음성 안내와 원격 관제가 개입합니다</div>
+          </div>
+          <div class="ui-block-meta">
+            <div class="ui-block-left">
+              <p class="ui-voice" style="font-family:'Lexend',sans-serif;font-size:15px;font-weight:600;color:var(--text);margin-bottom:6px;" data-i18n="os2.i1">100m 앞 교차로, 지금 오른쪽 차선으로 이동하세요.</p>
+              <p class="ui-block-left-sub" data-i18n="os2.i2">시선 이동 없이 음성만으로 판단하고 행동할 수 있다.</p>
+            </div>
+            <div class="ui-block-right">
+              <p data-i18n="os2.rd1"><strong>차선 변경 안내 · 교차로 진입 대응:</strong> 맥락 기반 선제 음성 안내로 내비게이션 화면 응시 시간을 최소화. <em>시선 분배 연구</em>를 근거로 30초 전 예고 안내를 설계했다.</p>
+              <p data-i18n="os2.rd2">톨게이트·돌발상황 등 시스템이 단독 대응할 수 없는 엣지 케이스에서 <em>원격 관제가 자동 개입</em>. 사용자는 개입 사실과 이유를 실시간으로 전달받는다.</p>
+            </div>
+          </div>
+          <div class="ui-img-wrap" style="padding:0;background:none;border:none;">
+            <img src="./REMOTE/phase-02.jpg" alt="Phase 02 UI" style="width:100%;height:auto;display:block;border-radius:12px;" />
+          </div>
+        </div>
+
+        <!-- Phase 03 — After -->
+        <div class="ui-block">
+          <div class="ui-block-header">
+            <div class="ui-block-num" data-i18n="os3.tag">Phase 03 · 운전 후</div>
+            <div class="ui-block-name" data-i18n="os3.title">주행 완료 후, 실수 구간을 함께 복기합니다</div>
+          </div>
+          <div class="ui-block-meta">
+            <div class="ui-block-left">
+              <p class="ui-voice" style="font-family:'Lexend',sans-serif;font-size:15px;font-weight:600;color:var(--text);margin-bottom:6px;" data-i18n="os3.i1">오늘 로터리 진입 시 속도 조절이 조금 아쉬웠어요. 다음엔 이렇게 해볼게요.</p>
+              <p class="ui-block-left-sub" data-i18n="os3.i2">한 번의 주행이 다음 주행을 더 나아지게 만드는 학습 루프.</p>
+            </div>
+            <div class="ui-block-right">
+              <p data-i18n="os3.rd1"><strong>주행 로그 요약 · 실수 구간 피드백:</strong> 주행 완료 직후 구간별 오류와 판단 지연 지점을 시각화. 비난이 아닌 <em>성장 피드백</em>으로 프레이밍.</p>
+              <p data-i18n="os3.rd2">다음 주행 개선 제안을 포함한 요약 리포트를 제공. 누적 데이터를 통해 초보 운전자가 스스로 발전을 체감할 수 있는 경험으로 설계.</p>
+            </div>
+          </div>
+          <div class="ui-img-wrap" style="padding:0;background:none;border:none;">
+            <img src="./REMOTE/phase-03.jpg" alt="Phase 03 UI" style="width:100%;height:auto;display:block;border-radius:12px;" />
+          </div>
+        </div>
+
+      </div>
+
+      <!-- 3 pillars -->
+      <h3 style="font-family:'Lexend',sans-serif;font-size:12px;font-weight:600;color:var(--text-3);letter-spacing:0.14em;text-transform:uppercase;margin:36px 0 16px;" data-i18n="s6.pillars.title">3개 핵심 구성 요소</h3>
+
+      <div class="pillars">
+        <div class="pillar">
+          <div class="pillar-icon">🗺️</div>
+          <div class="pillar-num">01</div>
+          <div class="pillar-name" data-i18n="p1.name">Driving OS</div>
+          <div class="pillar-desc" data-i18n="p1.desc">운전 전–중–후를 하나의 운영체제 레벨 흐름으로 연결. 상황별 개입 주체와 책임 범위를 정의.</div>
+          <ul class="pillar-items">
+            <li data-i18n="p1.i1">맥락 기반 우선순위 판단</li>
+            <li data-i18n="p1.i2">캐리 음성 보조 + 원격 지원 통합</li>
+          </ul>
+        </div>
+        <div class="pillar">
+          <div class="pillar-icon">🎙️</div>
+          <div class="pillar-num">02</div>
+          <div class="pillar-name" data-i18n="p2.name">Voice Agent</div>
+          <div class="pillar-desc" data-i18n="p2.desc">상황별 선제 음성 안내로 시선 이동 최소화. HUD 정보를 요약해 핵심만 음성으로 전달.</div>
+          <ul class="pillar-items">
+            <li data-i18n="p2.i1">"지금 오른쪽 차선으로 변경하세요"</li>
+            <li data-i18n="p2.i2">고위험 상황 30초 전 선제 안내</li>
+            <li data-i18n="p2.i3">Glance Time 30% 감소 목표</li>
+          </ul>
+        </div>
+        <div class="pillar">
+          <div class="pillar-icon">🛰️</div>
+          <div class="pillar-num">03</div>
+          <div class="pillar-name" data-i18n="p3.name">Remote Driving Support</div>
+          <div class="pillar-desc" data-i18n="p3.desc">초보가 판단하기 어려운 엣지케이스에 원격 관제 개입. 음성만으로 해결 안 되는 상황의 안전망.</div>
+          <ul class="pillar-items">
+            <li data-i18n="p3.i1">GPS 경로 vs 실제 차선 충돌</li>
+            <li data-i18n="p3.i2">교차로·합류 구간 판단 실패</li>
+            <li data-i18n="p3.i3">사고·공사·돌발 장애물</li>
+          </ul>
+        </div>
+      </div>
+
+      <div class="cs-callout">
+        <p data-i18n="s6.collab">
+          <strong>설계 원칙:</strong>
+          완전 자율주행이 아닌 <strong>사람–시스템 협업형 안전망</strong>.
+          Intervention-free Completion Rate와 Remote Intervention Success Rate를 동시에 관리해
+          "개입을 줄이려다 안전을 희생하는 유인"을 구조적으로 방지하는 KPI 설계를 적용했다.
+        </p>
+      </div>
+
+      <!-- 관제 화면 이미지 -->
+      <div style="margin-top:40px;">
+        <div style="font-size:10px;font-weight:600;letter-spacing:.16em;text-transform:uppercase;color:var(--text-3);margin-bottom:12px;">원격 지원 호출 시 관제 화면</div>
+        <div style="width:100%;background:var(--bg-card);border:1px solid var(--border);border-radius:14px;overflow:hidden;">
+          <img src="./REMOTE/control-screen.jpg" alt="원격 지원 관제 화면" style="width:100%;height:auto;display:block;" />
+        </div>
+      </div>
+    </section>
+
+    <!-- 07 RESULTS -->
+    <section class="cs-section" id="s7">
+      <div class="cs-num">07</div>
+      <h2 class="cs-title" data-i18n="s7.title">결과 <em>·</em> Results</h2>
+
+      <div class="result-grid">
+        <div class="res-cell">
+          <div class="res-num">85%</div>
+          <div class="res-desc" data-i18n="r1.d">Safe Route Completion Rate</div>
+          <div class="res-sub" data-i18n="r1.s">Baseline 70% → 85% · 사고 없이 지정 루트 완주</div>
+        </div>
+        <div class="res-cell">
+          <div class="res-num">−30%</div>
+          <div class="res-desc" data-i18n="r2.d">Glance Time & Reaction Time</div>
+          <div class="res-sub" data-i18n="r2.s">화면 응시 시간 감소 · 안내 후 조작 타이밍 단축</div>
+        </div>
+        <div class="res-cell">
+          <div class="res-num">15pt</div>
+          <div class="res-desc" data-i18n="r3.d">NASA-TLX 인지부하 감소</div>
+          <div class="res-sub" data-i18n="r3.s">평균 65 → 50 · 주관적 부담 유의미한 감소</div>
+        </div>
+        <div class="res-cell">
+          <div class="res-num">+20pt</div>
+          <div class="res-desc" data-i18n="r4.d">NPS 향상</div>
+          <div class="res-sub" data-i18n="r4.s">40 → 60 · System Trust Score 4.5 → 6.8/10</div>
+        </div>
+      </div>
+
+      <!-- Detail table -->
+      <h3 style="font-family:'Lexend',sans-serif;font-size:12px;font-weight:600;color:var(--text-3);letter-spacing:0.14em;text-transform:uppercase;margin:36px 0 16px;" data-i18n="s7.detail">전체 성공 지표 상세</h3>
+
+      <div class="result-cats">
+        <!-- Core -->
+        <div>
+          <div class="result-cat-title" data-i18n="cat1">핵심 성공 지표</div>
+          <div class="result-rows">
+            <div class="result-row result-header">
+              <div class="result-cell" data-i18n="th.metric">지표</div>
+              <div class="result-cell" data-i18n="th.before">Before</div>
+              <div class="result-cell" data-i18n="th.after">After</div>
+              <div class="result-cell" data-i18n="th.delta">변화</div>
+            </div>
+            <div class="result-row">
+              <div class="result-cell label" data-i18n="m1">Route Completion Rate</div>
+              <div class="result-cell before">70%</div>
+              <div class="result-cell after">85%</div>
+              <div class="result-cell after">+15%p</div>
+            </div>
+            <div class="result-row">
+              <div class="result-cell label" data-i18n="m2">First-pass Success Rate</div>
+              <div class="result-cell before">50%</div>
+              <div class="result-cell after">70%</div>
+              <div class="result-cell after">+20%p</div>
+            </div>
+            <div class="result-row">
+              <div class="result-cell label" data-i18n="m3">Task Completion Rate</div>
+              <div class="result-cell before">60%</div>
+              <div class="result-cell after">80%</div>
+              <div class="result-cell after">+20%p</div>
+            </div>
+            <div class="result-row">
+              <div class="result-cell label" data-i18n="m4">Intervention-free Completion</div>
+              <div class="result-cell before">40%</div>
+              <div class="result-cell after">60%</div>
+              <div class="result-cell after">+20%p</div>
+            </div>
+          </div>
+        </div>
+        <!-- Efficiency -->
+        <div>
+          <div class="result-cat-title" data-i18n="cat2">효율 지표</div>
+          <div class="result-rows">
+            <div class="result-row result-header">
+              <div class="result-cell" data-i18n="th.metric">지표</div>
+              <div class="result-cell" data-i18n="th.before">Before</div>
+              <div class="result-cell" data-i18n="th.after">After</div>
+              <div class="result-cell" data-i18n="th.delta">변화</div>
+            </div>
+            <div class="result-row">
+              <div class="result-cell label" data-i18n="m5">Completion Time</div>
+              <div class="result-cell before">10분 40초</div>
+              <div class="result-cell after">10분</div>
+              <div class="result-cell after">−8%</div>
+            </div>
+            <div class="result-row">
+              <div class="result-cell label" data-i18n="m6">Reaction Time</div>
+              <div class="result-cell before">기준</div>
+              <div class="result-cell after">−30%</div>
+              <div class="result-cell after">−30%</div>
+            </div>
+            <div class="result-row">
+              <div class="result-cell label" data-i18n="m7">Turns-to-success</div>
+              <div class="result-cell before">1.8회</div>
+              <div class="result-cell after">1.2회</div>
+              <div class="result-cell after">−33%</div>
+            </div>
+          </div>
+        </div>
+        <!-- Safety -->
+        <div>
+          <div class="result-cat-title" data-i18n="cat3">안전·인지부하 지표</div>
+          <div class="result-rows">
+            <div class="result-row result-header">
+              <div class="result-cell" data-i18n="th.metric">지표</div>
+              <div class="result-cell" data-i18n="th.before">Before</div>
+              <div class="result-cell" data-i18n="th.after">After</div>
+              <div class="result-cell" data-i18n="th.delta">변화</div>
+            </div>
+            <div class="result-row">
+              <div class="result-cell label" data-i18n="m8">Glance Time</div>
+              <div class="result-cell before">기준</div>
+              <div class="result-cell after">−30%</div>
+              <div class="result-cell after">−30%</div>
+            </div>
+            <div class="result-row">
+              <div class="result-cell label" data-i18n="m9">NASA-TLX</div>
+              <div class="result-cell before">65</div>
+              <div class="result-cell after">50</div>
+              <div class="result-cell after">−15pt</div>
+            </div>
+            <div class="result-row">
+              <div class="result-cell label" data-i18n="m10">Error Rate</div>
+              <div class="result-cell before">기준</div>
+              <div class="result-cell after">−30%</div>
+              <div class="result-cell after">−30%</div>
+            </div>
+          </div>
+        </div>
+        <!-- Trust -->
+        <div>
+          <div class="result-cat-title" data-i18n="cat4">신뢰·만족 지표</div>
+          <div class="result-rows">
+            <div class="result-row result-header">
+              <div class="result-cell" data-i18n="th.metric">지표</div>
+              <div class="result-cell" data-i18n="th.before">Before</div>
+              <div class="result-cell" data-i18n="th.after">After</div>
+              <div class="result-cell" data-i18n="th.delta">변화</div>
+            </div>
+            <div class="result-row">
+              <div class="result-cell label">NPS</div>
+              <div class="result-cell before">40</div>
+              <div class="result-cell after">60</div>
+              <div class="result-cell after">+20</div>
+            </div>
+            <div class="result-row">
+              <div class="result-cell label" data-i18n="m11">System Trust Score</div>
+              <div class="result-cell before">4.5/10</div>
+              <div class="result-cell after">6.8/10</div>
+              <div class="result-cell after">+2.3</div>
+            </div>
+            <div class="result-row">
+              <div class="result-cell label" data-i18n="m12">Helpfulness Rating</div>
+              <div class="result-cell before">3.2/5</div>
+              <div class="result-cell after">4.5/5</div>
+              <div class="result-cell after">+1.3</div>
+            </div>
+          </div>
+        </div>
+      </div>
+    </section>
+
+    <!-- 08 LESSONS -->
+    <section class="cs-section" id="s8">
+      <div class="cs-num">08</div>
+      <h2 class="cs-title" data-i18n="s8.title">레슨런 <em>·</em> Lessons</h2>
+
+      <div class="lesson-list">
+        <div class="lesson">
+          <div class="l-icon">L1</div>
+          <div class="l-body">
+            <h4 data-i18n="l1.h">기능이 아니라 OS 레벨에서 문제를 본 경험</h4>
+            <p data-i18n="l1.p">"어떤 문장을 읽어줄까"보다 <strong>"언제, 누구(차/원격/운전자), 어떤 책임으로 개입해야 하는지"</strong>를 정의하는 사고가 필요했다. 이 과정을 통해 서비스를 <strong>OS처럼 바라보는 시야</strong>를 얻었다.</p>
+          </div>
+        </div>
+        <div class="lesson">
+          <div class="l-icon">L2</div>
+          <div class="l-body">
+            <h4 data-i18n="l2.h">안전 vs 자율성 트레이드오프를 지표로 설계한 경험</h4>
+            <p data-i18n="l2.p">Safe Route Completion Rate를 Primary KPI, Intervention-free Completion Rate를 Secondary KPI로 두어 <strong>"개입을 줄이려다 안전을 희생하는 유인"을 막는 KPI 구조</strong>를 직접 설계했다. 지표 설계가 곧 서비스의 행동 원칙을 결정한다는 것을 배웠다.</p>
+          </div>
+        </div>
+        <div class="lesson">
+          <div class="l-icon">L3</div>
+          <div class="l-body">
+            <h4 data-i18n="l3.h">인지부하를 추상 개념이 아닌 측정 가능한 문제로 다룬 경험</h4>
+            <p data-i18n="l3.p">"초보 운전자가 불안하다"에서 멈추지 않고, NASA-TLX · Glance Time · Reaction Time · First-pass Success Rate 같은 지표로 <strong>인지부하를 가설–실험–결과 구조</strong>로 다뤘다. PM은 정성–정량 데이터를 연결하는 역할을 해야 한다는 학습을 했다.</p>
+          </div>
+        </div>
+        <div class="lesson">
+          <div class="l-icon">L4</div>
+          <div class="l-body">
+            <h4 data-i18n="l4.h">예외 상황을 먼저 정의하고 서비스 신뢰를 설계한 경험</h4>
+            <p data-i18n="l4.p">자율·보조 주행 시스템이 처리하지 못하는 상황(날씨·센서 오류·판단 불가)을 정의하고, 원격 관제의 개입 시나리오와 책임 범위를 설계했다. <strong>"해피 패스만 잘 만드는 것"보다 실패 시나리오와 백업 플랜</strong>까지 설계하는 것이 사용자 신뢰를 좌우한다는 것을 체득했다.</p>
+          </div>
+        </div>
+        <div class="lesson">
+          <div class="l-icon">L5</div>
+          <div class="l-body">
+            <h4 data-i18n="l5.h">맥락 이해가 기술 정교함보다 우선이라는 인사이트</h4>
+            <p data-i18n="l5.p">음성 인식 정확도나 HUD 그래픽 퀄리티보다, <strong>"운전자가 언제, 어떤 정보를 먼저 필요로 하는지"</strong>(예: 차선 변경 30초 전, 톨게이트 진입 직전)를 제대로 이해하고 설계한 것이 더 큰 효과를 냈다. 좋은 PM은 기술 스펙을 쌓는 사람이 아니라, <strong>사용자의 상황적 맥락과 인지 흐름을 구조화해서 비즈니스 레버로 바꾸는 사람</strong>이라는 인사이트를 얻었다.</p>
+          </div>
+        </div>
+      </div>
+    </section>
+
+  </div>
+
+  <div class="cs-next">
+    <div>
+      <div class="next-label" data-i18n="next.label">다음 케이스 스터디</div>
+      <a href="./case-study-plana.html" class="next-link" style="display:block;">
+        <div class="next-title">PLANA Flypad UX for UAM Pilots →</div>
+      </a>
+    </div>
+    <a href="./case-study-plana.html" class="next-link next-arrow">↗</a>
+  </div>
+
+  <footer>
+    <p>© 2026 Sumin Lee</p>
+    <p><a href="./index.html" style="font-size:11px;color:var(--text-3);transition:color .2s;" onmouseover="this.style.color='var(--accent)'" onmouseout="this.style.color='var(--text-3)'" data-i18n="footer.back">← Projects</a></p>
+  </footer>
+
+  <script>
+  /* i18n — EN only (KO is the default HTML) */
+  const en = {
+    'nav.work':'Projects','nav.about':'About','nav.contact':'Contact','hero.sub':'UX Research · Published Paper · 2022',
+    'hero.eyebrow':'Voice Driving OS · AV Safety · Cognitive Load',
+    'hero.h1':'<span style="white-space:nowrap">Designing the <em>cognitive flow</em> of novice drivers</span><br><span style="white-space:nowrap">means they finish the journey.</span>',
+    'hero.q':'Connecting pre-drive preparation, real-time guidance, crisis response, and post-drive feedback into a single voice-first Driving OS — reducing cognitive load and improving completion rate and safety for novice drivers.',
+    'meta.role.l':'Role','meta.role.v':'Service Planning · UX Research',
+    'meta.period.l':'Period','meta.domain.l':'Domain','meta.domain.v':'Mobility · AV Assisted Driving','meta.tools.l':'Tools',
+    's1.title':'Background',
+    's1.p1':'In the transition to AV levels 3–4, edge cases that the system cannot cover alone are inevitable. This service was designed as a <strong>human-system collaborative safety net</strong> to fill that gap.',
+    's1.p2':'Remote support is not a substitute feature — it is a structure needed to <strong>operate the service continuously without interruption</strong>. Making novice drivers successfully complete rides is the foundation of long-term retention and service trust.',
+    's1.bm.title':'Business Context','s1.bm1':'AV level 3–4 transition requires defined edge-case response structure','s1.bm2':'Remote support = safety net for service continuity','s1.bm3':'Novice driver success experience → adoption rate & retention↑',
+    's1.risk.title':'Target & Risks','s1.risk1':'Target: 0–2 years driving experience + lapsed license holders','s1.risk2':'Service adoption drop · fear & distrust from failed rides','s1.risk3':'If remote driving is perceived as a substitute rather than a safety net, autonomy trade-off issues arise',
+    's2.title':'Goal',
+    'kpi1':'Safe Route Completion Rate\nTarget (Baseline 70%)','kpi2':'Glance Time &\nReaction Time Reduction','kpi3':'NASA-TLX\nCognitive Load Decrease',
+    's2.inp':'Input (Validation Metrics)','s2.i1':'Safe Route Completion Rate 85%','s2.i2':'NASA-TLX cognitive load −15 points','s2.i3':'Guidance interpretation time −25%','s2.i4':'Glance Time −30%, Reaction Time −30%',
+    's2.out':'Output (Business Metrics)','s2.o1':'Novice/new user service adoption <strong style="color:var(--text)">+10%p</strong>','s2.o2':'Accident/danger events <strong style="color:var(--text)">−20%</strong>','s2.o3':'Error rate <strong style="color:var(--text)">−30%</strong>','s2.o4':'30-day retention <strong style="color:var(--text)">+5–8%p</strong> (40% → 45–48%)',
+    's3.title':'Data Analysis',
+    's3.bigstat1':'Novice drivers fixate on navigation within <strong>5 seconds before a complex intersection</strong>, causing deceleration and mis-operation',
+    's3.bigstat2':'<strong>60–80% of all driving errors concentrate within 100m</strong> of highway/intersection entry',
+    's3.quote':'"I need to watch the road ahead,<br>but it\'s hard to look at the nav<br>at the same time"',
+    's3.qual.title':'Qualitative — Common User Interview Voices',
+    'q1':'"The moment I look at the nav screen, I miss the lane-change timing."','q2':'"Interpreting the screen comes before knowing what to do."','q3':'"Even with lots of guidance, I don\'t know the priority."','q4':'"Frequently looking at the screen while driving is itself anxiety-inducing."',
+    's3.res.title':'Cognitive Load Research Basis','s3.r1':'Voice guidance reduces gaze dispersion by <strong style="color:var(--text)">20–40%</strong> vs. visual guidance, but some cognitive burden remains[1][2][3]','s3.r2':'Novice vs. expert drivers differ markedly in attention distribution under hazard; novices face compounded confusion from "hazard stimulus + screen interpretation"[4][5]','s3.r3':'Studies show safe completion rate of <strong style="color:var(--text)">80%+</strong> when remote support intervenes[6][4]',
+    's3.conclusion':'<strong>Key Insight:</strong> The "visual information interpretation burden" of novice drivers is the core cause of ride abandonment. The problem is not the amount of information — it is the <strong>sensory channel and timing of delivery</strong>.',
+    's4.title':'Finding the Problem',
+    's4.statement':'A visual-first information structure that cannot keep up with the real-time judgment speed of novice drivers — causing ride disconnection.',
+    's4.metrics.q':'How do we improve<br>our key metrics?',
+    's4.m1':'Increase drive completion rate by +15%p or more',
+    's4.m2':'Achieve First-pass Success Rate +20%+',
+    's5.title':'Hypothesis','s5.hyp':'Combining <em>proactive voice-first guidance</em> with <em>remote support</em> will reduce drop-off from delayed judgment and <em>raise completion rate by 15%p or more</em>.',
+    'h.c1':'Voice guidance → gaze dispersion −20–40%','h.c2':'Remote intervention → safe completion rate 80%+','h.c3':'First-pass Success Rate expected +20–30%',
+    's5.sub.title':'Hypothesis Breakdown',
+    'h1.title':'Voice Interface Hypothesis','h1.body':'Voice guidance will reduce off-road gaze time vs. visual controls, lowering the burden of information verification. Prior research shows 20–40% reduction in gaze dispersion vs. visual UI, but not complete elimination of cognitive burden.[2][1]',
+    'h2.title':'Remote Supervision Hypothesis','h2.body':'Remote supervision will intervene in edge cases the system cannot handle alone, reducing mid-ride abandonment and enabling safe completion. Case studies show 80%+ safe completion rate with remote support.[6][4]',
+    'h3.title':'Usability & Trust Hypothesis','h3.body':'Combining voice + remote supervision will help novice drivers understand "what to do and when" faster, increasing task success rate and trust. Studies show First-pass Success Rate +20–30%, System Trust Score +15 points.[3][1]',
+    's6.title':'Execution','s6.intro':'Noting that information priority and intervention level vary by driving context, the system was designed to <strong>proactively deliver guidance via real-time context detection</strong>, with <strong>remote driving support as a safety supplement</strong> in high-risk situations.',
+    's6.os.title':'Driving OS — 3-Phase Flow',
+    'os1.tag':'Phase 01 · Pre-Drive','os1.title':'Before departure, assess the route and your readiness.',
+    'os1.i1':'"Your route includes 2 complex intersections today. Please review before you go."','os1.i2':'The driver can mentally prepare for the route\'s difficulty before starting.',
+    'os1.rd1':'<strong>Checklist & Destination Input:</strong> Vehicle status and destination confirmed via voice before departure. Cognitive load is distributed before the drive begins.','os1.rd2':'<em>Route Difficulty Preview</em> — alerts the driver to highway entry and complex intersection count. Designed so novice drivers depart in a psychologically prepared state.',
+    'os2.tag':'Phase 02 · Driving','os2.title':'During the drive, voice guidance and remote supervision step in as needed.',
+    'os2.i1':'"In 100m, move to the right lane now."','os2.i2':'The driver can act on voice alone — no need to glance at the screen.',
+    'os2.rd1':'<strong>Lane Change & Intersection Guidance:</strong> Context-aware proactive voice instructions minimise navigation screen gaze time. Designed with 30-second advance warnings based on <em>gaze distribution research</em>.','os2.rd2':'For edge cases the system cannot handle alone — toll gates, sudden hazards — <em>remote supervision auto-intervenes</em>. The driver is informed of the intervention and its reason in real time.',
+    'os3.tag':'Phase 03 · Post-Drive','os3.title':'After the drive, review the moments that needed improvement.',
+    'os3.i1':'"Your speed entering the roundabout today was a bit off — here\'s what to try next time."','os3.i2':'Each drive feeds a learning loop that makes the next drive better.',
+    'os3.rd1':'<strong>Drive Log & Error Segment Feedback:</strong> Immediately after arrival, segment-level errors and hesitation points are visualised. Framed as <em>growth feedback</em>, not criticism.','os3.rd2':'A summary report with next-drive improvement suggestions is provided. Cumulative data lets novice drivers tangibly track their own progress over time.',
+    's6.pillars.title':'3 Core Components',
+    'p1.name':'Driving OS','p1.desc':'Connects pre/during/post-drive into a single OS-level flow. Defines the intervention agent and accountability scope by situation.','p1.i1':'Context-based priority judgment','p1.i2':'Carry voice + remote support integration',
+    'p2.name':'Voice Agent','p2.desc':'Proactive contextual voice guidance to minimize gaze shifts. Summarizes HUD info and delivers only the essentials via voice.','p2.i1':'"Change to the right lane now"','p2.i2':'Proactive briefing 30 seconds before high-risk events','p2.i3':'Glance Time −30% target',
+    'p3.name':'Remote Driving Support','p3.desc':'Remote supervision intervenes in edge cases novices cannot handle. Safety net for situations voice alone cannot resolve.','p3.i1':'GPS route vs. actual lane conflict','p3.i2':'Intersection/merge judgment failure','p3.i3':'Accidents, construction, sudden obstacles',
+    's6.collab':'<strong>Design Principle:</strong> Not full autonomy — a <strong>human-system collaborative safety net</strong>. Intervention-free Completion Rate and Remote Intervention Success Rate are managed simultaneously to structurally prevent the incentive to sacrifice safety for reduced intervention.',
+    's7.title':'Results',
+    'r1.d':'Safe Route Completion Rate','r1.s':'Baseline 70% → 85% · Completed without accidents or major deviations',
+    'r2.d':'Glance Time & Reaction Time','r2.s':'Screen gaze time reduced · Operation timing after guidance shortened',
+    'r3.d':'NASA-TLX Cognitive Load','r3.s':'Average 65 → 50 · Significant reduction in subjective burden',
+    'r4.d':'NPS Improvement','r4.s':'40 → 60 · System Trust Score 4.5 → 6.8/10',
+    's7.detail':'Full Success Metrics',
+    'cat1':'Core Success Metrics','cat2':'Efficiency Metrics','cat3':'Safety & Cognitive Load Metrics','cat4':'Trust & Satisfaction Metrics',
+    'th.metric':'Metric','th.before':'Before','th.after':'After','th.delta':'Change',
+    'm1':'Route Completion Rate','m2':'First-pass Success Rate','m3':'Task Completion Rate','m4':'Intervention-free Completion',
+    'm5':'Completion Time','m6':'Reaction Time','m7':'Turns-to-success',
+    'm8':'Glance Time','m9':'NASA-TLX','m10':'Error Rate',
+    'm11':'System Trust Score','m12':'Helpfulness Rating',
+    's8.title':'Lessons Learned',
+    'l1.h':'Viewing the problem at OS level, not feature level','l1.p':'Rather than "what sentence to read," I needed to define <strong>"when, who (car/remote/driver), and with what accountability to intervene."</strong> This process gave me the perspective to <strong>view a service as an operating system</strong>.',
+    'l2.h':'Designing the safety vs. autonomy trade-off into metrics','l2.p':'By setting Safe Route Completion Rate as Primary KPI and Intervention-free Completion Rate as Secondary KPI, I directly designed a <strong>KPI structure that prevents the incentive to sacrifice safety for reduced intervention</strong>. I learned that metric design determines a service\'s behavioral principles.',
+    'l3.h':'Treating cognitive load as a measurable problem, not an abstract concept','l3.p':'Rather than stopping at "novice drivers are anxious," I used NASA-TLX, Glance Time, Reaction Time, and First-pass Success Rate to frame <strong>cognitive load as a hypothesis–experiment–result structure</strong>. PMs must connect qualitative and quantitative data.',
+    'l4.h':'Defining edge cases first and designing service trust from there','l4.p':'I defined situations the system cannot handle (weather, sensor errors, judgment failures) and designed the remote supervision intervention scenario and accountability scope. I learned that designing <strong>failure scenarios and backup plans</strong> — not just the happy path — is what determines user trust.',
+    'l5.h':'Context understanding takes precedence over technical sophistication','l5.p':'More than voice recognition accuracy or HUD graphic quality, properly understanding and designing <strong>"when and what information the driver needs first"</strong> (e.g., 30 seconds before a lane change, just before toll entry) produced greater results. A good PM is not someone who accumulates tech specs — they are someone who <strong>structures user situational context and cognitive flow into business levers</strong>.',
+    'next.label':'Next Case Study','footer.back':'← Projects',
+    's5.strat.title':'3 Execution Strategies',
+    'st1.name':'Voice-First Proactive Guide',
+    'st1.desc':'Announce the next action via voice before the situation demands it. Reducing judgment load without any eye movement is the primary goal.',
+    'st2.name':'Context-Aware UI Reduction',
+    'st2.desc':'Auto-collapse the screen to essential info when high-risk conditions are detected. Prevents cognitive overload at the moments that matter most.',
+    'st3.name':'Remote Intervention Fallback',
+    'st3.desc':'A control instructor steps in immediately when novice judgment fails. Human oversight bridges the gap where system automation hits its limits.'
+  };
+
+  let lang = 'ko';
+  function setLang(l) {
+    lang = l; document.documentElement.lang = l;
+    const els = document.querySelectorAll('[data-i18n]');
+    els.forEach(e => e.classList.add('t-fade','fading'));
+    setTimeout(() => {
+      els.forEach(e => {
+        if (l === 'en' && en[e.dataset.i18n] !== undefined) e.innerHTML = en[e.dataset.i18n];
+        else if (l === 'ko' && ko[e.dataset.i18n] !== undefined) e.innerHTML = ko[e.dataset.i18n];
+        e.classList.remove('fading');
+      });
+    }, 220);
+    document.querySelectorAll('.lang-btn').forEach(b => b.classList.toggle('active', b.dataset.lang === l));
+  }
+
+  /* Build KO map from current DOM */
+  const ko = {};
+  document.querySelectorAll('[data-i18n]').forEach(e => { ko[e.dataset.i18n] = e.innerHTML; });
+
+  document.getElementById('langToggle').addEventListener('click', e => {
+    const btn = e.target.closest('.lang-btn');
+    if (btn && btn.dataset.lang !== lang) setLang(btn.dataset.lang);
+  });
+
+  const nav = document.getElementById('nav');
+  window.addEventListener('scroll', () => nav.classList.toggle('scrolled', scrollY > 40), {passive:true});
+
+  const dot = document.getElementById('cur-dot'), ring = document.getElementById('cur-ring');
+  let mx=0,my=0,rx=0,ry=0;
+  window.addEventListener('mousemove', e => { mx=e.clientX; my=e.clientY; });
+  (function a(){ dot.style.left=mx+'px'; dot.style.top=my+'px'; rx+=(mx-rx)*.12; ry+=(my-ry)*.12; ring.style.left=rx+'px'; ring.style.top=ry+'px'; requestAnimationFrame(a); })();
+  document.querySelectorAll('a,button').forEach(el => {
+    el.addEventListener('mouseenter',()=>document.body.classList.add('cursor-link'));
+    el.addEventListener('mouseleave',()=>document.body.classList.remove('cursor-link'));
+  });
+
+  const obs = new IntersectionObserver(es=>es.forEach(e=>{if(e.isIntersecting)e.target.classList.add('visible');}),{threshold:0.06});
+  document.querySelectorAll('.cs-section').forEach(el=>obs.observe(el));
+
+  (function(){
+    const toc=document.getElementById('csToc');
+    if(!toc)return;
+    const sections=document.querySelectorAll('.cs-section[id]');
+    const links=[];
+    sections.forEach(sec=>{
+      const titleEl=sec.querySelector('.cs-section-title,.cs-title');
+      if(!titleEl)return;
+      const parts=titleEl.textContent.split('·');
+      const label=(parts.length>1?parts[parts.length-1]:parts[0]).trim().split('—')[0].trim();
+      const a=document.createElement('a');
+      a.href='#'+sec.id; a.className='cs-toc-link'; a.dataset.target=sec.id;
+      a.innerHTML='<span class="cs-toc-tick"></span><span>'+label+'</span>';
+      toc.appendChild(a); links.push({el:a,sec});
+    });
+    const spy=new IntersectionObserver(entries=>{
+      entries.forEach(e=>{const l=links.find(x=>x.sec===e.target);if(l)l.el.classList.toggle('active',e.isIntersecting);});
+    },{rootMargin:'-20% 0px -65% 0px',threshold:0});
+    sections.forEach(s=>spy.observe(s));
+    toc.addEventListener('click',e=>{const a=e.target.closest('.cs-toc-link');if(!a)return;e.preventDefault();document.getElementById(a.dataset.target)?.scrollIntoView({behavior:'smooth'});});
+    const hero=document.querySelector('.cs-hero');
+    if(hero){toc.style.opacity='0';toc.style.visibility='hidden';new IntersectionObserver(es=>{const v=!es[0].isIntersecting;toc.style.opacity=v?'1':'0';toc.style.visibility=v?'visible':'hidden';toc.style.pointerEvents=v?'auto':'none';},{threshold:0.05}).observe(hero);}
+  })();
+  </script>
+</body>
+</html>

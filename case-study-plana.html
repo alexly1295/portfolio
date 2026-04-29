@@ -1,0 +1,1151 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>PLANA Flypad UX — Sumin Lee</title>
+  <link rel="icon" type="image/png" href="./favicon.png" />
+  <link rel="preconnect" href="https://fonts.googleapis.com" />
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+  <link href="https://fonts.googleapis.com/css2?family=Lexend:wght@300;400;500;600;700&family=Inter:wght@300;400;500;600&display=swap" rel="stylesheet" />
+  <style>
+    :root {
+      --bg:#0B0C11;--bg-2:#111318;--bg-card:#15161C;--bg-card-h:#1C1D25;
+      --accent:#E8182E;--accent-dim:rgba(232,24,46,.10);--accent-glow:rgba(232,24,46,.22);
+      --text:#F0ECE6;--text-2:#CCCAC6;--text-3:#5A5A66;
+      --border:rgba(255,255,255,0.07);--border-h:rgba(255,255,255,0.13);
+      --baseline:#5A5A66;--improved:#E8182E;
+    }
+    *,*::before,*::after{margin:0;padding:0;box-sizing:border-box;}
+    html{scroll-behavior:smooth;}
+    body{
+      background-color:var(--bg);
+      background-image:
+        radial-gradient(ellipse 80% 55% at -5% -5%,rgba(28,42,80,.55) 0%,transparent 50%),
+        radial-gradient(ellipse 55% 40% at 105% 105%,rgba(20,4,8,.95) 0%,transparent 48%),
+        radial-gradient(ellipse 60% 40% at 60% 0%,rgba(232,24,46,.03) 0%,transparent 55%);
+      color:var(--text);font-family:'Inter',sans-serif;font-size:16px;line-height:1.6;
+      overflow-x:hidden;-webkit-font-smoothing:antialiased;cursor:none;
+    }
+    a{color:inherit;text-decoration:none;cursor:none;}
+    #grain{position:fixed;inset:0;z-index:998;pointer-events:none;opacity:.038;
+      background-image:url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='256' height='256'%3E%3Cfilter id='n'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.85' numOctaves='4' stitchTiles='stitch'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23n)'/%3E%3C/svg%3E");
+      background-repeat:repeat;background-size:256px 256px;}
+    #cur-dot{position:fixed;width:6px;height:6px;background:var(--text);border-radius:50%;pointer-events:none;z-index:9999;transform:translate(-50%,-50%);transition:width .15s,height .15s,background .15s;}
+    #cur-ring{position:fixed;width:34px;height:34px;border:1px solid rgba(240,236,230,.22);border-radius:50%;pointer-events:none;z-index:9998;transform:translate(-50%,-50%);transition:width .3s,height .3s,border-color .3s,opacity .3s;}
+    body.cursor-link #cur-dot{width:44px;height:44px;background:var(--accent-dim);border:1px solid var(--accent-glow);}
+    body.cursor-link #cur-ring{opacity:0;}
+
+    nav{position:fixed;inset:0 0 auto;z-index:200;padding:22px 64px;display:flex;justify-content:space-between;align-items:center;transition:background .4s,border-color .4s;border-bottom:1px solid transparent;}
+    nav.scrolled{background:rgba(11,12,17,.88);backdrop-filter:blur(20px);border-color:var(--border);}
+    .nav-back{display:flex;align-items:center;gap:10px;font-size:12px;letter-spacing:0.1em;text-transform:uppercase;color:var(--text-3);transition:color .2s;}
+    .nav-back:hover{color:var(--text);}
+    .nav-back:hover svg{transform:translateX(-3px);}
+    .nav-back svg{transition:transform .2s;}
+    .nav-right{display:flex;align-items:center;gap:40px;}
+    .nav-links{display:flex;gap:36px;list-style:none;}
+    .nav-links a{font-size:13px;letter-spacing:.06em;color:var(--text-2);transition:color .2s;position:relative;}
+    .nav-links a::after{content:'';position:absolute;left:0;bottom:-3px;width:0;height:1px;background:var(--accent);transition:width .3s;}
+    .nav-links a:hover{color:var(--text);}
+    .nav-links a:hover::after{width:100%;}
+    .lang-toggle{display:flex;align-items:center;gap:4px;border:1px solid var(--border);border-radius:100px;padding:3px 4px;}
+    .lang-btn{background:none;border:none;outline:none;cursor:none;font-family:'Lexend',sans-serif;font-size:10px;font-weight:600;letter-spacing:0.1em;color:var(--text-3);padding:4px 10px;border-radius:100px;transition:background .2s,color .2s;}
+    .lang-btn.active{background:var(--accent);color:#fff;}
+    .lang-btn:hover:not(.active){color:var(--text);}
+
+    .cs-hero{min-height:100vh;display:flex;flex-direction:column;justify-content:flex-end;padding:0 64px 80px;position:relative;overflow:hidden;}
+    .cs-hero-bg{position:absolute;inset:0;background:radial-gradient(ellipse 70% 60% at 100% 0%,rgba(232,24,46,.05) 0%,transparent 55%),radial-gradient(ellipse 50% 40% at 0% 100%,rgba(28,42,80,.4) 0%,transparent 50%);}
+    .cs-hero-img{position:absolute;inset:0;width:100%;height:100%;object-fit:cover;opacity:.18;z-index:0;pointer-events:none;}
+    .cs-hero-num{font-family:'Lexend',sans-serif;font-size:180px;font-weight:700;letter-spacing:-12px;color:rgba(232,24,46,.04);line-height:1;position:absolute;right:40px;bottom:60px;user-select:none;pointer-events:none;}
+    .cs-eyebrow{display:inline-flex;align-items:center;gap:8px;font-size:10px;font-weight:500;letter-spacing:0.22em;text-transform:uppercase;color:var(--accent);margin-bottom:28px;opacity:0;animation:fadeUp .7s .2s forwards;}
+    .cs-eyebrow::before{content:'';width:3px;height:12px;background:var(--accent);border-radius:2px;}
+    .cs-sub{font-size:13px;letter-spacing:0.06em;text-transform:uppercase;color:var(--text-3);margin-bottom:14px;opacity:0;animation:fadeUp .6s .18s forwards;}
+    .cs-hero h1{font-family:'Lexend',sans-serif;font-size:clamp(28px,4.4vw,64px);font-weight:700;letter-spacing:-2px;line-height:1.05;max-width:920px;margin-bottom:28px;opacity:0;animation:fadeUp .9s .3s forwards;}
+    .cs-hero h1 em{font-style:normal;color:var(--accent);}
+    .cs-hero-q{font-size:clamp(14px,1.35vw,18px);color:var(--text-2);max-width:680px;line-height:1.75;font-weight:300;opacity:0;animation:fadeUp .8s .45s forwards;}
+    .cs-hero-meta{display:flex;gap:48px;flex-wrap:wrap;margin-top:56px;padding-top:40px;border-top:1px solid var(--border);opacity:0;animation:fadeUp .7s .6s forwards;}
+    .meta-label{font-size:9px;letter-spacing:0.22em;text-transform:uppercase;color:var(--text-3);margin-bottom:6px;}
+    .meta-val{font-family:'Lexend',sans-serif;font-size:14px;font-weight:500;color:var(--text);}
+    @keyframes fadeUp{to{opacity:1;transform:translateY(0);}}
+
+    .cs-body{max-width:960px;margin:0 auto;padding:0 64px 160px;}
+    @media(max-width:900px){.cs-body{padding:0 28px 100px;}nav{padding:18px 28px;}.cs-hero{padding:0 28px 60px;}}
+
+    .cs-section{padding:80px 0;border-top:1px solid var(--border);opacity:0;transform:translateY(28px);transition:opacity .75s,transform .75s;}
+    .cs-section.visible{opacity:1;transform:none;}
+    .cs-num{font-family:'Lexend',sans-serif;font-size:11px;font-weight:500;letter-spacing:0.22em;text-transform:uppercase;color:var(--accent);margin-bottom:8px;}
+    .cs-title{font-family:'Lexend',sans-serif;font-size:clamp(22px,2.8vw,34px);font-weight:700;letter-spacing:-1px;line-height:1.1;margin-bottom:40px;color:var(--text);}
+    .cs-title em{font-style:normal;color:var(--accent);}
+    .cs-p{font-size:15px;color:var(--text-2);line-height:1.85;margin-bottom:20px;}
+    .cs-p strong{color:var(--text);font-weight:500;}
+    .cs-callout{border-left:3px solid var(--accent);padding:20px 24px;background:rgba(232,24,46,.04);border-radius:0 8px 8px 0;margin:32px 0;}
+    .cs-callout p{font-size:15px;color:var(--text);line-height:1.8;}
+    .cs-callout strong{color:var(--accent);}
+
+    /* TWO COL */
+    .two-col{display:grid;grid-template-columns:1fr 1fr;gap:24px;margin:28px 0;}
+    @media(max-width:640px){.two-col{grid-template-columns:1fr;}}
+    .col-card{background:var(--bg-card);border:1px solid var(--border);border-radius:12px;padding:28px;}
+    .col-card h4{font-family:'Lexend',sans-serif;font-size:12px;font-weight:600;letter-spacing:0.1em;text-transform:uppercase;color:var(--text-3);margin-bottom:16px;}
+    .col-card h4.acc{color:var(--accent);}
+    .col-card ul{list-style:none;display:flex;flex-direction:column;gap:10px;}
+    .col-card ul li{font-size:14px;color:var(--text-2);line-height:1.65;padding-left:16px;position:relative;}
+    .col-card ul li::before{content:'';position:absolute;left:0;top:9px;width:5px;height:5px;border-radius:50%;background:var(--border-h);}
+    .col-card.acc-border{border-color:rgba(232,24,46,.22);background:rgba(232,24,46,.025);}
+    .col-card.acc-border ul li::before{background:var(--accent);opacity:.6;}
+
+    /* STAT GRID */
+    .stat-grid{display:grid;grid-template-columns:repeat(3,1fr);gap:2px;background:var(--border);margin:36px 0;}
+    @media(max-width:640px){.stat-grid{grid-template-columns:1fr 1fr;}}
+    .stat-cell{background:var(--bg-card);padding:26px 22px;}
+    .stat-num{font-family:'Lexend',sans-serif;font-size:34px;font-weight:700;letter-spacing:-2px;color:var(--accent);line-height:1;margin-bottom:8px;}
+    .stat-label{font-size:12px;color:var(--text-3);line-height:1.5;}
+
+    /* SECTION HEADING */
+    .chart-heading{font-family:'Lexend',sans-serif;font-size:12px;font-weight:600;color:var(--text-3);letter-spacing:0.14em;text-transform:uppercase;margin:36px 0 16px;}
+
+    /* ENV COMPLEXITY CHART */
+    .env-chart{display:flex;flex-direction:column;gap:10px;margin:20px 0;background:var(--bg-card);border:1px solid var(--border);border-radius:12px;padding:24px 28px;}
+    .env-row{display:grid;grid-template-columns:220px 1fr 1fr;gap:12px;align-items:center;}
+    @media(max-width:640px){.env-row{grid-template-columns:1fr;gap:4px;}}
+    .env-row.header .env-label{color:var(--text-3);}
+    .env-row.header .env-bar-wrap::after{display:none;}
+    .env-label{font-size:13px;color:var(--text-2);line-height:1.4;}
+    .env-bar-wrap{position:relative;display:flex;align-items:center;gap:8px;}
+    .env-bar-track{flex:1;height:6px;background:rgba(255,255,255,.05);border-radius:3px;overflow:hidden;}
+    .env-bar-fill{height:100%;border-radius:3px;transition:width 1s cubic-bezier(.25,.46,.45,.94);}
+    .env-bar-fill.complexity{background:var(--accent);}
+    .env-bar-fill.risk{background:rgba(232,24,46,.45);}
+    .env-score{font-family:'Lexend',sans-serif;font-size:12px;font-weight:600;color:var(--text);width:28px;text-align:right;flex-shrink:0;}
+    .env-col-label{font-size:10px;letter-spacing:0.14em;text-transform:uppercase;color:var(--text-3);margin-bottom:6px;}
+
+    /* INSIGHT BARS */
+    .insight-bars{display:flex;flex-direction:column;gap:14px;margin:20px 0;}
+    .insight-row{display:flex;flex-direction:column;gap:6px;}
+    .insight-text{font-size:13px;color:var(--text-2);line-height:1.5;}
+    .insight-bar-wrap{display:flex;align-items:center;gap:12px;}
+    .insight-track{flex:1;height:5px;background:rgba(255,255,255,.05);border-radius:3px;overflow:hidden;}
+    .insight-fill{height:100%;border-radius:3px;background:var(--accent);}
+    .insight-pct{font-family:'Lexend',sans-serif;font-size:13px;font-weight:700;color:var(--accent);width:36px;flex-shrink:0;}
+
+    /* PERFORMANCE DATA */
+    .perf-grid{display:grid;grid-template-columns:repeat(4,1fr);gap:2px;background:var(--border);margin:20px 0;}
+    @media(max-width:600px){.perf-grid{grid-template-columns:1fr 1fr;}}
+    .perf-cell{background:var(--bg-card);padding:20px 16px;}
+    .perf-num{font-family:'Lexend',sans-serif;font-size:28px;font-weight:700;letter-spacing:-1px;color:var(--accent);line-height:1;margin-bottom:6px;}
+    .perf-label{font-size:11px;color:var(--text-3);line-height:1.5;}
+
+    /* OODA */
+    .ooda-flow{display:grid;grid-template-columns:repeat(4,1fr);gap:2px;background:var(--border);margin:28px 0;}
+    @media(max-width:600px){.ooda-flow{grid-template-columns:1fr 1fr;}}
+    .ooda-cell{background:var(--bg-card);padding:22px 18px;position:relative;}
+    .ooda-cell.bottleneck{background:rgba(232,24,46,.05);border:1px solid rgba(232,24,46,.2);}
+    .ooda-letter{font-family:'Lexend',sans-serif;font-size:32px;font-weight:700;color:var(--accent);opacity:.15;position:absolute;top:14px;right:16px;line-height:1;}
+    .ooda-tag{font-size:9px;font-weight:600;letter-spacing:0.18em;text-transform:uppercase;color:var(--text-3);margin-bottom:8px;}
+    .ooda-name{font-family:'Lexend',sans-serif;font-size:15px;font-weight:700;color:var(--text);margin-bottom:8px;}
+    .ooda-desc{font-size:12px;color:var(--text-2);line-height:1.6;}
+    .ooda-badge{display:inline-block;margin-top:10px;font-size:9px;font-weight:600;letter-spacing:0.1em;text-transform:uppercase;padding:3px 9px;border-radius:100px;background:rgba(232,24,46,.15);color:var(--accent);}
+
+    /* HYPOTHESIS */
+    .hyp-card{background:var(--bg-card);border:1px solid rgba(232,24,46,.2);border-radius:12px;padding:36px;margin:28px 0;position:relative;overflow:hidden;}
+    .hyp-card::before{content:'"';position:absolute;top:-10px;left:20px;font-family:'Lexend',sans-serif;font-size:120px;font-weight:700;color:rgba(232,24,46,.05);line-height:1;pointer-events:none;}
+    .hyp-text{font-family:'Lexend',sans-serif;font-size:clamp(15px,1.7vw,20px);font-weight:500;line-height:1.65;color:var(--text);letter-spacing:-0.2px;position:relative;z-index:1;}
+    .hyp-text em{color:var(--accent);font-style:normal;}
+
+    .sub-hyps{display:flex;flex-direction:column;gap:14px;margin:28px 0;}
+    .sub-hyp{background:var(--bg-card);border:1px solid var(--border);border-radius:10px;padding:22px 24px;display:grid;grid-template-columns:56px 1fr;gap:16px;align-items:start;transition:border-color .2s;}
+    .sub-hyp:hover{border-color:rgba(232,24,46,.25);}
+    .sub-num{font-family:'Lexend',sans-serif;font-size:11px;font-weight:700;color:var(--accent);padding-top:2px;letter-spacing:0.06em;}
+    .sub-title{font-family:'Lexend',sans-serif;font-size:14px;font-weight:600;color:var(--text);margin-bottom:6px;}
+    .sub-body{font-size:13px;color:var(--text-2);line-height:1.7;}
+
+    /* ACTION STEPS */
+    .action-steps{display:flex;flex-direction:column;gap:20px;margin:28px 0;}
+    .action-step{display:grid;grid-template-columns:48px 1fr;gap:18px;align-items:start;}
+    .step-num{width:48px;height:48px;border-radius:50%;background:rgba(232,24,46,.1);border:1px solid rgba(232,24,46,.25);display:flex;align-items:center;justify-content:center;font-family:'Lexend',sans-serif;font-size:14px;font-weight:700;color:var(--accent);flex-shrink:0;}
+    .step-body h4{font-family:'Lexend',sans-serif;font-size:15px;font-weight:600;color:var(--text);margin-bottom:6px;margin-top:12px;}
+    .step-body p{font-size:14px;color:var(--text-2);line-height:1.75;}
+
+    /* HYP TABLE */
+    .hyp-table{width:100%;border-collapse:collapse;margin:24px 0;}
+    .hyp-table th{font-size:10px;letter-spacing:0.14em;text-transform:uppercase;color:var(--text-3);text-align:left;padding:10px 16px;border-bottom:1px solid var(--border);background:rgba(255,255,255,.02);}
+    .hyp-table td{font-size:13px;color:var(--text-2);padding:13px 16px;border-bottom:1px solid var(--border);line-height:1.5;}
+    .hyp-table td:first-child{color:var(--text);font-weight:500;}
+    .hyp-table td.acc{color:var(--accent);font-weight:600;}
+    .hyp-table tr:last-child td{border-bottom:none;}
+
+    /* A/B CHART */
+    .ab-chart{background:var(--bg-card);border:1px solid var(--border);border-radius:12px;padding:28px;margin:32px 0;}
+    .ab-legend{display:flex;gap:24px;margin-bottom:24px;}
+    .ab-legend-item{display:flex;align-items:center;gap:8px;font-size:12px;color:var(--text-2);}
+    .ab-legend-dot{width:10px;height:10px;border-radius:2px;flex-shrink:0;}
+    .ab-legend-dot.base{background:var(--baseline);}
+    .ab-legend-dot.impr{background:var(--improved);}
+    .ab-rows{display:flex;flex-direction:column;gap:16px;}
+    .ab-row{display:grid;grid-template-columns:180px 1fr;gap:16px;align-items:center;}
+    @media(max-width:640px){.ab-row{grid-template-columns:1fr;gap:6px;}}
+    .ab-metric{font-size:12px;color:var(--text-2);}
+    .ab-bars{display:flex;flex-direction:column;gap:5px;}
+    .ab-bar-row{display:flex;align-items:center;gap:10px;}
+    .ab-bar-track{flex:1;height:7px;background:rgba(255,255,255,.04);border-radius:4px;overflow:hidden;}
+    .ab-bar-fill{height:100%;border-radius:4px;transition:width 1s cubic-bezier(.25,.46,.45,.94);}
+    .ab-bar-fill.base{background:var(--baseline);}
+    .ab-bar-fill.impr{background:var(--improved);}
+    .ab-val{font-family:'Lexend',sans-serif;font-size:12px;font-weight:600;width:40px;flex-shrink:0;text-align:right;}
+    .ab-val.base{color:var(--text-3);}
+    .ab-val.impr{color:var(--accent);}
+
+    /* RESULT GRID */
+    .result-grid{display:grid;grid-template-columns:repeat(2,1fr);gap:2px;background:var(--border);margin:36px 0;}
+    .res-cell{background:var(--bg-card);padding:28px;position:relative;overflow:hidden;}
+    .res-cell::before{content:'';position:absolute;bottom:0;left:0;right:0;height:2px;background:linear-gradient(to right,var(--accent),transparent);}
+    .res-num{font-family:'Lexend',sans-serif;font-size:44px;font-weight:700;letter-spacing:-3px;color:var(--accent);line-height:1;margin-bottom:10px;}
+    .res-desc{font-size:13px;color:var(--text-2);line-height:1.6;}
+    .res-sub{font-size:11px;color:var(--text-3);margin-top:4px;}
+
+    /* INPUT OUTPUT TABLE */
+    .io-table{width:100%;border-collapse:collapse;margin:24px 0;}
+    .io-table th{font-size:10px;letter-spacing:0.14em;text-transform:uppercase;color:var(--text-3);text-align:left;padding:10px 14px;border-bottom:1px solid var(--border);background:rgba(255,255,255,.02);}
+    .io-table td{font-size:13px;color:var(--text-2);padding:12px 14px;border-bottom:1px solid var(--border);}
+    .io-table td:first-child{color:var(--text);font-weight:500;}
+    .io-table td.acc{color:var(--accent);font-weight:600;font-family:'Lexend',sans-serif;}
+    .io-table tr:last-child td{border-bottom:none;}
+
+    /* LESSONS */
+    .lesson-list{display:flex;flex-direction:column;gap:28px;margin:28px 0;}
+    .lesson{display:grid;grid-template-columns:40px 1fr;gap:18px;align-items:start;}
+    .l-icon{width:40px;height:40px;border-radius:50%;background:rgba(232,24,46,.1);border:1px solid rgba(232,24,46,.25);display:flex;align-items:center;justify-content:center;font-family:'Lexend',sans-serif;font-size:12px;font-weight:700;color:var(--accent);flex-shrink:0;}
+    .l-body h4{font-family:'Lexend',sans-serif;font-size:15px;font-weight:600;color:var(--text);margin-bottom:8px;margin-top:10px;}
+    .l-body p{font-size:14px;color:var(--text-2);line-height:1.8;}
+    .l-body p strong{color:var(--text);}
+
+    .cs-next{border-top:1px solid var(--border);padding:64px;display:flex;justify-content:space-between;align-items:center;}
+    .next-label{font-size:10px;letter-spacing:0.22em;text-transform:uppercase;color:var(--text-3);margin-bottom:12px;}
+    .next-title{font-family:'Lexend',sans-serif;font-size:22px;font-weight:600;color:var(--text);transition:color .2s;}
+    .next-link:hover .next-title{color:var(--accent);}
+    .next-arrow{font-size:28px;color:var(--text-3);transition:color .3s,transform .3s;}
+    .next-link:hover .next-arrow{color:var(--accent);transform:translate(6px,-6px);}
+    footer{padding:28px 64px;border-top:1px solid var(--border);display:flex;justify-content:space-between;align-items:center;}
+    footer p{font-size:11px;color:var(--text-3);}
+    .t-fade{transition:opacity .25s;}
+    .t-fade.fading{opacity:0;}
+    sup{font-size:10px;color:var(--accent);opacity:.5;}
+
+    /* PROBLEM SECTION REDESIGN */
+    .prob-statement-card{background:var(--bg-card);border:1px solid var(--border);border-radius:16px;padding:52px 48px;text-align:center;margin:32px 0;}
+    .prob-icon-wrap{width:48px;height:48px;border:1px solid var(--accent);border-radius:50%;display:flex;align-items:center;justify-content:center;margin:0 auto 14px;color:var(--accent);}
+    .prob-stmt-label{font-size:10px;font-weight:600;letter-spacing:.22em;text-transform:uppercase;color:var(--text-3);margin-bottom:22px;}
+    .prob-quote{font-family:'Lexend',sans-serif;font-size:clamp(15px,1.8vw,22px);font-weight:500;line-height:1.65;color:var(--text);max-width:720px;margin:0 auto;}
+    .prob-metrics{display:grid;grid-template-columns:1fr 1fr;gap:32px;align-items:center;margin-top:48px;padding-top:40px;border-top:1px solid var(--border);}
+    @media(max-width:640px){.prob-metrics{grid-template-columns:1fr;}}
+    .prob-metrics-q{font-family:'Lexend',sans-serif;font-size:clamp(16px,1.7vw,21px);font-weight:600;color:var(--text);line-height:1.35;}
+    .prob-pills{display:flex;flex-direction:column;gap:10px;}
+    .prob-pill{display:flex;align-items:center;gap:12px;background:var(--bg-card-h);border:1px solid var(--border);border-radius:100px;padding:12px 20px;font-size:13px;color:var(--text-2);}
+    .prob-pill-icon{width:26px;height:26px;border-radius:50%;border:1px solid var(--border-h);display:flex;align-items:center;justify-content:center;flex-shrink:0;font-size:11px;color:var(--text-3);}
+
+    /* ── FLOATING TOC ───────────────────── */
+    .cs-toc{position:fixed;right:28px;top:50%;transform:translateY(-50%);z-index:150;display:flex;flex-direction:column;gap:0;pointer-events:auto;align-items:flex-start;width:max-content;transition:opacity .35s,visibility .35s;}
+    .strategies{display:grid;grid-template-columns:repeat(3,1fr);gap:2px;background:var(--border);margin:28px 0;}
+    @media(max-width:640px){.strategies{grid-template-columns:1fr;}}
+    .strat-card{background:var(--bg-card);padding:28px;}
+    .strat-num{font-size:10px;font-weight:600;letter-spacing:.18em;text-transform:uppercase;color:var(--accent);margin-bottom:10px;}
+    .strat-name{font-family:'Lexend',sans-serif;font-size:16px;font-weight:600;color:var(--text);margin-bottom:8px;}
+    .strat-desc{font-size:13px;color:var(--text-2);line-height:1.65;}
+    .cs-toc-link{display:flex;align-items:center;gap:10px;padding:5px 0;color:var(--text-3);font-size:11px;font-family:'Inter',sans-serif;letter-spacing:.03em;white-space:nowrap;text-decoration:none;cursor:none;transition:color .25s,opacity .25s;opacity:.4;}
+    .cs-toc-link:hover{color:var(--text-2);opacity:.85;}
+    .cs-toc-link.active{color:var(--accent);opacity:1;font-weight:500;}
+    .cs-toc-tick{width:1.5px;height:12px;background:currentColor;border-radius:2px;flex-shrink:0;transition:height .25s,width .25s;}
+    .cs-toc-link.active .cs-toc-tick{height:20px;width:2px;}
+    @media(max-width:1260px){.cs-toc{display:none;}}
+    /* ctx-label */
+    .ctx-label{font-size:10px;font-weight:600;letter-spacing:.18em;text-transform:uppercase;color:var(--text-3);display:flex;align-items:center;gap:12px;margin:32px 0 16px;}
+    .ctx-label::after{content:'';flex:1;height:1px;background:var(--border);}
+  </style>
+</head>
+<body>
+  <div id="grain"></div>
+  <div id="cur-dot"></div>
+  <div id="cur-ring"></div>
+  <nav class="cs-toc" id="csToc"></nav>
+
+  <nav id="nav">
+    <a href="./work.html" class="nav-back" onclick="if(history.length>1){history.back();return false;}">
+      <svg width="16" height="16" viewBox="0 0 16 16" fill="none" stroke="currentColor" stroke-width="1.5"><path d="M10 12L6 8l4-4"/></svg>
+    </a>
+    <div class="nav-right">
+      <ul class="nav-links">
+        <li><a href="./work.html" data-i18n="nav.work">Projects</a></li>
+        <li><a href="./contact.html" data-i18n="nav.about">About</a></li>
+      </ul>
+      <div class="lang-toggle" id="langToggle">
+        <button class="lang-btn active" data-lang="ko">KR</button>
+        <button class="lang-btn" data-lang="en">EN</button>
+      </div>
+    </div>
+  </nav>
+
+  <!-- HERO -->
+  <section class="cs-hero">
+    <div class="cs-hero-bg"></div>
+    <img class="cs-hero-img" src="./thumb-plana.jpg" alt="" />
+    <div class="cs-hero-num" aria-hidden="true">03</div>
+    <p class="cs-sub">PLANA · UAM Cockpit UX · 2022–2023</p>
+    <div class="cs-eyebrow" data-i18n="hero.eyebrow">Explainable UI · OODA Loop · Autocorrection Strategy</div>
+    <h1 data-i18n="hero.h1">조종사는 정보를 <em>탐색</em>하면 안 된다.<br>정보가 조종사를 <em>찾아와야</em> 한다.</h1>
+    <p class="cs-hero-q" data-i18n="hero.q">
+      UAM 단일 조종사 환경에서 시각 클러터로 인한 OODA 루프 병목을 분석하고,
+      비행 맥락 기반 자동 보정 전략(Autocorrection Strategy)을 적용해
+      Safe Mission Completion Rate 95%를 달성한 Flypad UX 설계
+    </p>
+    <div class="cs-hero-meta">
+      <div><div class="meta-label" data-i18n="meta.role.l">Role</div><div class="meta-val" data-i18n="meta.role.v">UX Research · UX Design Manager</div></div>
+      <div><div class="meta-label">Period</div><div class="meta-val">2022 — 2023</div></div>
+      <div><div class="meta-label" data-i18n="meta.domain.l">Domain</div><div class="meta-val">UAM · eVTOL Cockpit UX</div></div>
+      <div><div class="meta-label" data-i18n="meta.tools.l">Tools</div><div class="meta-val">NASA-TLX · Eye-tracking · A/B Test</div></div>
+    </div>
+  </section>
+
+  <div class="cs-body">
+
+    <!-- 01 BACKGROUND -->
+    <section class="cs-section" id="s1">
+      <div class="cs-num">01</div>
+      <h2 class="cs-title" data-i18n="s1.title">배경 <em>·</em> Background</h2>
+
+      <!-- 3-column image grid -->
+      <div style="display:grid;grid-template-columns:repeat(3,1fr);gap:12px;margin:36px 0;">
+        <img src="./PLANA/bg-01.jpg" alt="UAM cockpit environment 01" style="width:100%;height:auto;border-radius:12px;display:block;object-fit:cover;" />
+        <img src="./PLANA/bg-02.jpg" alt="UAM cockpit environment 02" style="width:100%;height:auto;border-radius:12px;display:block;object-fit:cover;" />
+        <img src="./PLANA/bg-03.jpg" alt="UAM cockpit environment 03" style="width:100%;height:auto;border-radius:12px;display:block;object-fit:cover;" />
+      </div>
+
+      <!-- UAM/UAS Environment bullets -->
+      <div class="ctx-label" style="margin-top:0;">UAM/UAS Environment</div>
+      <ul style="list-style:none;display:flex;flex-direction:column;gap:12px;margin-bottom:36px;">
+        <li style="display:flex;gap:10px;font-size:14px;line-height:1.75;color:var(--text-2);">
+          <span style="color:var(--accent);flex-shrink:0;margin-top:2px;">●</span>
+          <span data-i18n="s1.b1">저고도·도심 비행, 복잡한 교통 밀도, 기상·풍향 변화를 <strong style="color:var(--accent);">동시에 고려</strong>해야 하는 UAM/UAS 운용 환경</span>
+        </li>
+        <li style="display:flex;gap:10px;font-size:14px;line-height:1.75;color:var(--text-2);">
+          <span style="color:var(--accent);flex-shrink:0;margin-top:2px;">●</span>
+          <span data-i18n="s1.b2">단일 조종사(eVTOL, UAM)에게 <strong style="color:var(--accent);">상황 인식(SA) 유지와 다중 태스크 관리</strong>가 가장 큰 운영 리스크로 지목</span>
+        </li>
+        <li style="display:flex;gap:10px;font-size:14px;line-height:1.75;color:var(--text-2);">
+          <span style="color:var(--accent);flex-shrink:0;margin-top:2px;">●</span>
+          <span data-i18n="s1.b3">기존 cockpit 디스플레이는 항법·자세·교통·기상·경고 등 다양한 정보를 한 화면에 나열 → <strong style="color:var(--accent);">시각적 클러터(clutter) 및 판단 지연 유발</strong></span>
+        </li>
+        <li style="display:flex;gap:10px;font-size:14px;line-height:1.75;color:var(--text-2);">
+          <span style="color:var(--accent);flex-shrink:0;margin-top:2px;">●</span>
+          <span data-i18n="s1.b4">단순 정보 나열 UI를 넘어서, <strong style="color:var(--accent);">OODA 루프 전체를 지원</strong>하며 인지부하를 관리하는 cockpit UX 설계 필요</span>
+        </li>
+      </ul>
+
+      <!-- 현재 리스크 -->
+      <div class="ctx-label">현재 리스크</div>
+      <ul style="list-style:none;display:flex;flex-direction:column;gap:12px;margin-bottom:36px;">
+        <li style="display:flex;gap:10px;font-size:14px;line-height:1.75;color:var(--text-2);">
+          <span style="color:var(--accent);flex-shrink:0;margin-top:2px;">●</span>
+          <span data-i18n="s1.risk1">시각적 클러터가 조종사의 판단 지연을 유발 → <strong style="color:var(--accent);">미션 실패율 증가</strong> → 기체 손실 및 브랜드 신뢰도 추락이라는 거대한 비즈니스 리스크</span>
+        </li>
+      </ul>
+
+      <!-- Callout -->
+      <div class="cs-callout">
+        <p data-i18n="s1.callout">
+          👉 모빌리티 시장에서 새롭게 활동할 UAM 운영 구조에서는 <strong>"HMI가 사실상 가상의 크루 멤버 역할"</strong>을 해야 한다는 요구가 커지고 있다 — 판단을 돕는 시스템 설계 필요
+        </p>
+      </div>
+
+      <!-- UAM Environment Chart -->
+      <div class="chart-heading" data-i18n="s1.env.title">UAM/UAS 환경 복잡도 & 운영 리스크 (1–5점)</div>
+      <div class="env-chart">
+        <div class="env-row" style="margin-bottom:4px;">
+          <div></div>
+          <div>
+            <div class="env-col-label" data-i18n="env.complexity">환경 복잡도</div>
+          </div>
+          <div>
+            <div class="env-col-label" data-i18n="env.risk">운영 리스크</div>
+          </div>
+        </div>
+        <div class="env-row">
+          <div class="env-label" data-i18n="env.f1">저고도 비행</div>
+          <div class="env-bar-wrap"><div class="env-bar-track"><div class="env-bar-fill complexity" style="width:100%"></div></div><div class="env-score">5.0</div></div>
+          <div class="env-bar-wrap"><div class="env-bar-track"><div class="env-bar-fill risk" style="width:90%"></div></div><div class="env-score">4.5</div></div>
+        </div>
+        <div class="env-row">
+          <div class="env-label" data-i18n="env.f2">도시 장애물·복잡한 교통 밀도</div>
+          <div class="env-bar-wrap"><div class="env-bar-track"><div class="env-bar-fill complexity" style="width:100%"></div></div><div class="env-score">5.0</div></div>
+          <div class="env-bar-wrap"><div class="env-bar-track"><div class="env-bar-fill risk" style="width:100%"></div></div><div class="env-score">5.0</div></div>
+        </div>
+        <div class="env-row">
+          <div class="env-label" data-i18n="env.f3">바람·기상·시정 변화</div>
+          <div class="env-bar-wrap"><div class="env-bar-track"><div class="env-bar-fill complexity" style="width:90%"></div></div><div class="env-score">4.5</div></div>
+          <div class="env-bar-wrap"><div class="env-bar-track"><div class="env-bar-fill risk" style="width:80%"></div></div><div class="env-score">4.0</div></div>
+        </div>
+        <div class="env-row">
+          <div class="env-label" data-i18n="env.f4">공역 제약·경로 재계산 빈도</div>
+          <div class="env-bar-wrap"><div class="env-bar-track"><div class="env-bar-fill complexity" style="width:90%"></div></div><div class="env-score">4.5</div></div>
+          <div class="env-bar-wrap"><div class="env-bar-track"><div class="env-bar-fill risk" style="width:80%"></div></div><div class="env-score">4.0</div></div>
+        </div>
+        <div class="env-row">
+          <div class="env-label" data-i18n="env.f5">단일 조종사 다중 태스크 부담</div>
+          <div class="env-bar-wrap"><div class="env-bar-track"><div class="env-bar-fill complexity" style="width:100%"></div></div><div class="env-score">5.0</div></div>
+          <div class="env-bar-wrap"><div class="env-bar-track"><div class="env-bar-fill risk" style="width:100%"></div></div><div class="env-score">5.0</div></div>
+        </div>
+      </div>
+
+      <div class="cs-callout">
+        <p data-i18n="s1.biz.risk">
+          <strong>비즈니스 리스크:</strong>
+          기존의 시각적 클러터가 조종사의 판단 지연을 유발해 미션 실패율을 높이고,
+          이는 곧 <strong>기체 손실 및 브랜드 신뢰도 추락</strong>이라는 거대한 비즈니스 리스크로 이어진다.
+        </p>
+      </div>
+    </section>
+
+    <!-- 02 GOAL -->
+    <section class="cs-section" id="s2">
+      <div class="cs-num">02</div>
+      <h2 class="cs-title" data-i18n="s2.title">목표 <em>·</em> Goal</h2>
+
+      <div class="stat-grid">
+        <div class="stat-cell"><div class="stat-num">95%</div><div class="stat-label" data-i18n="kpi1">Safe Mission Completion Rate<br>목표 (고부하 시나리오)</div></div>
+        <div class="stat-cell"><div class="stat-num">−25%</div><div class="stat-label" data-i18n="kpi2">주요 태스크 완료 시간<br>평균 단축 목표</div></div>
+        <div class="stat-cell"><div class="stat-num">−15pt</div><div class="stat-label" data-i18n="kpi3">NASA-TLX<br>인지부하 감소 목표</div></div>
+      </div>
+
+      <div class="two-col">
+        <div class="col-card acc-border">
+          <h4 class="acc" data-i18n="s2.inp">Input (검증 지표)</h4>
+          <ul>
+            <li data-i18n="s2.i1">주요 태스크 완료 시간 <strong style="color:var(--text)">−25%</strong></li>
+            <li data-i18n="s2.i2">첫 시도 성공률 <strong style="color:var(--text)">+20%</strong></li>
+            <li data-i18n="s2.i3">Glance Time <strong style="color:var(--text)">−30%</strong></li>
+            <li data-i18n="s2.i4">NASA-TLX <strong style="color:var(--text)">−15점</strong></li>
+            <li data-i18n="s2.i5">2초 이상 off-road glance <strong style="color:var(--text)">−40%</strong></li>
+          </ul>
+        </div>
+        <div class="col-card acc-border">
+          <h4 class="acc" data-i18n="s2.out">Output (비즈니스 성과)</h4>
+          <ul>
+            <li data-i18n="s2.o1">고부하 구간 Safe Mission Completion Rate <strong style="color:var(--text)">95%+</strong></li>
+            <li data-i18n="s2.o2">복잡 공역·기상 회피 시나리오 조종 오류율 감소</li>
+            <li data-i18n="s2.o3">파일럿 설문 "계기 이해도·시스템 신뢰도" <strong style="color:var(--text)">+20pt</strong></li>
+            <li data-i18n="s2.o4">새로운 Flypad UI 표준 cockpit 채택 근거 확보</li>
+          </ul>
+        </div>
+      </div>
+
+      <div class="cs-callout">
+        <p data-i18n="s2.essence">
+          <strong>핵심 목표:</strong>
+          비행 중 특정 구간(계기 비상·경로변경·버드스트라이크 등)에서 시각 정보가 과도하게 쏟아질 때,
+          해당 OODA 단계에 필요한 <strong>핵심 정보만 골라서 먼저 보여주고</strong> 나머지는 뒤로 미뤄
+          의사결정 속도와 정확도를 높이는 것.
+        </p>
+      </div>
+    </section>
+
+    <!-- 03 ROOT CAUSE -->
+    <section class="cs-section" id="s3">
+      <div class="cs-num">03</div>
+      <h2 class="cs-title" data-i18n="s3.title">원인 분석 <em>·</em> Data Analysis</h2>
+
+      <!-- Pilot Insights -->
+      <!-- ── Context · Product (정량) ── -->
+      <div class="ctx-label">Context · Product</div>
+      <div class="chart-heading" data-i18n="s3.quant.title">정량 분석 — 고부하 구간 실제 수행 지표</div>
+      <div class="perf-grid">
+        <div class="perf-cell"><div class="perf-num">34%</div><div class="perf-label" data-i18n="p1">2초+ off-road<br>glance 비율</div></div>
+        <div class="perf-cell"><div class="perf-num">+22%</div><div class="perf-label" data-i18n="p2">판단 지연<br>증가율</div></div>
+        <div class="perf-cell"><div class="perf-num">+15%</div><div class="perf-label" data-i18n="p3">입력 오류<br>증가율</div></div>
+        <div class="perf-cell"><div class="perf-num">+30%</div><div class="perf-label" data-i18n="p4">재시도 횟수<br>증가율</div></div>
+      </div>
+
+      <!-- 기존 UI 성과 바 차트 -->
+      <div style="background:var(--bg-card);border:1px solid var(--border);border-radius:16px;padding:24px;margin:20px 0;">
+        <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:20px;">
+          <div style="font-size:12px;font-weight:600;color:var(--text-2);" data-i18n="bchart.title">기존 UI</div>
+          <div style="display:flex;align-items:center;gap:6px;font-size:11px;color:var(--text-3);"><span style="width:8px;height:8px;border-radius:50%;background:#E8182E;display:inline-block;"></span><span data-i18n="bchart.legend">기존 UI</span></div>
+        </div>
+        <!-- Bar chart -->
+        <div style="position:relative;height:180px;margin-bottom:8px;">
+          <div style="position:absolute;left:0;top:0;bottom:24px;display:flex;flex-direction:column;justify-content:space-between;width:36px;text-align:right;padding-right:6px;">
+            <span style="font-size:10px;color:var(--text-3);">100%</span>
+            <span style="font-size:10px;color:var(--text-3);">75%</span>
+            <span style="font-size:10px;color:var(--text-3);">50%</span>
+            <span style="font-size:10px;color:var(--text-3);">25%</span>
+            <span style="font-size:10px;color:var(--text-3);">0%</span>
+          </div>
+          <div style="position:absolute;left:42px;right:0;top:0;bottom:24px;">
+            <!-- grid lines -->
+            <div style="position:absolute;inset:0;display:flex;flex-direction:column;justify-content:space-between;pointer-events:none;">
+              <div style="border-top:1px dashed rgba(255,255,255,.07);width:100%;"></div>
+              <div style="border-top:1px dashed rgba(255,255,255,.07);width:100%;"></div>
+              <div style="border-top:1px dashed rgba(255,255,255,.07);width:100%;"></div>
+              <div style="border-top:1px dashed rgba(255,255,255,.07);width:100%;"></div>
+              <div style="border-top:1px solid rgba(255,255,255,.13);width:100%;"></div>
+            </div>
+            <!-- bars -->
+            <div style="display:flex;align-items:flex-end;height:100%;gap:12px;padding:0 8px;">
+              <div style="flex:1;height:100%;display:flex;align-items:flex-end;">
+                <div style="width:100%;height:80%;background:#E8182E;border-radius:4px 4px 0 0;"></div>
+              </div>
+              <div style="flex:1;height:100%;display:flex;align-items:flex-end;">
+                <div style="width:100%;height:18%;background:#E8182E;border-radius:4px 4px 0 0;"></div>
+              </div>
+              <div style="flex:1;height:100%;display:flex;align-items:flex-end;">
+                <div style="width:100%;height:32%;background:#E8182E;border-radius:4px 4px 0 0;"></div>
+              </div>
+              <div style="flex:1;height:100%;display:flex;align-items:flex-end;">
+                <div style="width:100%;height:65%;background:#E8182E;border-radius:4px 4px 0 0;"></div>
+              </div>
+            </div>
+          </div>
+          <!-- x labels -->
+          <div style="position:absolute;left:42px;right:0;bottom:0;display:flex;gap:12px;padding:0 8px;">
+            <div style="flex:1;text-align:center;font-size:10px;color:var(--text-3);" data-i18n="bchart.x1">미션 성공률</div>
+            <div style="flex:1;text-align:center;font-size:10px;color:var(--text-3);" data-i18n="bchart.x2">오류율</div>
+            <div style="flex:1;text-align:center;font-size:10px;color:var(--text-3);" data-i18n="bchart.x3">Off-road Glance</div>
+            <div style="flex:1;text-align:center;font-size:10px;color:var(--text-3);" data-i18n="bchart.x4">First-pass 성공률</div>
+          </div>
+        </div>
+        <!-- NASA-TLX + 반응시간 -->
+        <div style="display:grid;grid-template-columns:1fr 1fr;gap:12px;margin-top:16px;">
+          <div style="background:var(--bg-card-h);border:1px solid var(--border);border-radius:12px;padding:16px 18px;display:flex;align-items:center;justify-content:space-between;">
+            <div>
+              <div style="font-size:10px;font-weight:700;letter-spacing:.1em;color:var(--text-3);margin-bottom:6px;">NASA-TLX</div>
+              <div style="font-size:18px;font-weight:700;color:var(--text);">58pt <span style="color:var(--text-3);font-weight:400;font-size:14px;">→</span> <span style="color:#E8182E;">42pt</span></div>
+            </div>
+            <div style="background:#7A1020;border-radius:8px;padding:8px 14px;font-size:15px;font-weight:700;color:#E8182E;">–16pt</div>
+          </div>
+          <div style="background:var(--bg-card-h);border:1px solid var(--border);border-radius:12px;padding:16px 18px;display:flex;align-items:center;justify-content:space-between;">
+            <div>
+              <div style="font-size:10px;font-weight:700;letter-spacing:.1em;color:var(--text-3);margin-bottom:6px;" data-i18n="bchart.rt">반응 시간</div>
+              <div style="font-size:18px;font-weight:700;color:var(--text);">3.8s <span style="color:var(--text-3);font-weight:400;font-size:14px;">→</span> <span style="color:#E8182E;">2.9s</span></div>
+            </div>
+            <div style="background:#7A1020;border-radius:8px;padding:8px 14px;font-size:15px;font-weight:700;color:#E8182E;">–0.9s</div>
+          </div>
+        </div>
+        <!-- NASA-TLX 정의 -->
+        <div style="margin-top:14px;padding:12px 14px;background:rgba(255,255,255,.03);border-radius:8px;border:1px solid var(--border);">
+          <div style="font-size:11px;font-weight:600;color:var(--text-2);margin-bottom:4px;" data-i18n="bchart.def.title">NASA-TLX의 정의:</div>
+          <div style="font-size:12px;color:var(--text-3);line-height:1.75;" data-i18n="bchart.def.body">NASA에서 개발한 조종사가 특정 태스크를 수행할 때 느끼는 인지·정서적 작업부하를 정량화하는 대표 지표입니다.<br>값이 낮을수록 화면이 더 이해하기 쉽고, 결정과 조작에 드는 부담이 적다고 해석할 수 있습니다.</div>
+        </div>
+      </div>
+
+      <!-- 시나리오별 고부하 영향 테이블 -->
+      <div class="chart-heading" data-i18n="s3.scenario.title">시나리오별 고부하 영향</div>
+      <table class="hyp-table">
+        <thead><tr>
+          <th data-i18n="th.s">시나리오</th><th data-i18n="th.m">지표</th><th data-i18n="th.base">기존 UI</th><th data-i18n="th.hi">고부하 시</th><th data-i18n="th.src">근거</th>
+        </tr></thead>
+        <tbody>
+          <tr><td data-i18n="sc1">이착륙</td><td data-i18n="sc1m">Off-road 비율</td><td>12%</td><td class="acc">35%↑</td><td data-i18n="sc1s">Eye-tracking</td></tr>
+          <tr><td data-i18n="sc2">경고 처리</td><td data-i18n="sc2m">경고 무시율</td><td>8%</td><td class="acc">28%↑</td><td data-i18n="sc2s">NASA-TLX</td></tr>
+          <tr><td data-i18n="sc3">회피 기동</td><td data-i18n="sc3m">오류율</td><td>7%</td><td class="acc">15%↑</td><td data-i18n="sc3s">Single-pilot</td></tr>
+        </tbody>
+      </table>
+
+      <div class="cs-callout">
+        <p data-i18n="s3.conclusion">
+          <strong>원인 결론:</strong>
+          정량 데이터(시선 분산 2.5배 증가)와 정성 데이터(경고 묻힘 피드백)를 결합하여,
+          <strong>OODA 루프의 Orient–Decide 단계에서 병목</strong>이 발생함을 확인했다.
+        </p>
+      </div>
+
+      <!-- ── Context · User (정성) ── -->
+      <div class="ctx-label" style="margin-top:36px;">Context · User</div>
+      <div style="display:grid;grid-template-columns:1fr 1fr;gap:24px;align-items:stretch;">
+
+        <!-- 파일럿 인터뷰 바 차트 -->
+        <div style="display:flex;flex-direction:column;">
+          <div class="chart-heading" data-i18n="s3.qual.title">정성 분석 — 파일럿 인터뷰 인사이트 응답 강도</div>
+          <div class="insight-bars" style="flex:1;">
+            <div class="insight-row">
+              <div class="insight-text" data-i18n="i1">"어떤 정보를 먼저 봐야 하는지 매번 다시 판단해야 한다"</div>
+              <div class="insight-bar-wrap"><div class="insight-track"><div class="insight-fill" style="width:78%"></div></div><div class="insight-pct">78%</div></div>
+            </div>
+            <div class="insight-row">
+              <div class="insight-text" data-i18n="i2">"중요한 경고가 주변 정보에 묻혀 보인다"</div>
+              <div class="insight-bar-wrap"><div class="insight-track"><div class="insight-fill" style="width:72%"></div></div><div class="insight-pct">72%</div></div>
+            </div>
+            <div class="insight-row">
+              <div class="insight-text" data-i18n="i3">"고부하일수록 시선 전환이 늘어난다"</div>
+              <div class="insight-bar-wrap"><div class="insight-track"><div class="insight-fill" style="width:80%"></div></div><div class="insight-pct">80%</div></div>
+            </div>
+            <div class="insight-row">
+              <div class="insight-text" data-i18n="i4">"단일 조종사 상황인식 유지가 어렵다"</div>
+              <div class="insight-bar-wrap"><div class="insight-track"><div class="insight-fill" style="width:76%"></div></div><div class="insight-pct">76%</div></div>
+            </div>
+          </div>
+        </div>
+
+        <!-- 시나리오별 지표 악화 히트맵 -->
+        <div style="background:var(--bg-card);border:1px solid var(--border);border-radius:16px;padding:16px 18px;display:flex;flex-direction:column;justify-content:space-between;">
+          <div style="font-size:10px;color:var(--text-3);letter-spacing:.08em;margin-bottom:10px;" data-i18n="heatmap.title">시나리오별 지표 악화 히트맵</div>
+          <!-- header -->
+          <div style="display:grid;grid-template-columns:58px repeat(4,1fr);gap:4px;margin-bottom:4px;">
+            <div></div>
+            <div style="font-size:9px;color:var(--accent);text-align:center;font-weight:600;" data-i18n="hm.c1">Off-road</div>
+            <div style="font-size:9px;color:var(--accent);text-align:center;font-weight:600;" data-i18n="hm.c2">오류율</div>
+            <div style="font-size:9px;color:var(--accent);text-align:center;font-weight:600;" data-i18n="hm.c3">판단지연</div>
+            <div style="font-size:9px;color:var(--accent);text-align:center;font-weight:600;" data-i18n="hm.c4">경고무시</div>
+          </div>
+          <!-- 이착륙 -->
+          <div style="display:grid;grid-template-columns:58px repeat(4,1fr);gap:4px;margin-bottom:4px;align-items:center;">
+            <div style="font-size:10px;color:var(--text-2);" data-i18n="hm.r1">이착륙</div>
+            <div style="background:#C0182E;border-radius:6px;padding:5px 2px;text-align:center;font-size:10px;font-weight:700;color:#fff;" data-i18n="hm.danger">위험</div>
+            <div style="background:#1E1E26;border-radius:6px;padding:5px 2px;text-align:center;font-size:10px;color:var(--text-3);" data-i18n="hm.normal">보통</div>
+            <div style="background:#7A1020;border-radius:6px;padding:5px 2px;text-align:center;font-size:10px;color:#E8182E;" data-i18n="hm.high">높음</div>
+            <div style="background:#1E1E26;border-radius:6px;padding:5px 2px;text-align:center;font-size:10px;color:var(--text-3);" data-i18n="hm.normal">보통</div>
+          </div>
+          <!-- 경로 변경 -->
+          <div style="display:grid;grid-template-columns:58px repeat(4,1fr);gap:4px;margin-bottom:4px;align-items:center;">
+            <div style="font-size:10px;color:var(--text-2);" data-i18n="hm.r2">경로 변경</div>
+            <div style="background:#7A1020;border-radius:6px;padding:5px 2px;text-align:center;font-size:10px;color:#E8182E;" data-i18n="hm.high">높음</div>
+            <div style="background:#7A1020;border-radius:6px;padding:5px 2px;text-align:center;font-size:10px;color:#E8182E;" data-i18n="hm.high">높음</div>
+            <div style="background:#1E1E26;border-radius:6px;padding:5px 2px;text-align:center;font-size:10px;color:var(--text-3);" data-i18n="hm.normal">보통</div>
+            <div style="background:#1E1E26;border-radius:6px;padding:5px 2px;text-align:center;font-size:10px;color:var(--text-3);" data-i18n="hm.normal">보통</div>
+          </div>
+          <!-- 기상 회피 -->
+          <div style="display:grid;grid-template-columns:58px repeat(4,1fr);gap:4px;margin-bottom:4px;align-items:center;">
+            <div style="font-size:10px;color:var(--text-2);" data-i18n="hm.r3">기상 회피</div>
+            <div style="background:#7A1020;border-radius:6px;padding:5px 2px;text-align:center;font-size:10px;color:#E8182E;" data-i18n="hm.high">높음</div>
+            <div style="background:#1E1E26;border-radius:6px;padding:5px 2px;text-align:center;font-size:10px;color:var(--text-3);" data-i18n="hm.normal">보통</div>
+            <div style="background:#C0182E;border-radius:6px;padding:5px 2px;text-align:center;font-size:10px;font-weight:700;color:#fff;" data-i18n="hm.danger">위험</div>
+            <div style="background:#7A1020;border-radius:6px;padding:5px 2px;text-align:center;font-size:10px;color:#E8182E;" data-i18n="hm.high">높음</div>
+          </div>
+          <!-- 경고 처리 -->
+          <div style="display:grid;grid-template-columns:58px repeat(4,1fr);gap:4px;align-items:center;">
+            <div style="font-size:10px;color:var(--text-2);" data-i18n="hm.r4">경고 처리</div>
+            <div style="background:#C0182E;border-radius:6px;padding:5px 2px;text-align:center;font-size:10px;font-weight:700;color:#fff;" data-i18n="hm.danger">위험</div>
+            <div style="background:#7A1020;border-radius:6px;padding:5px 2px;text-align:center;font-size:10px;color:#E8182E;" data-i18n="hm.high">높음</div>
+            <div style="background:#7A1020;border-radius:6px;padding:5px 2px;text-align:center;font-size:10px;color:#E8182E;" data-i18n="hm.high">높음</div>
+            <div style="background:#C0182E;border-radius:6px;padding:5px 2px;text-align:center;font-size:10px;font-weight:700;color:#fff;" data-i18n="hm.danger">위험</div>
+          </div>
+          <!-- legend -->
+          <div style="display:flex;gap:12px;margin-top:10px;justify-content:flex-end;">
+            <span style="font-size:9px;color:var(--text-3);display:flex;align-items:center;gap:4px;"><span style="width:7px;height:7px;border-radius:50%;background:#C0182E;display:inline-block;"></span><span data-i18n="hm.danger">위험</span></span>
+            <span style="font-size:9px;color:var(--text-3);display:flex;align-items:center;gap:4px;"><span style="width:7px;height:7px;border-radius:50%;background:#7A1020;display:inline-block;"></span><span data-i18n="hm.high">높음</span></span>
+            <span style="font-size:9px;color:var(--text-3);display:flex;align-items:center;gap:4px;"><span style="width:7px;height:7px;border-radius:50%;background:#1E1E26;display:inline-block;"></span><span data-i18n="hm.normal">보통</span></span>
+          </div>
+        </div>
+
+      </div>
+
+      <div class="cs-callout">
+        <p data-i18n="s3.conclusion">
+          <strong>원인 결론:</strong>
+          정량 데이터(시선 분산 2.5배 증가)와 정성 데이터(경고 묻힘 피드백)를 결합하여,
+          <strong>OODA 루프의 Orient–Decide 단계에서 병목</strong>이 발생함을 확인했다.
+        </p>
+      </div>
+    </section>
+
+    <!-- 04 PROBLEM DEFINITION -->
+    <section class="cs-section" id="s4">
+      <div class="cs-num">04</div>
+      <h2 class="cs-title" data-i18n="s4.title">문제 정의 <em>·</em> Problem</h2>
+
+      <div class="ooda-flow">
+        <div class="ooda-cell">
+          <div class="ooda-letter" aria-hidden="true">O</div>
+          <div class="ooda-tag">OODA 1</div>
+          <div class="ooda-name" data-i18n="ooda1">Observe</div>
+          <div class="ooda-desc" data-i18n="ooda1d">센서·계기 데이터 수집. 고부하 시 glance cycle 2.5배 증가.</div>
+        </div>
+        <div class="ooda-cell bottleneck">
+          <div class="ooda-letter" aria-hidden="true">O</div>
+          <div class="ooda-tag">OODA 2</div>
+          <div class="ooda-name" data-i18n="ooda2">Orient</div>
+          <div class="ooda-desc" data-i18n="ooda2d">수집 정보 해석 및 상황 판단. 클러터로 인한 정보 탐색 비용 급증.</div>
+          <div class="ooda-badge" data-i18n="ooda2b">핵심 병목</div>
+        </div>
+        <div class="ooda-cell bottleneck">
+          <div class="ooda-letter" aria-hidden="true">D</div>
+          <div class="ooda-tag">OODA 3</div>
+          <div class="ooda-name" data-i18n="ooda3">Decide</div>
+          <div class="ooda-desc" data-i18n="ooda3d">행동 결정. 판단 지연 22% 증가·오류율 15% 증가.</div>
+          <div class="ooda-badge" data-i18n="ooda3b">핵심 병목</div>
+        </div>
+        <div class="ooda-cell">
+          <div class="ooda-letter" aria-hidden="true">A</div>
+          <div class="ooda-tag">OODA 4</div>
+          <div class="ooda-name" data-i18n="ooda4">Act</div>
+          <div class="ooda-desc" data-i18n="ooda4d">조종 입력 실행. 잘못된 결정이 그대로 입력 오류로 전파.</div>
+        </div>
+      </div>
+
+      <div class="prob-statement-card" style="margin-top:32px;">
+        <div class="prob-icon-wrap">
+          <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5"><circle cx="12" cy="12" r="10"/><text x="12" y="17" text-anchor="middle" fill="currentColor" stroke="none" font-size="13" font-weight="700" font-family="sans-serif">?</text></svg>
+        </div>
+        <div class="prob-stmt-label">Problem Statement</div>
+        <p class="prob-quote" data-i18n="s4.statement">실시간 판단에 필요한 정보가<br>적절한 타이밍과 우선순위로 제시되지 않는다.</p>
+      </div>
+
+      <div class="prob-metrics">
+        <p class="prob-metrics-q" data-i18n="s4.metrics.q">핵심 지표를 어떻게<br>개선할 수 있을까?</p>
+        <div class="prob-pills">
+          <div class="prob-pill">
+            <div class="prob-pill-icon">↑</div>
+            <span data-i18n="s4.m1">Safe Mission Completion Rate 95% 달성</span>
+          </div>
+          <div class="prob-pill">
+            <div class="prob-pill-icon">↓</div>
+            <span data-i18n="s4.m2">NASA-TLX 인지부하 −15pt 감소</span>
+          </div>
+        </div>
+      </div>
+    </section>
+
+    <!-- 05 HYPOTHESIS -->
+    <section class="cs-section" id="s5">
+      <div class="cs-num">05</div>
+      <h2 class="cs-title" data-i18n="s5.title">가설 <em>·</em> Hypothesis</h2>
+
+      <div class="hyp-card">
+        <p class="hyp-text" data-i18n="s5.hyp">
+          <em>상황별 자동 보정 UI</em>가 적용되면
+          OODA 전환 시간이 <em>25% 단축</em>되고
+          오류율이 <em>40% 감소</em>한다.
+        </p>
+      </div>
+
+      <div class="chart-heading" data-i18n="s5.map.title">OODA 단계별 문제–가설–검증 지표 매핑</div>
+      <table class="hyp-table">
+        <thead><tr>
+          <th data-i18n="hm.comp">구성요소</th>
+          <th data-i18n="hm.prob">문제</th>
+          <th data-i18n="hm.hyp">가설</th>
+          <th data-i18n="hm.kpi">검증 지표</th>
+        </tr></thead>
+        <tbody>
+          <tr><td>Observe</td><td data-i18n="hm1p">정보 과부하</td><td data-i18n="hm1h">핵심 우선 노출</td><td data-i18n="hm1k">Glance time ↓25%</td></tr>
+          <tr><td>Orient</td><td data-i18n="hm2p">시선 왕복</td><td data-i18n="hm2h">컨텍스트 그룹화</td><td data-i18n="hm2k">SA 점수 ↑20%</td></tr>
+          <tr><td>Decide</td><td data-i18n="hm3p">판단 지연</td><td data-i18n="hm3h">예측 보조</td><td data-i18n="hm3k">오류율 ↓40%</td></tr>
+        </tbody>
+      </table>
+
+      <div class="sub-hyps">
+        <div class="sub-hyp">
+          <div class="sub-num">H1</div>
+          <div>
+            <div class="sub-title" data-i18n="h1.t">핵심 정보 자동 정렬 가설</div>
+            <div class="sub-body" data-i18n="h1.b">OODA 단계와 비행 Phase(공역 복잡도·경고 레벨)에 따라 핵심 정보만 전면에 자동 정렬하면, 조종사의 첫 반응 시간(Reaction Time)이 줄고 첫 시도 성공률(First-pass Success)이 유의미하게 향상될 것이다.</div>
+          </div>
+        </div>
+        <div class="sub-hyp">
+          <div class="sub-num">H2</div>
+          <div>
+            <div class="sub-title" data-i18n="h2.t">상황별 강조 & Autocorrection 가설</div>
+            <div class="sub-body" data-i18n="h2.b">착시·오해가 잦은 정보(복잡한 고도 제약·회피 권고·기상 정보)에 Autocorrection Strategy(색·레이어·레이블·아이콘 재설계)를 적용하면, 잘못된 해석과 재시도 횟수, 2초 이상 off-road glance 비율이 감소할 것이다.</div>
+          </div>
+        </div>
+        <div class="sub-hyp">
+          <div class="sub-num">H3</div>
+          <div>
+            <div class="sub-title" data-i18n="h3.t">전체 Cognitive Load 가설</div>
+            <div class="sub-body" data-i18n="h3.b">H1+H2를 결합한 FLYpad UX는 기존 cockpit UI 대비 NASA-TLX를 포함한 주관적 인지부하를 낮추면서도, 상황 인식(SA)과 시스템 신뢰도는 유지 혹은 향상시킬 수 있을 것이다.</div>
+          </div>
+        </div>
+      </div>
+
+      <h3 style="font-family:'Lexend',sans-serif;font-size:12px;font-weight:600;color:var(--text-3);letter-spacing:0.14em;text-transform:uppercase;margin:36px 0 18px;" data-i18n="s5.strat.title">3가지 실행 전략</h3>
+      <div class="strategies">
+        <div class="strat-card">
+          <div class="strat-num">전략 01</div>
+          <div class="strat-name" data-i18n="st1.name">정보 우선순위 자동화 (Prioritize)</div>
+          <div class="strat-desc" data-i18n="st1.desc">OODA 단계와 비행 Phase에 따라 핵심 정보를 자동으로 전면 정렬. 조종사의 탐색 비용 제로를 목표로 한다.</div>
+        </div>
+        <div class="strat-card">
+          <div class="strat-num">전략 02</div>
+          <div class="strat-name" data-i18n="st2.name">착시 보정 UI (Autocorrect)</div>
+          <div class="strat-desc" data-i18n="st2.desc">오해가 잦은 정보(고도·기상·회피 권고)에 색·레이어·레이블을 재설계. 잘못된 해석과 재시도를 원천 제거한다.</div>
+        </div>
+        <div class="strat-card">
+          <div class="strat-num">전략 03</div>
+          <div class="strat-name" data-i18n="st3.name">임계치 기반 알림 (Alert)</div>
+          <div class="strat-desc" data-i18n="st3.desc">규칙 기반 임계치 도달 시 청각+시각 복합 경보 자동 발령. 능동적 확인 없이도 위험을 인지할 수 있게 설계한다.</div>
+        </div>
+      </div>
+    </section>
+
+    <!-- 06 ACTION -->
+    <section class="cs-section" id="s6">
+      <div class="cs-num">06</div>
+      <h2 class="cs-title" data-i18n="s6.title">실행 <em>·</em> Execution</h2>
+
+      <!-- 실행 이미지 01 -->
+      <img src="./PLANA/exec-01.jpg" alt="Execution overview 01" style="width:100%;height:auto;border-radius:16px;display:block;margin-bottom:24px;" />
+
+      <div class="cs-callout">
+        <p data-i18n="s6.method">
+          <strong>A/B 실험 설계:</strong>
+          Autocorrection Strategy 없음(Control) vs. 있음(Variant) 동일 미션·루트 비행 비교.
+          전략: 조종사가 정보를 탐색하는 비용을 <strong>Zero-Search</strong>로 만들기 위해
+          비행 맥락에 따라 필요한 정보만 선제적으로 노출하는 시스템 구축.
+        </p>
+      </div>
+
+      <!-- 실행 이미지 02 -->
+      <img src="./PLANA/exec-02.jpg" alt="Execution overview 02" style="width:100%;height:auto;border-radius:16px;display:block;margin-top:24px;" />
+
+      <div class="action-steps">
+        <div class="action-step">
+          <div class="step-num">1</div>
+          <div class="step-body">
+            <h4 data-i18n="a1.t">정보 구조 재설계 — OODA 기반 레이아웃</h4>
+            <p data-i18n="a1.b">비행 Phase(이륙 전 준비–상승–순항–접근–착륙) 및 OODA 단계에 따라 반드시 봐야 하는 정보만 1차 계층에 배치, 나머지는 2·3차 계층으로 이관. 예: 접근·착륙 Phase에서는 속도/고도/활주로 Alignment/경고를 전면에, 저우선 지형·트래픽은 축소·레이어링.</p>
+          </div>
+        </div>
+        <div class="action-step">
+          <div class="step-num">2</div>
+          <div class="step-body">
+            <h4 data-i18n="a2.t">핵심 정보 시각적 우선순위 부여</h4>
+            <p data-i18n="a2.b">색·대비·위치·모션·아이콘 크기 등 시각적 변수로 현재 태스크에 필요한 정보와 나머지를 강하게 구분. 위험도 높은 경고·모드 변경 정보는 HUD 영역 또는 시야 중심 근처에 배치해 eyes-out 상태에서도 인지 가능하게 설계.</p>
+          </div>
+        </div>
+        <div class="action-step">
+          <div class="step-num">3</div>
+          <div class="step-body">
+            <h4 data-i18n="a3.t">Autocorrection Strategy 적용</h4>
+            <p data-i18n="a3.b">자주 헷갈리는 요소(고도 프로파일·경로 편차·바람 방향·회피 권고)에 시각적 보정 설계. 예: 강한 측풍 구간에서 heading bug·wind vector·경사각을 한 묶음으로 시각화. 잘못된 조작 패턴이 발견된 구간에는 사전 강조(anticipatory cue)를 추가해 조종사가 의도·모드 상태를 재확인하도록 유도.</p>
+          </div>
+        </div>
+        <div class="action-step">
+          <div class="step-num">4</div>
+          <div class="step-body">
+            <h4 data-i18n="a4.t">Cognitive Load 관점 화면 구조 검증</h4>
+            <p data-i18n="a4.b">정보 밀도·시선 이동 경로·확인 필수 지점을 기준으로 플로우별 Fitts law / glance path 점검. 단일 태스크 수행에 필요한 화면 전환 수·조작 수 최소화. NASA-TLX·Eye-tracking·태스크 기반 수행 데이터로 각 설계안의 인지부하 비교.</p>
+          </div>
+        </div>
+      </div>
+
+      <div class="two-col" style="margin-top:16px;">
+        <div class="col-card">
+          <h4 data-i18n="s6.dev">개발팀 협업</h4>
+          <ul>
+            <li data-i18n="s6.dev1">실시간 비행 데이터 중 '자동 보정 트리거' 발동 임계값(Threshold) 합의</li>
+            <li data-i18n="s6.dev2">레이턴시 고려한 정보 우선순위 노출 로직 공동 설계</li>
+          </ul>
+        </div>
+        <div class="col-card">
+          <h4 data-i18n="s6.design">디자인팀 협업</h4>
+          <ul>
+            <li data-i18n="s6.des1">OODA 기반 레이아웃에서 정보 우선순위 4단계 계층 설계</li>
+            <li data-i18n="s6.des2">고부하 조종 환경에 최적화된 시각 시스템 구축</li>
+          </ul>
+        </div>
+      </div>
+
+      <!-- 실행 이미지 03 -->
+      <img src="./PLANA/exec-03.jpg" alt="Execution overview 03" style="width:100%;height:auto;border-radius:16px;display:block;margin-top:24px;" />
+
+    </section>
+
+    <!-- 07 RESULTS -->
+    <section class="cs-section" id="s7">
+      <div class="cs-num">07</div>
+      <h2 class="cs-title" data-i18n="s7.title">결과 <em>·</em> Results</h2>
+
+      <img src="./PLANA/results.jpg" alt="Results overview" style="width:100%;height:auto;border-radius:16px;display:block;margin-bottom:32px;" />
+
+      <div class="result-grid">
+        <div class="res-cell">
+          <div class="res-num">95%</div>
+          <div class="res-desc" data-i18n="r1.d">Safe Mission Completion Rate</div>
+          <div class="res-sub" data-i18n="r1.s">고부하 구간 달성 · Input 개선이 Output으로 직접 연결</div>
+        </div>
+        <div class="res-cell">
+          <div class="res-num">−50%</div>
+          <div class="res-desc" data-i18n="r2.d">착시 구간 오류율</div>
+          <div class="res-sub" data-i18n="r2.s">15% → 7.5% · Autocorrection Strategy 효과</div>
+        </div>
+        <div class="res-cell">
+          <div class="res-num">−15pt</div>
+          <div class="res-desc" data-i18n="r3.d">NASA-TLX 인지부하</div>
+          <div class="res-sub" data-i18n="r3.s">50 → 35점 · SA 점수 +18%</div>
+        </div>
+        <div class="res-cell">
+          <div class="res-num">+20pt</div>
+          <div class="res-desc" data-i18n="r4.d">계기 이해도·시스템 신뢰도</div>
+          <div class="res-sub" data-i18n="r4.s">파일럿 설문 기준 · 표준 Flypad UI 채택 근거 확보</div>
+        </div>
+      </div>
+
+      <!-- A/B Chart -->
+      <div class="chart-heading" data-i18n="s7.ab.title">A/B 테스트 — Baseline UI vs. Auto-correction UI</div>
+      <div class="ab-chart">
+        <div class="ab-legend">
+          <div class="ab-legend-item"><div class="ab-legend-dot base"></div><span data-i18n="ab.base">Baseline UI</span></div>
+          <div class="ab-legend-item"><div class="ab-legend-dot impr"></div><span data-i18n="ab.impr">Auto-correction UI</span></div>
+        </div>
+        <div class="ab-rows">
+          <div class="ab-row">
+            <div class="ab-metric" data-i18n="abm1">Mission Success Rate (%)</div>
+            <div class="ab-bars">
+              <div class="ab-bar-row"><div class="ab-bar-track"><div class="ab-bar-fill base" style="width:82%"></div></div><div class="ab-val base">82%</div></div>
+              <div class="ab-bar-row"><div class="ab-bar-track"><div class="ab-bar-fill impr" style="width:95%"></div></div><div class="ab-val impr">95%</div></div>
+            </div>
+          </div>
+          <div class="ab-row">
+            <div class="ab-metric" data-i18n="abm2">First-pass Success Rate (%)</div>
+            <div class="ab-bars">
+              <div class="ab-bar-row"><div class="ab-bar-track"><div class="ab-bar-fill base" style="width:66%"></div></div><div class="ab-val base">66%</div></div>
+              <div class="ab-bar-row"><div class="ab-bar-track"><div class="ab-bar-fill impr" style="width:81%"></div></div><div class="ab-val impr">81%</div></div>
+            </div>
+          </div>
+          <div class="ab-row">
+            <div class="ab-metric" data-i18n="abm3">Error Rate (%)</div>
+            <div class="ab-bars">
+              <div class="ab-bar-row"><div class="ab-bar-track"><div class="ab-bar-fill base" style="width:18%"></div></div><div class="ab-val base">18%</div></div>
+              <div class="ab-bar-row"><div class="ab-bar-track"><div class="ab-bar-fill impr" style="width:9%"></div></div><div class="ab-val impr">9%</div></div>
+            </div>
+          </div>
+          <div class="ab-row">
+            <div class="ab-metric" data-i18n="abm4">2s+ Off-road Glance (%)</div>
+            <div class="ab-bars">
+              <div class="ab-bar-row"><div class="ab-bar-track"><div class="ab-bar-fill base" style="width:34%"></div></div><div class="ab-val base">34%</div></div>
+              <div class="ab-bar-row"><div class="ab-bar-track"><div class="ab-bar-fill impr" style="width:21%"></div></div><div class="ab-val impr">21%</div></div>
+            </div>
+          </div>
+          <div class="ab-row">
+            <div class="ab-metric" data-i18n="abm5">NASA-TLX (0–100)</div>
+            <div class="ab-bars">
+              <div class="ab-bar-row"><div class="ab-bar-track"><div class="ab-bar-fill base" style="width:58%"></div></div><div class="ab-val base">58</div></div>
+              <div class="ab-bar-row"><div class="ab-bar-track"><div class="ab-bar-fill impr" style="width:42%"></div></div><div class="ab-val impr">42</div></div>
+            </div>
+          </div>
+          <div class="ab-row">
+            <div class="ab-metric" data-i18n="abm6">Reaction Time (s)</div>
+            <div class="ab-bars">
+              <div class="ab-bar-row"><div class="ab-bar-track"><div class="ab-bar-fill base" style="width:76%"></div></div><div class="ab-val base">3.8s</div></div>
+              <div class="ab-bar-row"><div class="ab-bar-track"><div class="ab-bar-fill impr" style="width:58%"></div></div><div class="ab-val impr">2.9s</div></div>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <!-- IO table -->
+      <div class="chart-heading" data-i18n="s7.io.title">Input → Output 연결 검증</div>
+      <table class="io-table">
+        <thead><tr>
+          <th data-i18n="io.inp">Input 지표</th>
+          <th data-i18n="io.ab">A/B 결과</th>
+          <th data-i18n="io.out">Output 영향</th>
+        </tr></thead>
+        <tbody>
+          <tr><td data-i18n="io1i">태스크 시간 −25%</td><td class="acc">Reaction time −25%</td><td data-i18n="io1o">Safe Completion 95%↑</td></tr>
+          <tr><td data-i18n="io2i">첫 성공률 +20%</td><td class="acc">First-pass +15%p</td><td data-i18n="io2o">오류율 50%↓</td></tr>
+          <tr><td data-i18n="io3i">Glance −30%</td><td class="acc">Off-road −35%</td><td data-i18n="io3o">신뢰도 +20pt</td></tr>
+          <tr><td data-i18n="io4i">NASA-TLX −15pt</td><td class="acc">Workload −15–20%</td><td data-i18n="io4o">Mission 성공률↑</td></tr>
+        </tbody>
+      </table>
+
+      <div class="cs-callout">
+        <p data-i18n="s7.summary">
+          <strong>핵심 성과:</strong>
+          cockpit UX를 단순 '보기 좋은 화면'이 아니라,
+          <strong>판단을 돕는 시스템</strong>으로 확장했다는 점이 이 프로젝트의 본질적인 성과다.
+          Input(반응 시간 25% 단축)의 개선이 결과적으로 Output(미션 완료율 95%)으로 이어짐을 A/B 테스트로 검증하여
+          단일 조종사 운영의 안정성과 비즈니스 타당성을 입증했다.<sup>[1][2][3][4]</sup>
+        </p>
+      </div>
+    </section>
+
+    <!-- 08 LESSONS -->
+    <section class="cs-section" id="s8">
+      <div class="cs-num">08</div>
+      <h2 class="cs-title" data-i18n="s8.title">레슨런 <em>·</em> Lessons</h2>
+
+      <div class="lesson-list">
+        <div class="lesson">
+          <div class="l-icon">L1</div>
+          <div class="l-body">
+            <h4 data-i18n="l1.h">가치 전달의 설계: 심리적 도달 시점이 복잡한 도메인에서의 신뢰 레버</h4>
+            <p data-i18n="l1.p">기술적 정교함보다 사용자 인지 흐름에 맞는 <strong>'심리적 도달 시점'</strong>을 설계하는 것이 복잡한 도메인에서 비즈니스 신뢰를 구축하는 핵심 레버임을 학습했다. 조종사가 정보를 찾지 않아도 되는 상태를 만드는 것이 UX의 역할이다.</p>
+          </div>
+        </div>
+        <div class="lesson">
+          <div class="l-icon">L2</div>
+          <div class="l-body">
+            <h4 data-i18n="l2.h">데이터 기반 의사결정: 표면적 불편함을 측정 가능한 지표로 구조화</h4>
+            <p data-i18n="l2.p">표면적 불편함을 인지부하라는 측정 가능한 지표(NASA-TLX·Glance Time·Reaction Time)로 구조화하여 문제를 해결하는 <strong>논리적 접근 방식</strong>을 체득했다. 정성 인사이트를 응답 강도(%)로 수치화하고, 정량 데이터와 교차 검증해 OODA 병목을 특정한 것이 해결의 출발점이었다.</p>
+          </div>
+        </div>
+      </div>
+    </section>
+
+  </div>
+
+  <div class="cs-next">
+    <div>
+      <div class="next-label" data-i18n="next.label">다음 케이스 스터디</div>
+      <a href="./case-study-pickaround.html" class="next-link" style="display:block;">
+        <div class="next-title">PickAround · Seafood B2C Service →</div>
+      </a>
+    </div>
+    <a href="./case-study-pickaround.html" class="next-link next-arrow">↗</a>
+  </div>
+
+  <footer>
+    <p>© 2026 Sumin Lee</p>
+    <p><a href="./index.html" style="font-size:11px;color:var(--text-3);transition:color .2s;" onmouseover="this.style.color='var(--accent)'" onmouseout="this.style.color='var(--text-3)'" data-i18n="footer.back">← Projects</a></p>
+  </footer>
+
+  <script>
+  /* Build KO map from DOM, then EN override */
+  const ko = {};
+  document.querySelectorAll('[data-i18n]').forEach(e => { ko[e.dataset.i18n] = e.innerHTML; });
+
+  const en = {
+    'nav.work':'Projects','nav.about':'About','nav.contact':'Contact',
+    'hero.eyebrow':'Explainable UI · OODA Loop · Autocorrection Strategy',
+    'hero.h1':'<span style="white-space:nowrap">Pilots should not <em>search</em> for information.</span><br><span style="white-space:nowrap">Information should <em>find</em> the pilot.</span>',
+    'hero.q':'Analyzing OODA loop bottlenecks from visual clutter in a single-pilot UAM environment, and applying context-driven Autocorrection Strategy to achieve Safe Mission Completion Rate of 95%.',
+    'meta.role.l':'Role','meta.role.v':'UX Research · UX Design Manager',
+    'meta.domain.l':'Domain','meta.tools.l':'Tools',
+    's1.title':'Background',
+    's1.b1':'Low-altitude urban flight, dense traffic, and shifting weather must all be managed <strong style="color:var(--accent);">simultaneously</strong> in UAM/UAS operations.',
+    's1.b2':'For a single pilot (eVTOL, UAM), maintaining <strong style="color:var(--accent);">Situational Awareness (SA) and multi-task management</strong> is identified as the greatest operational risk.',
+    's1.b3':'Existing cockpit displays stack navigation, attitude, traffic, weather, and alerts on a single screen → <strong style="color:var(--accent);">visual clutter and delayed judgment.</strong>',
+    's1.b4':'Beyond simple information display, cockpit UX must <strong style="color:var(--accent);">support the full OODA loop</strong> while managing cognitive load.',
+    's1.risk1':'Visual clutter triggers pilot judgment delays → <strong style="color:var(--accent);">increased mission failure rate</strong> → an enormous business risk of vehicle loss and brand trust erosion.',
+    's1.callout':'👉 In emerging UAM operations, there is growing demand that <strong>"HMI must act as a virtual crew member"</strong> — a system designed to support judgment, not just display data.',
+    's1.env.title':'UAM/UAS Environment Complexity & Operational Risk (1–5)',
+    'env.complexity':'Env. Complexity','env.risk':'Op. Risk Impact',
+    'env.f1':'Low-altitude flight','env.f2':'Urban obstacles & dense traffic','env.f3':'Wind / weather / visibility','env.f4':'Airspace constraints & rerouting','env.f5':'Single-pilot multitasking burden',
+    's1.biz.risk':'<strong>Business Risk:</strong> Existing visual clutter causes pilot judgment delays that increase mission failure rates, directly translating into <strong>vehicle loss and brand trust collapse</strong> — a massive business risk.',
+    's2.title':'Goal',
+    'kpi1':'Safe Mission Completion Rate\nTarget (high-load scenarios)','kpi2':'Avg. Task Completion Time\nReduction Target','kpi3':'NASA-TLX\nCognitive Load Reduction',
+    's2.inp':'Input (Validation Metrics)','s2.i1':'Task completion time <strong style="color:var(--text)">−25%</strong>','s2.i2':'First-pass success rate <strong style="color:var(--text)">+20%</strong>','s2.i3':'Glance Time <strong style="color:var(--text)">−30%</strong>','s2.i4':'NASA-TLX <strong style="color:var(--text)">−15 points</strong>','s2.i5':'2s+ off-road glance <strong style="color:var(--text)">−40%</strong>',
+    's2.out':'Output (Business Impact)','s2.o1':'High-load Safe Mission Completion Rate <strong style="color:var(--text)">95%+</strong>','s2.o2':'Pilot error rate reduction in complex airspace / weather avoidance','s2.o3':'Pilot survey "instrument comprehension & system trust" <strong style="color:var(--text)">+20pt</strong>','s2.o4':'Evidence to adopt new Flypad UI as standard cockpit configuration',
+    's2.essence':'<strong>Core Goal:</strong> When visual information floods the display during critical flight segments (emergency instruments, rerouting, bird strike), <strong>surface only the information needed for that OODA stage first</strong> and defer the rest — improving decision speed and accuracy.',
+    's3.title':'Data Analysis',
+    's3.qual.title':'Qualitative — Pilot Interview Insight Response Strength',
+    'i1':'"I have to re-evaluate which information to look at first every single time."','i2':'"Critical warnings get buried in surrounding information."','i3':'"The higher the workload, the more my eyes jump between instruments."','i4':'"Maintaining situational awareness as a single pilot is very difficult."',
+    's3.quant.title':'Quantitative — High-load Segment Performance Metrics',
+    'p1':'2s+ off-road\nglance rate','p2':'Judgment delay\nincrease','p3':'Input error\nincrease','p4':'Retry count\nincrease',
+    's3.scenario.title':'Scenario-Level High-load Impact',
+    'th.s':'Scenario','th.m':'Metric','th.base':'Baseline UI','th.hi':'High-load','th.src':'Source',
+    'sc1':'Takeoff/Landing','sc1m':'Off-road glance rate','sc1s':'Eye-tracking',
+    'sc2':'Alert processing','sc2m':'Alert ignore rate','sc2s':'NASA-TLX',
+    'sc3':'Avoidance maneuver','sc3m':'Error rate','sc3s':'Single-pilot',
+    's3.conclusion':'<strong>Conclusion:</strong> Cross-analyzing quantitative data (2.5× gaze cycle increase) and qualitative data (alert burial feedback) confirms a <strong>bottleneck at the Orient–Decide stages of the OODA loop</strong>.',
+    's4.title':'Finding the Problem',
+    'ooda1':'Observe','ooda1d':'Sensor/instrument data intake. Gaze cycle 2.5× increase under high load.',
+    'ooda2':'Orient','ooda2d':'Information interpretation & situational assessment. Information search cost spikes from clutter.','ooda2b':'Key Bottleneck',
+    'ooda3':'Decide','ooda3d':'Action decision. Judgment delay +22%, error rate +15%.','ooda3b':'Key Bottleneck',
+    'ooda4':'Act','ooda4d':'Control input execution. Wrong decisions propagate directly as input errors.',
+    's4.statement':'Information needed for real-time judgment is not presented at the right timing or priority.',
+    's4.metrics.q':'How do we improve<br>our key metrics?',
+    's4.m1':'Achieve Safe Mission Completion Rate of 95%',
+    's4.m2':'Reduce NASA-TLX cognitive load by −15pt',
+    's5.title':'Hypothesis','s5.hyp':'If a <em>context-aware auto-correction UI</em> is applied, OODA transition time will be reduced by <em>25%</em> and error rate will decrease by <em>40%</em>.',
+    's5.map.title':'OODA Stage × Problem–Hypothesis–KPI Mapping',
+    'hm.comp':'Component','hm.prob':'Problem','hm.hyp':'Hypothesis','hm.kpi':'Validation KPI',
+    'hm1p':'Info overload','hm1h':'Priority surfacing','hm1k':'Glance time ↓25%',
+    'hm2p':'Gaze jumping','hm2h':'Context grouping','hm2k':'SA score ↑20%',
+    'hm3p':'Judgment delay','hm3h':'Predictive assist','hm3k':'Error rate ↓40%',
+    'h1.t':'Auto-alignment Hypothesis','h1.b':'If key information is automatically aligned to the foreground based on OODA stage and flight phase (airspace complexity, alert level), pilot Reaction Time will decrease and First-pass Success Rate will improve significantly.',
+    'h2.t':'Situational Emphasis & Autocorrection Hypothesis','h2.b':'Applying Autocorrection Strategy (color/layer/label/icon redesign) to frequently misread information (altitude constraints, avoidance advisories, weather) will reduce misinterpretation, retry count, and 2s+ off-road glance rate.',
+    'h3.t':'Overall Cognitive Load Hypothesis','h3.b':'The FLYpad UX combining H1+H2 will reduce subjective cognitive load (NASA-TLX) vs. existing cockpit UI, while maintaining or improving situational awareness (SA) and system trust.',
+    's6.title':'Execution',
+    's6.method':'<strong>A/B Experiment Design:</strong> Without Autocorrection Strategy (Control) vs. With (Variant) — same mission and route comparison. Strategy: build a system that <strong>proactively surfaces needed information by flight context</strong> to achieve Zero-Search cost for pilots.',
+    'a1.t':'Information Architecture Redesign — OODA-based Layout','a1.b':'By flight phase (pre-takeoff prep – climb – cruise – approach – landing) and OODA stage, only must-see information is placed in the primary layer; everything else moves to secondary/tertiary. Example: approach/landing phase surfaces speed/altitude/runway alignment/alerts; low-priority terrain/traffic is compressed and layered.',
+    'a2.t':'Visual Priority Weighting for Key Information','a2.b':'Color, contrast, position, motion, and icon size distinguish task-critical information from the rest. High-risk alerts and mode change info are placed near the HUD centerline so they\'re perceptible even in eyes-out conditions.',
+    'a3.t':'Autocorrection Strategy Application','a3.b':'Visual correction applied to frequently misread elements (altitude profiles, path deviation, wind direction, avoidance advisories). Example: in strong crosswind zones, heading bug, wind vector, and bank angle are visualized as one grouped unit. Anticipatory cues added at error-prone segments so pilots confirm intent/mode state before mistakes.',
+    'a4.t':'Cognitive Load Validation of Screen Structure','a4.b':'Fitts law / glance path checked per flow based on information density, gaze path, and required confirmation points. Screen transitions and operations per single task minimized. NASA-TLX, eye-tracking, and task performance data used to compare cognitive load across design variants.',
+    's6.dev':'Engineering Collaboration','s6.dev1':'Agreed on auto-correction trigger activation thresholds in real-time flight data','s6.dev2':'Co-designed information priority exposure logic accounting for latency',
+    's6.design':'Design Team Collaboration','s6.des1':'Designed 4-level information priority hierarchy within OODA-based layout','s6.des2':'Built visual system optimized for high-load flight operations',
+    's7.title':'Results',
+    'r1.d':'Safe Mission Completion Rate','r1.s':'High-load scenarios achieved · Input improvements directly linked to Output',
+    'r2.d':'Illusion-prone Segment Error Rate','r2.s':'15% → 7.5% · Autocorrection Strategy effect',
+    'r3.d':'NASA-TLX Cognitive Load','r3.s':'50 → 35 pts · SA score +18%',
+    'r4.d':'Instrument Comprehension & Trust','r4.s':'Pilot survey basis · Evidence for standard Flypad UI adoption',
+    's7.ab.title':'A/B Test — Baseline UI vs. Auto-correction UI',
+    'ab.base':'Baseline UI','ab.impr':'Auto-correction UI',
+    'abm1':'Mission Success Rate (%)','abm2':'First-pass Success Rate (%)','abm3':'Error Rate (%)','abm4':'2s+ Off-road Glance (%)','abm5':'NASA-TLX (0–100)','abm6':'Reaction Time (s)',
+    's7.io.title':'Input → Output Connection Validation',
+    'io.inp':'Input Metric','io.ab':'A/B Result','io.out':'Output Impact',
+    'io1i':'Task time −25%','io1o':'Safe Completion 95%↑',
+    'io2i':'First-pass +20%','io2o':'Error rate −50%',
+    'io3i':'Glance −30%','io3o':'Trust score +20pt',
+    'io4i':'NASA-TLX −15pt','io4o':'Mission success rate↑',
+    's7.summary':'<strong>Core Achievement:</strong> Extended cockpit UX from a "visually appealing screen" to a <strong>system that supports judgment</strong>. A/B testing verified that Input improvements (−25% reaction time) directly translated to Output (95% mission completion rate), proving both operational safety and business viability for single-pilot operations.',
+    's8.title':'Lessons Learned',
+    'l1.h':'Designing the moment of psychological arrival is the trust lever in complex domains','l1.p':'Designing the <strong>\'psychological arrival point\'</strong> that matches user cognitive flow — rather than technical sophistication — is the core lever for building business trust in complex domains. The UX role is creating a state where pilots never need to search.',
+    'l2.h':'Data-driven decision making: structuring surface-level discomfort into measurable metrics','l2.p':'Structuring surface-level discomfort into measurable cognitive load metrics (NASA-TLX, Glance Time, Reaction Time) to solve problems in a <strong>logical framework</strong>. Quantifying qualitative insights as response strength (%) and cross-validating with quantitative data to pinpoint the OODA bottleneck was the starting point for resolution.',
+    'next.label':'Next Case Study',
+    'footer.back':'← Projects',
+    's5.strat.title':'3 Execution Strategies',
+    'st1.name':'Automated Info Prioritization',
+    'st1.desc':'Auto-sort critical data to the foreground based on OODA phase and flight conditions — targeting Zero-Search information access for every pilot.',
+    'st2.name':'Autocorrection UI Design',
+    'st2.desc':'Redesign color, layers, labels, and icons for frequently misread data (altitude, weather, avoidance advisories) — eliminating misinterpretation at source.',
+    'st3.name':'Threshold-Based Alert System',
+    'st3.desc':'Trigger multimodal (audio + visual) alerts automatically when rule-based thresholds are reached — so pilots never miss critical signals without actively checking.'
+  };
+
+  let lang = 'ko';
+  function setLang(l) {
+    lang = l; document.documentElement.lang = l;
+    const src = l === 'en' ? en : ko;
+    const els = document.querySelectorAll('[data-i18n]');
+    els.forEach(e => e.classList.add('t-fade','fading'));
+    setTimeout(() => {
+      els.forEach(e => { if(src[e.dataset.i18n]!==undefined) e.innerHTML=src[e.dataset.i18n]; e.classList.remove('fading'); });
+    }, 220);
+    document.querySelectorAll('.lang-btn').forEach(b=>b.classList.toggle('active',b.dataset.lang===l));
+  }
+  document.getElementById('langToggle').addEventListener('click', e => {
+    const btn = e.target.closest('.lang-btn');
+    if (btn && btn.dataset.lang !== lang) setLang(btn.dataset.lang);
+  });
+
+  const nav = document.getElementById('nav');
+  window.addEventListener('scroll',()=>nav.classList.toggle('scrolled',scrollY>40),{passive:true});
+
+  const dot=document.getElementById('cur-dot'),ring=document.getElementById('cur-ring');
+  let mx=0,my=0,rx=0,ry=0;
+  window.addEventListener('mousemove',e=>{mx=e.clientX;my=e.clientY;});
+  (function a(){dot.style.left=mx+'px';dot.style.top=my+'px';rx+=(mx-rx)*.12;ry+=(my-ry)*.12;ring.style.left=rx+'px';ring.style.top=ry+'px';requestAnimationFrame(a);})();
+  document.querySelectorAll('a,button').forEach(el=>{
+    el.addEventListener('mouseenter',()=>document.body.classList.add('cursor-link'));
+    el.addEventListener('mouseleave',()=>document.body.classList.remove('cursor-link'));
+  });
+
+  const obs=new IntersectionObserver(es=>es.forEach(e=>{if(e.isIntersecting)e.target.classList.add('visible');}),{threshold:0.06});
+  document.querySelectorAll('.cs-section').forEach(el=>obs.observe(el));
+
+  /* ── Floating TOC ─────────────────────── */
+  (function(){
+    const toc=document.getElementById('csToc');
+    if(!toc)return;
+    const sections=document.querySelectorAll('.cs-section[id]');
+    const links=[];
+    sections.forEach(sec=>{
+      const titleEl=sec.querySelector('.cs-section-title,.cs-title');
+      if(!titleEl)return;
+      const parts=titleEl.textContent.split('·');
+      const label=(parts.length>1?parts[parts.length-1]:parts[0]).trim().split('—')[0].trim();
+      const a=document.createElement('a');
+      a.href='#'+sec.id; a.className='cs-toc-link'; a.dataset.target=sec.id;
+      a.innerHTML='<span class="cs-toc-tick"></span><span>'+label+'</span>';
+      toc.appendChild(a); links.push({el:a,sec});
+    });
+    const spy=new IntersectionObserver(entries=>{
+      entries.forEach(e=>{const l=links.find(x=>x.sec===e.target);if(l)l.el.classList.toggle('active',e.isIntersecting);});
+    },{rootMargin:'-20% 0px -65% 0px',threshold:0});
+    sections.forEach(s=>spy.observe(s));
+    toc.addEventListener('click',e=>{const a=e.target.closest('.cs-toc-link');if(!a)return;e.preventDefault();document.getElementById(a.dataset.target)?.scrollIntoView({behavior:'smooth'});});
+    const hero=document.querySelector('.cs-hero');
+    if(hero){toc.style.opacity='0';toc.style.visibility='hidden';new IntersectionObserver(es=>{const v=!es[0].isIntersecting;toc.style.opacity=v?'1':'0';toc.style.visibility=v?'visible':'hidden';toc.style.pointerEvents=v?'auto':'none';},{threshold:0.05}).observe(hero);}
+  })();
+  </script>
+</body>
+</html>
