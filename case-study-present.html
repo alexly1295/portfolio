@@ -740,6 +740,13 @@
     }
     window.addEventListener('scroll', updateToc, { passive:true });
     updateToc();
+
+    // Hide broken images gracefully
+    document.querySelectorAll('img').forEach(img => {
+      const hide = () => { const w = img.closest('.img-wrap, .exec-img-wrap'); (w || img).style.display = 'none'; };
+      img.addEventListener('error', hide);
+      if (img.complete && img.naturalWidth === 0) hide();
+    });
   </script>
 </body>
 </html>
