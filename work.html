@@ -218,7 +218,8 @@
       letter-spacing: -1px; color: var(--row-accent, var(--accent)); line-height: 1;
     }
     .row-metric-label { font-size: 10px; color: var(--text-3); text-align: left; line-height: 1.4; }
-    .row-arrow { font-size: 18px; color: var(--text-3); transition: color .2s, transform .25s; }
+    .row-arrow { width:18px; height:18px; color: var(--text-3); transition: color .2s, transform .25s; flex-shrink:0; }
+    .row-arrow svg { width:100%; height:100%; stroke:currentColor; fill:none; }
     .project-row:hover .row-arrow { color: var(--row-accent, var(--accent)); transform: translate(4px, -4px); }
 
     .project-row::after {
@@ -450,7 +451,7 @@
             <div class="row-metric" style="color:#F5C518">+25%</div>
             <div class="row-metric-label" data-i18n="p1.metric">14일 재이용률</div>
           </div>
-          <div class="row-arrow">↗</div>
+          <div class="row-arrow"><svg viewBox="0 0 24 24" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><line x1="7" y1="17" x2="17" y2="7"/><polyline points="7 7 17 7 17 17"/></svg></div>
         </div>
       </a>
 
@@ -475,7 +476,7 @@
             <div class="row-metric" style="color:#FF6B35">32%</div>
             <div class="row-metric-label" data-i18n="p4.metric">30일 재구매율</div>
           </div>
-          <div class="row-arrow">↗</div>
+          <div class="row-arrow"><svg viewBox="0 0 24 24" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><line x1="7" y1="17" x2="17" y2="7"/><polyline points="7 7 17 7 17 17"/></svg></div>
         </div>
       </a>
 
@@ -500,7 +501,7 @@
             <div class="row-metric" style="color:#E8182E">−25%</div>
             <div class="row-metric-label" data-i18n="p3.metric">상황인식 오류 감소</div>
           </div>
-          <div class="row-arrow">↗</div>
+          <div class="row-arrow"><svg viewBox="0 0 24 24" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><line x1="7" y1="17" x2="17" y2="7"/><polyline points="7 7 17 7 17 17"/></svg></div>
         </div>
       </a>
 
@@ -526,7 +527,7 @@
             <div class="row-metric" style="color:#A78BFA" data-i18n="p5.metric">졸업 작품</div>
             <div class="row-metric-label" data-i18n="p5.mlabel">Master's Thesis</div>
           </div>
-          <div class="row-arrow">↗</div>
+          <div class="row-arrow"><svg viewBox="0 0 24 24" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><line x1="7" y1="17" x2="17" y2="7"/><polyline points="7 7 17 7 17 17"/></svg></div>
         </div>
       </a>
 
@@ -551,7 +552,7 @@
             <div class="row-metric" style="color:#4A9EFF">−30%</div>
             <div class="row-metric-label" data-i18n="p2.metric">시선 이탈 시간 감소</div>
           </div>
-          <div class="row-arrow">↗</div>
+          <div class="row-arrow"><svg viewBox="0 0 24 24" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><line x1="7" y1="17" x2="17" y2="7"/><polyline points="7 7 17 7 17 17"/></svg></div>
         </div>
       </a>
 
@@ -575,7 +576,7 @@
           <div class="row-sub" data-i18n="sp1.co">개인 프로젝트</div>
         </div>
         <div class="row-right">
-          <div class="row-arrow">↗</div>
+          <div class="row-arrow"><svg viewBox="0 0 24 24" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><line x1="7" y1="17" x2="17" y2="7"/><polyline points="7 7 17 7 17 17"/></svg></div>
         </div>
       </a>
 
@@ -592,7 +593,7 @@
           <div class="row-sub" data-i18n="sp2.co">개인 프로젝트</div>
         </div>
         <div class="row-right">
-          <div class="row-arrow">↗</div>
+          <div class="row-arrow"><svg viewBox="0 0 24 24" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><line x1="7" y1="17" x2="17" y2="7"/><polyline points="7 7 17 7 17 17"/></svg></div>
         </div>
       </a>
 
@@ -609,7 +610,7 @@
           <div class="row-sub" data-i18n="sp3.co">개인 프로젝트</div>
         </div>
         <div class="row-right">
-          <div class="row-arrow">↗</div>
+          <div class="row-arrow"><svg viewBox="0 0 24 24" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><line x1="7" y1="17" x2="17" y2="7"/><polyline points="7 7 17 7 17 17"/></svg></div>
         </div>
       </a>
 
@@ -626,7 +627,7 @@
           <div class="row-sub" data-i18n="sp4.co">개인 프로젝트</div>
         </div>
         <div class="row-right">
-          <div class="row-arrow">↗</div>
+          <div class="row-arrow"><svg viewBox="0 0 24 24" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><line x1="7" y1="17" x2="17" y2="7"/><polyline points="7 7 17 7 17 17"/></svg></div>
         </div>
       </a>
 
