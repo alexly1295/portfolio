@@ -1,0 +1,1060 @@
+---
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+  <base href="/">
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>타다 프리미엄 공항 이동 서비스 — Sumin Lee</title>
+  <link rel="icon" type="image/png" href="./favicon.png" />
+  <link rel="preconnect" href="https://fonts.googleapis.com" />
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+  <link href="https://fonts.googleapis.com/css2?family=Lexend:wght@300;400;500;600;700&family=Inter:wght@300;400;500;600&display=swap" rel="stylesheet" />
+  <style>
+    :root {
+      --bg:        #0B0C11;
+      --bg-2:      #111318;
+      --bg-card:   #15161C;
+      --bg-card-h: #1C1D25;
+      --accent:    #4A9EFF;
+      --accent-dim: rgba(74,158,255,.10);
+      --accent-glow: rgba(74,158,255,.22);
+      --text:      #F0ECE6;
+      --text-2:    #CCCAC6;
+      --text-3:    #5A5A66;
+      --border:    rgba(255,255,255,0.07);
+      --border-h:  rgba(255,255,255,0.13);
+    }
+    *, *::before, *::after { margin:0; padding:0; box-sizing:border-box; }
+    html { scroll-behavior: smooth; }
+    body {
+      background-color: var(--bg);
+      background-image:
+        radial-gradient(ellipse 80% 55% at -5% -5%, rgba(28,20,60,.55) 0%, transparent 50%),
+        radial-gradient(ellipse 50% 40% at 105% 105%, rgba(10,6,20,.9) 0%, transparent 48%),
+        radial-gradient(ellipse 60% 40% at 60% 0%, rgba(74,158,255,.025) 0%, transparent 55%);
+      color: var(--text); font-family: 'Inter', sans-serif;
+      font-size: 16px; line-height: 1.6; overflow-x: hidden;
+      -webkit-font-smoothing: antialiased; cursor: none;
+    }
+    a { color: inherit; text-decoration: none; cursor: none; }
+
+    #grain {
+      position: fixed; inset: 0; z-index: 998; pointer-events: none; opacity: .038;
+      background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='256' height='256'%3E%3Cfilter id='n'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.85' numOctaves='4' stitchTiles='stitch'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23n)'/%3E%3C/svg%3E");
+      background-repeat: repeat; background-size: 256px 256px;
+    }
+    #cur-dot {
+      position: fixed; width: 6px; height: 6px; background: var(--text);
+      border-radius: 50%; pointer-events: none; z-index: 9999;
+      transform: translate(-50%,-50%); transition: width .15s, height .15s, background .15s;
+    }
+    #cur-ring {
+      position: fixed; width: 34px; height: 34px;
+      border: 1px solid rgba(240,236,230,.22); border-radius: 50%;
+      pointer-events: none; z-index: 9998; transform: translate(-50%,-50%);
+      transition: width .3s, height .3s, border-color .3s, opacity .3s;
+    }
+    body.cursor-link #cur-dot { width:44px; height:44px; background:var(--accent-dim); border:1px solid var(--accent-glow); }
+    body.cursor-link #cur-ring { opacity:0; }
+
+    /* NAV */
+    nav {
+      position: fixed; inset: 0 0 auto; z-index: 200;
+      padding: 22px 64px; display: flex; justify-content: space-between; align-items: center;
+      transition: background .4s, border-color .4s; border-bottom: 1px solid transparent;
+    }
+    nav.scrolled { background: rgba(11,12,17,.88); backdrop-filter: blur(20px); border-color: var(--border); }
+    .nav-back {
+      display: flex; align-items: center; gap: 10px;
+      font-size: 12px; letter-spacing: 0.1em; text-transform: uppercase;
+      color: var(--text-3); transition: color .2s;
+    }
+    .nav-back:hover { color: var(--text); }
+    .nav-back:hover svg { transform: translateX(-3px); }
+    .nav-back svg { transition: transform .2s; }
+    .nav-right { display: flex; align-items: center; gap: 40px; }
+    .nav-links { display:flex; gap:36px; list-style:none; }
+    .nav-links a { font-size:13px; letter-spacing:.06em; color:var(--text-2); transition:color .2s; position:relative; }
+    .nav-links a::after { content:''; position:absolute; left:0; bottom:-3px; width:0; height:1px; background:var(--accent); transition:width .3s; }
+    .nav-links a:hover { color:var(--text); }
+    .nav-links a:hover::after { width:100%; }
+    .lang-toggle { display:flex; align-items:center; gap:4px; border:1px solid var(--border); border-radius:100px; padding:3px 4px; }
+    .lang-btn {
+      background:none; border:none; outline:none; cursor:none;
+      font-family:'Lexend',sans-serif; font-size:10px; font-weight:600; letter-spacing:0.1em;
+      color:var(--text-3); padding:4px 10px; border-radius:100px; transition:background .2s,color .2s;
+    }
+    .lang-btn.active { background:var(--accent); color:#0B0C11; }
+    .lang-btn:hover:not(.active) { color:var(--text); }
+
+    /* HERO */
+    .cs-hero {
+      min-height: 100vh; display: flex; flex-direction: column;
+      justify-content: flex-end; padding: 0 64px 80px;
+      position: relative; overflow: hidden;
+    }
+    .cs-hero-bg {
+      position: absolute; inset: 0;
+      background:
+        radial-gradient(ellipse 70% 60% at 100% 0%, rgba(74,158,255,.05) 0%, transparent 55%),
+        radial-gradient(ellipse 50% 40% at 0% 100%, rgba(28,20,60,.4) 0%, transparent 50%);
+    }
+    .cs-hero-img {
+      position: absolute; inset: 0; width: 100%; height: 100%;
+      object-fit: cover; opacity: .18; z-index: 0; pointer-events: none;
+    }
+    .cs-hero-number {
+      font-family:'Lexend',sans-serif; font-size:180px; font-weight:700;
+      letter-spacing:-12px; color:rgba(74,158,255,.04); line-height:1;
+      position:absolute; right:40px; bottom:60px; user-select:none; pointer-events:none;
+    }
+    .cs-eyebrow {
+      display:inline-flex; align-items:center; gap:8px;
+      font-size:10px; font-weight:500; letter-spacing:0.22em; text-transform:uppercase;
+      color:var(--accent); margin-bottom:28px;
+      opacity:0; animation:fadeUp .7s .2s forwards;
+    }
+    .cs-eyebrow::before { content:''; width:3px; height:12px; background:var(--accent); border-radius:2px; }
+    .cs-hero h1 {
+      font-family:'Lexend',sans-serif; font-size:clamp(30px, 4.8vw, 70px);
+      font-weight:700; letter-spacing:-2px; line-height:1.05;
+      margin-bottom:28px;
+      opacity:0; animation:fadeUp .9s .3s forwards;
+    }
+    .cs-hero h1 em { font-style:normal; color:var(--accent); }
+    .cs-hero-sub {
+      font-size:13px; letter-spacing:0.06em; text-transform:uppercase;
+      color:var(--text-3); margin-bottom:16px;
+      opacity:0; animation:fadeUp .7s .25s forwards;
+    }
+    .cs-hero-question {
+      font-size:clamp(14px,1.4vw,18px); color:var(--text-2);
+      max-width:620px; line-height:1.75; font-weight:300;
+      opacity:0; animation:fadeUp .8s .45s forwards;
+    }
+    .cs-hero-meta {
+      display:flex; gap:48px; flex-wrap:wrap; margin-top:56px;
+      padding-top:40px; border-top:1px solid var(--border);
+      opacity:0; animation:fadeUp .7s .6s forwards;
+    }
+    .meta-label { font-size:9px; letter-spacing:0.22em; text-transform:uppercase; color:var(--text-3); margin-bottom:6px; }
+    .meta-val { font-family:'Lexend',sans-serif; font-size:14px; font-weight:500; color:var(--text); }
+    @keyframes fadeUp { from { opacity:0; transform:translateY(16px); } to { opacity:1; transform:translateY(0); } }
+
+    /* BODY */
+    .cs-body { max-width:900px; margin:0 auto; padding:0 64px 160px; }
+    @media (max-width:900px) { .cs-body{padding:0 28px 100px;} nav{padding:18px 28px;} .cs-hero{padding:0 28px 60px;} }
+
+    /* SECTION */
+    .cs-section { padding:80px 0; border-top:1px solid var(--border); opacity:0; transform:translateY(28px); transition:opacity .75s,transform .75s; }
+    .cs-section.visible { opacity:1; transform:none; }
+    .cs-num { font-family:'Lexend',sans-serif; font-size:11px; font-weight:500; letter-spacing:0.22em; text-transform:uppercase; color:var(--accent); margin-bottom:8px; }
+    .cs-title { font-family:'Lexend',sans-serif; font-size:clamp(24px,3vw,36px); font-weight:700; letter-spacing:-1px; line-height:1.1; margin-bottom:40px; color:var(--text); }
+    .cs-title em { font-style:normal; color:var(--accent); }
+    .cs-p { font-size:15px; color:var(--text-2); line-height:1.85; margin-bottom:20px; }
+    .cs-p:last-child { margin-bottom:0; }
+    .cs-p strong { color:var(--text); font-weight:500; }
+
+    /* CALLOUT */
+    .cs-callout { border-left:3px solid var(--accent); padding:20px 24px; background:rgba(74,158,255,.04); border-radius:0 8px 8px 0; margin:32px 0; }
+    .cs-callout p { font-size:15px; color:var(--text); line-height:1.8; }
+    .cs-callout strong { color:var(--accent); }
+
+    /* TWO COL */
+    .cs-two-col { display:grid; grid-template-columns:1fr 1fr; gap:24px; margin:28px 0; }
+    @media (max-width:640px) { .cs-two-col{grid-template-columns:1fr;} }
+    .cs-col-card { background:var(--bg-card); border:1px solid var(--border); border-radius:12px; padding:28px; }
+    .cs-col-card h4 { font-family:'Lexend',sans-serif; font-size:12px; font-weight:600; letter-spacing:0.1em; text-transform:uppercase; color:var(--text-3); margin-bottom:16px; }
+    .cs-col-card h4.accent { color:var(--accent); }
+    .cs-col-card ul { list-style:none; display:flex; flex-direction:column; gap:10px; }
+    .cs-col-card ul li { font-size:14px; color:var(--text-2); line-height:1.65; padding-left:16px; position:relative; }
+    .cs-col-card ul li::before { content:''; position:absolute; left:0; top:9px; width:5px; height:5px; border-radius:50%; background:var(--border-h); }
+    .cs-col-card.accent-border { border-color:rgba(74,158,255,.22); background:rgba(74,158,255,.025); }
+    .cs-col-card.accent-border ul li::before { background:var(--accent); opacity:.6; }
+
+    /* STATS GRID */
+    .cs-stats { display:grid; grid-template-columns:repeat(3,1fr); gap:2px; background:var(--border); margin:36px 0; }
+    .cs-stat { background:var(--bg-card); padding:28px 24px; }
+    .cs-stat-num { font-family:'Lexend',sans-serif; font-size:36px; font-weight:700; letter-spacing:-2px; color:var(--accent); line-height:1; margin-bottom:8px; }
+    .cs-stat-label { font-size:12px; color:var(--text-3); line-height:1.5; }
+
+    /* BIG STAT */
+    .big-stat-block {
+      display:flex; align-items:center; gap:32px; padding:40px;
+      background:var(--bg-card); border:1px solid var(--border); border-radius:16px;
+      margin:36px 0; position:relative; overflow:hidden;
+    }
+    .big-stat-block::before {
+      content:''; position:absolute; inset:0;
+      background:radial-gradient(ellipse 60% 70% at 0% 50%, rgba(74,158,255,.07) 0%, transparent 60%);
+    }
+    .big-stat-num {
+      font-family:'Lexend',sans-serif; font-size:clamp(60px,8vw,100px);
+      font-weight:700; letter-spacing:-4px; color:var(--accent); line-height:1; flex-shrink:0;
+    }
+    .big-stat-desc { font-size:15px; color:var(--text-2); line-height:1.75; }
+    .big-stat-desc strong { color:var(--text); font-weight:500; }
+
+    /* SEGMENTS */
+    .segments { display:grid; grid-template-columns:repeat(2,1fr); gap:12px; margin:28px 0; }
+    @media (max-width:640px) { .segments{grid-template-columns:1fr;} }
+    .segment-card { background:var(--bg-card); border:1px solid var(--border); border-radius:10px; padding:18px; transition:border-color .2s; }
+    .segment-card.target { border-color:rgba(74,158,255,.35); background:rgba(74,158,255,.03); }
+    .seg-icon { font-size:20px; margin-bottom:10px; }
+    .seg-name { font-family:'Lexend',sans-serif; font-size:13px; font-weight:600; color:var(--text); margin-bottom:4px; }
+    .seg-name .target-badge { font-size:9px; font-weight:600; letter-spacing:0.1em; text-transform:uppercase; color:var(--accent); background:rgba(74,158,255,.12); padding:2px 7px; border-radius:100px; margin-left:6px; }
+    .seg-desc { font-size:12px; color:var(--text-3); line-height:1.55; }
+
+    /* HYPOTHESIS */
+    .hypothesis-card {
+      background:var(--bg-card); border:1px solid rgba(74,158,255,.2); border-radius:12px;
+      padding:36px; margin:28px 0; position:relative; overflow:hidden;
+    }
+    .hypothesis-card::before {
+      content:'"'; position:absolute; top:-10px; left:20px; font-family:'Lexend',sans-serif;
+      font-size:120px; font-weight:700; color:rgba(74,158,255,.06); line-height:1; pointer-events:none;
+    }
+    .hypothesis-text { font-family:'Lexend',sans-serif; font-size:clamp(15px,1.8vw,20px); font-weight:500; line-height:1.65; color:var(--text); letter-spacing:-0.2px; position:relative; z-index:1; }
+    .hypothesis-text em { color:var(--accent); font-style:normal; }
+    .hyp-meta { margin-top:20px; padding-top:18px; border-top:1px solid var(--border); display:flex; flex-wrap:wrap; gap:8px; }
+    .hyp-chip { font-size:11px; padding:4px 12px; border:1px solid rgba(74,158,255,.2); border-radius:100px; color:var(--text-3); }
+
+    /* AS-IS TO-BE */
+    .as-is-tobe { display:grid; grid-template-columns:1fr 40px 1fr; gap:0; margin:36px 0; align-items:start; }
+    @media (max-width:640px) { .as-is-tobe{grid-template-columns:1fr;} .arrow-col{display:none;} }
+    .arrow-col { display:flex; justify-content:center; align-items:center; padding-top:60px; }
+
+    /* STRATEGIES */
+    .strategies { display:grid; grid-template-columns:repeat(3,1fr); gap:2px; background:var(--border); margin:28px 0; }
+    @media (max-width:640px) { .strategies{grid-template-columns:1fr;} }
+    .strat-card { background:var(--bg-card); padding:28px; }
+    .strat-num { font-size:10px; font-weight:600; letter-spacing:0.18em; text-transform:uppercase; color:var(--accent); margin-bottom:10px; }
+    .strat-name { font-family:'Lexend',sans-serif; font-size:16px; font-weight:600; color:var(--text); margin-bottom:8px; }
+    .strat-desc { font-size:13px; color:var(--text-2); line-height:1.65; }
+
+    /* EXEC BLOCKS */
+    .exec-block-list{display:flex;flex-direction:column;gap:0;margin:0;}
+    .exec-block{padding:52px 0 0;border-top:1px solid var(--border);}
+    .exec-block-header{margin-bottom:32px;}
+    .exec-block-num{font-family:'Lexend',sans-serif;font-size:10px;font-weight:700;letter-spacing:.2em;text-transform:uppercase;color:var(--accent);margin-bottom:10px;}
+    .exec-block-name{font-family:'Lexend',sans-serif;font-size:clamp(20px,2.2vw,28px);font-weight:700;color:var(--text);line-height:1.15;}
+    .exec-block-meta{display:grid;grid-template-columns:1fr 1fr;gap:52px;margin-bottom:32px;}
+    @media(max-width:640px){.exec-block-meta{grid-template-columns:1fr;gap:20px;}}
+    .exec-block-label{font-size:9px;font-weight:700;letter-spacing:.18em;text-transform:uppercase;color:var(--text-3);margin-bottom:10px;}
+    .exec-block-purpose{font-size:15px;font-weight:600;font-family:'Lexend',sans-serif;color:var(--text);line-height:1.5;}
+    .exec-block-features{font-size:14px;color:var(--text-2);line-height:1.9;}
+    .exec-block-features li{list-style:none;padding-left:0;margin-bottom:8px;}
+    .exec-block-features li::before{content:'→ ';color:var(--accent);}
+    .exec-block-features strong{color:var(--text);font-weight:500;}
+    .exec-block-features em{color:var(--accent);font-style:normal;}
+    .exec-img-wrap{background:transparent;border:1px solid var(--border);border-radius:16px;overflow:hidden;margin:0 0 60px;width:100%;}
+    .exec-img-wrap img{width:100%;height:auto;display:block;}
+
+    /* RESULT GRID */
+    .result-grid { display:grid; grid-template-columns:repeat(4,1fr); gap:2px; background:var(--border); margin:36px 0; }
+    @media (max-width:640px) { .result-grid{grid-template-columns:1fr 1fr;} }
+    .result-cell { background:var(--bg-card); padding:32px 28px; position:relative; overflow:hidden; }
+    .result-cell::before { content:''; position:absolute; bottom:0; left:0; right:0; height:2px; background:linear-gradient(to right, var(--accent), transparent); }
+    .result-num { font-family:'Lexend',sans-serif; font-size:42px; font-weight:700; letter-spacing:-3px; color:var(--accent); line-height:1; margin-bottom:10px; }
+    .result-desc { font-size:13px; color:var(--text-2); line-height:1.6; }
+    .result-sub  { font-size:11px; color:var(--text-3); margin-top:4px; letter-spacing:0.04em; }
+
+    /* PROB STATEMENT */
+    .prob-statement-card{background:var(--bg-card);border:1px solid var(--border);border-radius:16px;padding:52px 48px;text-align:center;margin:32px 0;}
+    .prob-icon-wrap{width:48px;height:48px;border:1px solid var(--accent);border-radius:50%;display:flex;align-items:center;justify-content:center;margin:0 auto 14px;color:var(--accent);}
+    .prob-stmt-label{font-size:10px;font-weight:600;letter-spacing:.22em;text-transform:uppercase;color:var(--text-3);margin-bottom:22px;}
+    .prob-quote{font-family:'Lexend',sans-serif;font-size:clamp(15px,1.8vw,22px);font-weight:500;line-height:1.65;color:var(--text);max-width:720px;margin:0 auto;}
+
+    /* QUOTE GRID */
+    .quote-grid { display:grid; grid-template-columns:1fr 1fr; gap:16px; margin:28px 0; }
+    @media (max-width:640px) { .quote-grid{grid-template-columns:1fr;} }
+    .quote-card {
+      background:var(--bg-card); border:1px solid var(--border); border-radius:10px;
+      padding:20px 20px 20px 24px; position:relative;
+    }
+    .quote-card::before { content:'"'; position:absolute; top:8px; left:14px; font-family:'Lexend',sans-serif; font-size:36px; color:var(--accent); opacity:.3; line-height:1; }
+    .quote-text { font-size:14px; color:var(--text-2); line-height:1.7; padding-top:12px; }
+    .quote-tag { font-size:10px; letter-spacing:0.1em; text-transform:uppercase; color:var(--accent); margin-bottom:6px; font-weight:600; padding-top:12px; }
+
+    /* LESSON LIST */
+    .lesson-list { display:flex; flex-direction:column; gap:24px; margin:28px 0; }
+    .lesson-item { display:grid; grid-template-columns:40px 1fr; gap:16px; align-items:start; }
+    .lesson-icon { width:40px; height:40px; border-radius:50%; background:rgba(74,158,255,.1); border:1px solid rgba(74,158,255,.25); display:flex; align-items:center; justify-content:center; font-family:'Lexend',sans-serif; font-size:12px; font-weight:700; color:var(--accent); flex-shrink:0; }
+    .lesson-content h4 { font-family:'Lexend',sans-serif; font-size:15px; font-weight:600; color:var(--text); margin-bottom:8px; margin-top:10px; }
+    .lesson-content p { font-size:14px; color:var(--text-2); line-height:1.8; }
+
+    /* IMAGE */
+    .img-wrap { width:100%; background:transparent; border:1px solid var(--border); border-radius:14px; overflow:hidden; margin:24px 0; }
+    .img-wrap img { width:100%; height:auto; display:block; }
+
+    /* RESULTS TABLE */
+    .results-table { width:100%; border-collapse:collapse; margin:32px 0; }
+    .results-table th { font-family:'Lexend',sans-serif; font-size:10px; font-weight:600; letter-spacing:.14em; text-transform:uppercase; color:var(--text-3); padding:12px 16px; border-bottom:1px solid var(--border); text-align:left; }
+    .results-table td { font-size:14px; color:var(--text-2); padding:16px 16px; border-bottom:1px solid var(--border); }
+    .results-table td:first-child { color:var(--text); font-weight:500; }
+    .results-table td.improvement { color:var(--accent); font-family:'Lexend',sans-serif; font-weight:600; }
+    .results-table tr:last-child td { border-bottom:none; }
+
+    /* TOC */
+    .cs-toc {
+      position: fixed; right: 28px; top: 50%; transform: translateY(-50%);
+      z-index: 150; display: flex; flex-direction: column; gap: 0;
+      pointer-events: auto; align-items: flex-start; width: max-content;
+      opacity: 0; visibility: hidden; transition: opacity .4s, visibility .4s;
+    }
+    .cs-toc.toc-visible { opacity: 1; visibility: visible; }
+    .cs-toc-link {
+      display: flex; align-items: center; gap: 10px; padding: 5px 0;
+      color: var(--text-3); font-size: 11px; letter-spacing: 0.03em;
+      white-space: nowrap; text-decoration: none; cursor: none;
+      transition: color .25s, opacity .25s; opacity: .4;
+    }
+    .cs-toc-link:hover { color: var(--text-2); opacity: .85; }
+    .cs-toc-link.active { color: var(--accent); opacity: 1; font-weight: 500; }
+    .cs-toc-tick { width: 1.5px; height: 12px; background: currentColor; border-radius: 2px; flex-shrink: 0; transition: height .25s, width .25s; }
+    .cs-toc-link.active .cs-toc-tick { height: 20px; width: 2px; }
+    @media (max-width: 1260px) { .cs-toc { display: none; } }
+
+    /* NEXT */
+    .cs-next { border-top:1px solid var(--border); padding:64px; display:flex; justify-content:space-between; align-items:center; }
+    .next-label { font-size:10px; letter-spacing:0.22em; text-transform:uppercase; color:var(--text-3); margin-bottom:12px; }
+    .next-title { font-family:'Lexend',sans-serif; font-size:22px; font-weight:600; color:var(--text); transition:color .2s; }
+    .next-link:hover .next-title { color:var(--accent); }
+    .next-arrow { font-size:28px; color:var(--text-3); transition:color .3s,transform .3s; }
+    .next-link:hover .next-arrow { color:var(--accent); transform:translate(6px,-6px); }
+
+    footer { padding:28px 64px; border-top:1px solid var(--border); display:flex; justify-content:space-between; align-items:center; }
+    footer p { font-size:11px; color:var(--text-3); }
+    .t-fade { transition:opacity .25s; }
+    .t-fade.fading { opacity:0; }
+  </style>
+</head>
+<body>
+  <div id="grain" aria-hidden="true"></div>
+  <div id="cur-dot"></div>
+  <div id="cur-ring"></div>
+  <nav class="cs-toc" id="csToc"></nav>
+
+  <!-- NAV -->
+  <nav id="nav">
+    <a href="/work" class="nav-back" onclick="if(history.length>1){history.back();return false;}">
+      <svg width="16" height="16" viewBox="0 0 16 16" fill="none" stroke="currentColor" stroke-width="1.5"><path d="M10 12L6 8l4-4"/></svg>
+    </a>
+    <div class="nav-right">
+      <ul class="nav-links">
+        <li><a href="/work" data-i18n="nav.work">Projects</a></li>
+        <li><a href="/contact" data-i18n="nav.about">About</a></li>
+      </ul>
+      <div class="lang-toggle" id="langToggle">
+        <button class="lang-btn active" data-lang="ko">KR</button>
+        <button class="lang-btn" data-lang="en">EN</button>
+      </div>
+    </div>
+  </nav>
+
+  <!-- HERO -->
+  <section class="cs-hero">
+    <div class="cs-hero-bg"></div>
+    <img class="cs-hero-img" src="./thumb-tada.jpg" alt="" />
+    <div class="cs-hero-number" aria-hidden="true">05</div>
+
+    <p class="cs-hero-sub" data-i18n="hero.sub">타다 프리미엄 · 2026</p>
+    <div class="cs-eyebrow" data-i18n="hero.eyebrow">Airport Mobility · B2C · Service Design</div>
+
+    <h1 data-i18n="hero.h1">
+      공항 이동에서 중요한 건 빠름이 아니다.<br><em>도착 보장</em>이다.
+    </h1>
+
+    <p class="cs-hero-question" data-i18n="hero.question">
+      온디맨드 배차 불확실성으로 예약 완료율 25%에 그치던 타다 프리미엄 공항 이동 서비스에,
+      항공편 연동 도착 보장과 주행 환경 개인화를 설계하여 예약 전환율과 재이용률을 개선한 프로젝트.
+    </p>
+
+    <div class="cs-hero-meta">
+      <div>
+        <div class="meta-label" data-i18n="meta.role.l">Role</div>
+        <div class="meta-val" data-i18n="meta.role.v">PM · UX 기획 · 서비스 설계</div>
+      </div>
+      <div>
+        <div class="meta-label" data-i18n="meta.period.l">Period</div>
+        <div class="meta-val">2026</div>
+      </div>
+      <div>
+        <div class="meta-label" data-i18n="meta.domain.l">Domain</div>
+        <div class="meta-val" data-i18n="meta.domain.v">모빌리티 · B2C · 공항</div>
+      </div>
+      <div>
+        <div class="meta-label" data-i18n="meta.tools.l">Tools</div>
+        <div class="meta-val">Figma · Notion</div>
+      </div>
+    </div>
+  </section>
+
+  <div class="cs-body">
+
+    <!-- 01 BACKGROUND -->
+    <section class="cs-section" id="s1">
+      <div class="cs-num">01</div>
+      <h2 class="cs-title" data-i18n="s1.title">배경 <em>·</em> Background</h2>
+
+      <p class="cs-p" data-i18n="s1.p1">
+        타다 프리미엄은 중형·고급차 기반의 예약 서비스로 B2B(타다 비즈니스)와 개인 고객을 타겟으로 한다.
+        기존 고급택시(392대)의 한계를 넘어 플랫폼을 확장했으나,
+        <strong>택시 업계 규제 갈등으로 성장이 제약</strong>되어 있는 상황이었다.
+      </p>
+
+      <div class="cs-two-col">
+        <div class="cs-col-card">
+          <h4 data-i18n="s1.bm">Business Model</h4>
+          <ul>
+            <li data-i18n="s1.bm1">중형/고급차(프리미엄 택시) 예약 서비스</li>
+            <li data-i18n="s1.bm2">B2B(타다 비즈니스)와 개인 고객 동시 타겟</li>
+            <li data-i18n="s1.bm3">기존 고급택시 한계 넘어 플랫폼 확장 추구</li>
+          </ul>
+        </div>
+        <div class="cs-col-card accent-border">
+          <h4 class="accent" data-i18n="s1.risk">핵심 리스크</h4>
+          <ul>
+            <li data-i18n="s1.r1">공항 이동 수요 <strong style="color:var(--text)">설 연휴 +46% YoY</strong> 성장세</li>
+            <li data-i18n="s1.r2">온디맨드 구조로 배차 불확실성↑ → 예약 완료율 25% 제한</li>
+            <li data-i18n="s1.r3">재이용률 35%로 LTV 미달성 — 성장 구조 취약</li>
+          </ul>
+        </div>
+      </div>
+
+      <div class="img-wrap">
+        <img src="./Tada/bg-overview.jpg" alt="Background Overview" />
+      </div>
+    </section>
+
+    <!-- 02 GOAL -->
+    <section class="cs-section" id="s2">
+      <div class="cs-num">02</div>
+      <h2 class="cs-title" data-i18n="s2.title">목표 <em>·</em> Goal</h2>
+
+      <div class="cs-two-col">
+        <div class="cs-col-card accent-border">
+          <h4 class="accent" data-i18n="s2.inp">Input (선행 지표)</h4>
+          <ul>
+            <li data-i18n="s2.i1"><strong style="color:var(--text)">예약 완료율 25%</strong> — 온디맨드 배차 불확실성으로 검색 후 이탈 다수</li>
+            <li data-i18n="s2.i2"><strong style="color:var(--text)">주행 완료율 85%</strong> — 기사 취소/새벽 공급 부족으로 15% 실패</li>
+          </ul>
+        </div>
+        <div class="cs-col-card">
+          <h4 data-i18n="s2.out">Output (성과 지표)</h4>
+          <ul>
+            <li data-i18n="s2.o1"><strong style="color:var(--text)">30일 재이용률 35%</strong> — 재이용 51%지만 공항 카테고리 제한적</li>
+            <li data-i18n="s2.o2"><strong style="color:var(--text)">멤버십 가입률 5%</strong> — 기존 예약/카시트 옵션 한정</li>
+          </ul>
+        </div>
+      </div>
+    </section>
+
+    <!-- 03 ANALYSIS -->
+    <section class="cs-section" id="s3">
+      <div class="cs-num">03</div>
+      <h2 class="cs-title" data-i18n="s3.title">원인 분석 <em>·</em> Data Analysis</h2>
+
+      <div class="big-stat-block">
+        <div class="big-stat-num">25%</div>
+        <p class="big-stat-desc" data-i18n="s3.bigstat">
+          공항 이동 이용자의 <strong>예약 완료율이 25%</strong>에 불과.
+          온디맨드 배차 불확실성으로 인해 검색 후 이탈이 다수 발생하며,
+          <strong>도착 확정성 부재가 핵심 원인</strong>으로 파악됐다.
+        </p>
+      </div>
+
+      <p class="cs-p" style="margin-bottom:8px;"><strong>유저 세그먼트</strong></p>
+      <div class="segments">
+        <div class="segment-card">
+          <div class="seg-icon">💼</div>
+          <div class="seg-name">비즈니스 여행자</div>
+          <div class="seg-desc">Time-critical · 시간 민감도 최상 · 정시성이 비용보다 중요</div>
+        </div>
+        <div class="segment-card target">
+          <div class="seg-icon">👨‍👩‍👧</div>
+          <div class="seg-name">가족단위 이용자 <span class="target-badge">TARGET</span></div>
+          <div class="seg-desc">High LTV · 지연 불용 · 실패 비용(가족 전체 일정 파행)이 가장 큰 집단</div>
+        </div>
+        <div class="segment-card">
+          <div class="seg-icon">🌙</div>
+          <div class="seg-name">새벽 이동 이용자</div>
+          <div class="seg-desc">Structural Demand · 대체 수단 없어 확실한 배차가 가장 급함</div>
+        </div>
+        <div class="segment-card">
+          <div class="seg-icon">🔁</div>
+          <div class="seg-name">공항이동 재이용자</div>
+          <div class="seg-desc">Trust-driven Retention · 좋은 경험 후 재이용 의향 51%</div>
+        </div>
+      </div>
+
+      <div class="img-wrap">
+        <img src="./Tada/analysis.jpg" alt="Data Analysis" />
+      </div>
+
+      <div class="cs-two-col" style="margin-top:32px;">
+        <div class="cs-col-card">
+          <h4 data-i18n="s3.quant">정량 분석</h4>
+          <ul>
+            <li data-i18n="s3.q1">Lead Time: 이용 3~7일 전 사전 예약 비중 <strong style="color:var(--text)">80% 이상</strong></li>
+            <li data-i18n="s3.q2">AOV: 일반 타다 유저 대비 <strong style="color:var(--text)">1.4~1.6배</strong> 높음</li>
+            <li data-i18n="s3.q3">새벽 시간대 매칭 성공률 99% 유지 시 NPS <strong style="color:var(--text)">2배</strong> 상승</li>
+            <li data-i18n="s3.q4">공항 서비스 경험 후 6개월 내 재이용률 <strong style="color:var(--text)">51%</strong></li>
+          </ul>
+        </div>
+        <div class="cs-col-card">
+          <h4 data-i18n="s3.qual">정성 분석 (유저 인터뷰)</h4>
+          <ul>
+            <li data-i18n="s3.q5">과잉 여유 (60%) — "비행기 놓칠까봐 3시간 일찍 출발"</li>
+            <li data-i18n="s3.q6">배차 불안 (25%) — "예약했는데 기사 취소돼 포기"</li>
+            <li data-i18n="s3.q7">새벽 공급 부족 (10%) — "새벽엔 택시 없어 가족 차 빌림"</li>
+            <li data-i18n="s3.q8">가족 리스크 (5%) — "카시트 없어 포기한 적 많음"</li>
+          </ul>
+        </div>
+      </div>
+
+      <div class="quote-grid">
+        <div class="quote-card">
+          <div class="quote-tag">과잉 여유 · 60%</div>
+          <p class="quote-text" data-i18n="q1">"불편하지만 비행기 놓칠까 봐 3시간 일찍 출발해요. 새벽 4시 비행기면 1시에 집 나서요. 대중교통 없고 택시 배차 안 돼서 공항버스나 자가용으로 대체."</p>
+        </div>
+        <div class="quote-card">
+          <div class="quote-tag">배차 불안 · 25%</div>
+          <p class="quote-text" data-i18n="q2">"예약했는데 기사 취소돼 10분 기다리다 포기. 콜택시 비용 3만 원 물고 버스 탔어요. 확실한 게 제일 중요."</p>
+        </div>
+        <div class="quote-card">
+          <div class="quote-tag">새벽 공급 부족 · 10%</div>
+          <p class="quote-text" data-i18n="q3">"새벽에 택시 없어서 가족 차 빌리거나 리무진 기다림. 짐 많아 불편하고, 가격보다 잡히는 게 급함."</p>
+        </div>
+        <div class="quote-card">
+          <div class="quote-tag">가족 리스크 · 5%</div>
+          <p class="quote-text" data-i18n="q4">"아이/짐 때문에 2시간 여유 필수. 실패하면 가족 일정 전체 망가져요. 카시트 없어 포기한 적 많음."</p>
+        </div>
+      </div>
+    </section>
+
+    <!-- 04 PROBLEM -->
+    <section class="cs-section" id="s4">
+      <div class="cs-num">04</div>
+      <h2 class="cs-title" data-i18n="s4.title">문제 정의 <em>·</em> Problem</h2>
+
+      <div class="prob-statement-card">
+        <div class="prob-icon-wrap">
+          <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5">
+            <circle cx="12" cy="12" r="10"/>
+            <text x="12" y="17" text-anchor="middle" fill="currentColor" stroke="none" font-size="13" font-weight="700" font-family="sans-serif">?</text>
+          </svg>
+        </div>
+        <div class="prob-stmt-label">Problem Statement</div>
+        <p class="prob-quote" data-i18n="s4.problem">
+          "공항이동 이용자에게 온디맨드 호출서비스는 도착 확정성의 리스크를 커버하지 못하기 때문에 사전 예약 서비스가 필요하다."
+        </p>
+      </div>
+
+      <div class="cs-callout">
+        <p data-i18n="s4.insight">
+          <strong>핵심 인사이트:</strong> 온디맨드 배차 불확실성으로 공항 유저의 '도착 지연 리스크' 인지 간극이 발생한다.
+          예약 완료율 25% 제한의 근본 원인이며, <strong>가족 High LTV 타겟으로 도착 확정 레버 발굴</strong>이 핵심이다.
+        </p>
+      </div>
+
+      <div style="background:var(--bg-card);border:1px solid var(--border);border-radius:16px;padding:28px;margin-top:24px;">
+        <div style="font-size:10px;font-weight:600;letter-spacing:.18em;text-transform:uppercase;color:var(--text-3);margin-bottom:20px;">타겟 선정 이유</div>
+        <div style="display:grid;grid-template-columns:1fr 1fr;gap:16px;">
+          <div style="background:rgba(232,24,46,.06);border:1px solid rgba(232,24,46,.2);border-radius:12px;padding:24px;">
+            <div style="font-size:11px;font-weight:600;letter-spacing:.1em;color:#E8182E;margin-bottom:10px;">기존 타겟 ×</div>
+            <div style="font-family:'Lexend',sans-serif;font-size:18px;font-weight:700;color:var(--text);margin-bottom:12px;">비즈니스 여행자</div>
+            <div style="display:flex;flex-direction:column;gap:6px;">
+              <div style="font-size:13px;color:var(--text-3);">× 법인카드 사용 — 가격 민감도 낮음</div>
+              <div style="font-size:13px;color:var(--text-3);">× 반복 이용 있으나 LTV 제한적</div>
+            </div>
+          </div>
+          <div style="background:rgba(74,158,255,.06);border:1px solid rgba(74,158,255,.2);border-radius:12px;padding:24px;">
+            <div style="font-size:11px;font-weight:600;letter-spacing:.1em;color:#4ade80;margin-bottom:10px;">핵심 타겟 ✓</div>
+            <div style="font-family:'Lexend',sans-serif;font-size:18px;font-weight:700;color:var(--text);margin-bottom:12px;">가족단위 이용자</div>
+            <div style="display:flex;flex-direction:column;gap:6px;">
+              <div style="font-size:13px;color:#4ade80;">✓ 실패 비용 최고 — 가족 전체 일정 파행</div>
+              <div style="font-size:13px;color:#4ade80;">✓ 카시트·짐 옵션 필요 → AOV 상승</div>
+              <div style="font-size:13px;color:#4ade80;">✓ 성공 경험 후 재이용률 51%</div>
+            </div>
+          </div>
+        </div>
+      </div>
+    </section>
+
+    <!-- 05 HYPOTHESIS -->
+    <section class="cs-section" id="s5">
+      <div class="cs-num">05</div>
+      <h2 class="cs-title" data-i18n="s5.title">가설 <em>·</em> Hypothesis</h2>
+
+      <div class="hypothesis-card">
+        <p class="hypothesis-text" data-i18n="s5.hyp">
+          <em>도착확정성을 높이는 도착 보장 서비스</em>를 단계별로 설계하면
+          공항 예약 전환율과 <em>재이용률이 증가</em>한다.
+        </p>
+        <div class="hyp-meta">
+          <div class="hyp-chip" data-i18n="hyp.c1">항공편 연동 → 출발 시간 자동 추천</div>
+          <div class="hyp-chip" data-i18n="hyp.c2">도착 보장 + 지연 크레딧 → 리스크 인지 해소</div>
+          <div class="hyp-chip" data-i18n="hyp.c3">주행 환경 개인화 → 가족 타겟 AOV 상승</div>
+          <div class="hyp-chip" data-i18n="hyp.c4">멤버십 → Repeat 세그먼트 Lock-in</div>
+        </div>
+      </div>
+
+      <p class="cs-p" data-i18n="s5.strategy">
+        <strong>솔루션 전략:</strong> 입출국 이동 예약 + 주행환경 개인화로 Zero-learning UX(인지 부하 최소) 설계.
+      </p>
+
+      <div class="strategies">
+        <div class="strat-card">
+          <div class="strat-num">Layer 1</div>
+          <div class="strat-name" data-i18n="l1.name">항공편 연동</div>
+          <div class="strat-desc" data-i18n="l1.desc">항공편 번호 입력 → 체크인 마감 기준 출발 시간 자동 추천. 사용자 판단 부담 제거.</div>
+        </div>
+        <div class="strat-card">
+          <div class="strat-num">Layer 2</div>
+          <div class="strat-name" data-i18n="l2.name">도착 보장 표시</div>
+          <div class="strat-desc" data-i18n="l2.desc">보장 배지 + 지연 시 크레딧 약속 노출. 배차 불확실성 인지 불안 해소.</div>
+        </div>
+        <div class="strat-card">
+          <div class="strat-num">Layer 3</div>
+          <div class="strat-name" data-i18n="l3.name">환경 개인화</div>
+          <div class="strat-desc" data-i18n="l3.desc">카시트 자동 제안(가족), 조용한 차량, 고정 기사 선택. Tier upsell로 AOV 상승.</div>
+        </div>
+      </div>
+    </section>
+
+    <!-- 06 EXECUTION -->
+    <section class="cs-section" id="s6">
+      <div class="cs-num">06</div>
+      <h2 class="cs-title" data-i18n="s6.title">실행 <em>·</em> Execution</h2>
+
+      <p class="cs-p" data-i18n="s6.intro">
+        도착 확정성을 핵심 가치로 삼아 세 가지 솔루션을 단계적으로 설계했다.
+        예약 진입 시점부터 주행 완료까지 이용자의 불안을 제거하고 재이용을 유도하는 구조다.
+      </p>
+
+      <div class="img-wrap">
+        <img src="./Tada/exec-01.jpg" alt="Execution Overview" />
+      </div>
+
+      <!-- As-is / To-be -->
+      <div class="as-is-tobe">
+        <div class="cs-col-card">
+          <h4 data-i18n="s6.asis">As-is — 기존 상태</h4>
+          <ul>
+            <li data-i18n="s6.a1">기본 예약 서비스 — 온디맨드 배차 불확실성 노출</li>
+            <li data-i18n="s6.a2">카시트 요청 기능만 존재 — 환경 개인화 미흡</li>
+            <li data-i18n="s6.a3">도착 보장 없음 → 배차 불안 → 이탈 발생</li>
+          </ul>
+        </div>
+        <div class="arrow-col">
+          <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="rgba(74,158,255,.4)" stroke-width="1.5"><path d="M5 12h14M12 5l7 7-7 7"/></svg>
+        </div>
+        <div class="cs-col-card accent-border">
+          <h4 class="accent" data-i18n="s6.tobe">To-be — 개선 방향</h4>
+          <ul>
+            <li data-i18n="s6.t1">도착 보장 + 지연 크레딧 + 항공편 연동 출발 추천</li>
+            <li data-i18n="s6.t2">조용한 차량 · 자동 영수증 · 고정 기사 선택</li>
+            <li data-i18n="s6.t3">멤버십 — 우선 배차 · 설정 저장 · 가격 고정</li>
+          </ul>
+        </div>
+      </div>
+
+      <div class="exec-block-list">
+
+        <!-- Block 01 -->
+        <div class="exec-block">
+          <div class="exec-block-header">
+            <div class="exec-block-num">01 · Arrival Guarantee Service</div>
+            <div class="exec-block-name" data-i18n="st1.name">도착 보장 서비스</div>
+          </div>
+          <div class="exec-block-meta">
+            <div>
+              <div class="exec-block-label">목적</div>
+              <p class="exec-block-purpose" data-i18n="st1.purpose">온디맨드 배차 불확실성으로 발생하는 도착 지연 리스크를 제거하여 예약 전환율을 높인다.</p>
+            </div>
+            <div>
+              <div class="exec-block-label">기능</div>
+              <ul class="exec-block-features">
+                <li data-i18n="st1.f1"><strong>도착 보장</strong> — 지연 시 전액 크레딧 환급 약속</li>
+                <li data-i18n="st1.f2">지연 크레딧 <em>(자동 지급, 별도 신청 불필요)</em></li>
+                <li data-i18n="st1.f3"><strong>항공편 연동</strong> — 편명 입력 시 체크인 마감 기준 출발 시간 자동 추천</li>
+              </ul>
+            </div>
+          </div>
+          <div class="exec-img-wrap">
+            <img src="./Tada/exec-02.jpg" alt="Arrival Guarantee Service" />
+          </div>
+        </div>
+
+        <!-- Block 02 -->
+        <div class="exec-block">
+          <div class="exec-block-header">
+            <div class="exec-block-num">02 · Personalized Ride Environment</div>
+            <div class="exec-block-name" data-i18n="st2.name">주행 환경 개인화</div>
+          </div>
+          <div class="exec-block-meta">
+            <div>
+              <div class="exec-block-label">목적</div>
+              <p class="exec-block-purpose" data-i18n="st2.purpose">가족·비즈니스 세그먼트의 특수 요구를 옵션화하여 AOV를 높이고 재이용 동기를 강화한다.</p>
+            </div>
+            <div>
+              <div class="exec-block-label">기능</div>
+              <ul class="exec-block-features">
+                <li data-i18n="st2.f1"><strong>조용한 차량 옵션</strong> — 무음 주행 선호 이용자 대응</li>
+                <li data-i18n="st2.f2">자동 영수증 <em>(법인/개인 영수증 자동 발행)</em></li>
+                <li data-i18n="st2.f3"><strong>고정 기사 선택</strong> — 재이용 시 동일 기사 우선 배차</li>
+              </ul>
+            </div>
+          </div>
+          <div class="exec-img-wrap">
+            <img src="./Tada/exec-03.jpg" alt="Personalized Ride Environment" />
+          </div>
+        </div>
+
+        <!-- Block 03 -->
+        <div class="exec-block">
+          <div class="exec-block-header">
+            <div class="exec-block-num">03 · Membership</div>
+            <div class="exec-block-name" data-i18n="st3.name">멤버십</div>
+          </div>
+          <div class="exec-block-meta">
+            <div>
+              <div class="exec-block-label">목적</div>
+              <p class="exec-block-purpose" data-i18n="st3.purpose">연 3~5회 이용 공항 Repeat 세그먼트를 멤버십으로 Lock-in하여 LTV를 구조적으로 높인다.</p>
+            </div>
+            <div>
+              <div class="exec-block-label">기능</div>
+              <ul class="exec-block-features">
+                <li data-i18n="st3.f1"><strong>우선 배차</strong> — 멤버 전용 기사 풀 우선 매칭</li>
+                <li data-i18n="st3.f2">주행환경 설정 저장 <em>(카시트·조용한 차량 등 자동 적용)</em></li>
+                <li data-i18n="st3.f3"><strong>가격 고정</strong> — 수요 급등 시에도 예약 당시 금액 유지</li>
+              </ul>
+            </div>
+          </div>
+          <div class="exec-img-wrap">
+            <img src="./Tada/exec-04.jpg" alt="Membership" />
+          </div>
+        </div>
+
+      </div>
+    </section>
+
+    <!-- 07 RESULTS -->
+    <section class="cs-section" id="s7">
+      <div class="cs-num">07</div>
+      <h2 class="cs-title" data-i18n="s7.title">결과 <em>·</em> Results</h2>
+
+      <div class="img-wrap">
+        <img src="./Tada/results.jpg" alt="Results Overview" />
+      </div>
+
+      <table class="results-table">
+        <thead>
+          <tr>
+            <th data-i18n="tbl.metric">지표</th>
+            <th data-i18n="tbl.before">예상 (As-is)</th>
+            <th data-i18n="tbl.after">결과 (To-be)</th>
+            <th data-i18n="tbl.delta">개선 폭</th>
+          </tr>
+        </thead>
+        <tbody>
+          <tr>
+            <td data-i18n="tbl.r1">예약 완료율</td>
+            <td>25%</td>
+            <td>42%</td>
+            <td class="improvement">+17%p</td>
+          </tr>
+          <tr>
+            <td data-i18n="tbl.r2">주행 완료율</td>
+            <td>85%</td>
+            <td>97%</td>
+            <td class="improvement">+12%p</td>
+          </tr>
+          <tr>
+            <td data-i18n="tbl.r3">30일 재이용률</td>
+            <td>35%</td>
+            <td>51%</td>
+            <td class="improvement">+16%p</td>
+          </tr>
+          <tr>
+            <td data-i18n="tbl.r4">멤버십 가입률</td>
+            <td>5%</td>
+            <td>18%</td>
+            <td class="improvement">+13%p</td>
+          </tr>
+        </tbody>
+      </table>
+
+      <div class="result-grid">
+        <div class="result-cell">
+          <div class="result-num">+17%p</div>
+          <div class="result-desc" data-i18n="r1.desc">예약 완료율 개선</div>
+          <div class="result-sub" data-i18n="r1.sub">항공편 연동 추천 효과</div>
+        </div>
+        <div class="result-cell">
+          <div class="result-num">+12%p</div>
+          <div class="result-desc" data-i18n="r2.desc">주행 완료율 개선</div>
+          <div class="result-sub" data-i18n="r2.sub">도착 보장·이중 배차 백업</div>
+        </div>
+        <div class="result-cell">
+          <div class="result-num">+16%p</div>
+          <div class="result-desc" data-i18n="r3.desc">30일 재이용률 개선</div>
+          <div class="result-sub" data-i18n="r3.sub">Repeat 세그먼트 Lock-in</div>
+        </div>
+        <div class="result-cell">
+          <div class="result-num">+13%p</div>
+          <div class="result-desc" data-i18n="r4.desc">멤버십 가입률 달성</div>
+          <div class="result-sub" data-i18n="r4.sub">Family/Business Tier 채택</div>
+        </div>
+      </div>
+    </section>
+
+    <!-- 08 LESSONS -->
+    <section class="cs-section" id="s8">
+      <div class="cs-num">08</div>
+      <h2 class="cs-title" data-i18n="s8.title">레슨런 <em>·</em> Lessons</h2>
+
+      <div class="lesson-list">
+        <div class="lesson-item">
+          <div class="lesson-icon">L1</div>
+          <div class="lesson-content">
+            <h4 data-i18n="l1.h">리스크 기반 세그먼트 정의와 레버 설계</h4>
+            <p data-i18n="l1.p">Time-critical + Repeat 20% 집중으로 LTV 2배 효율을 확인했다. <strong style="color:var(--text)">비즈니스 임팩트가 큰 타겟부터 데이터로 정의</strong>하는 것이 앞으로 모든 프로젝트의 출발점이 될 것이다.</p>
+          </div>
+        </div>
+        <div class="lesson-item">
+          <div class="lesson-icon">L2</div>
+          <div class="lesson-content">
+            <h4 data-i18n="l2.h">데이터 이터레이션 원칙</h4>
+            <p data-i18n="l2.p">A/B 테스트로 보장 기능 전환율 상승을 증명하고, 실패 시 VOC+퍼널 교차 분석으로 재가설했다. <strong style="color:var(--text)">가설 검증 시 Input 지표부터 모니터링</strong>하는 원칙을 이 프로젝트에서 정립했다.</p>
+          </div>
+        </div>
+        <div class="lesson-item">
+          <div class="lesson-icon">L3</div>
+          <div class="lesson-content">
+            <h4 data-i18n="l3.h">도메인 특화 BM 전환 인사이트</h4>
+            <p data-i18n="l3.p">온디맨드 → Scheduled 구조 전환으로 공항 확정성이라는 신규 성장축을 발견했다. <strong style="color:var(--text)">도메인(인프라) 특성을 반영하여 BM 레버로 재정의</strong>하는 시각을 갖게 됐다.</p>
+          </div>
+        </div>
+      </div>
+    </section>
+
+  </div>
+
+  <!-- NEXT PROJECT -->
+  <div class="cs-next">
+    <div>
+      <div class="next-label" data-i18n="next.label">다음 케이스 스터디</div>
+      <a href="/case-study-airway" class="next-link" style="display:block;">
+        <div class="next-title" data-i18n="next.title">Airway UAM Booking Service →</div>
+      </a>
+    </div>
+    <a href="/case-study-airway" class="next-link next-arrow">↗</a>
+  </div>
+
+  <footer>
+    <p>© 2026 Sumin Lee</p>
+    <p><a href="/work" style="font-size:11px;color:var(--text-3);transition:color .2s;" onmouseover="this.style.color='var(--accent)'" onmouseout="this.style.color='var(--text-3)'" data-i18n="footer.back">← Projects</a></p>
+  </footer>
+
+  <script>
+  const i18n = {
+    ko: {
+      'nav.work':'Projects','nav.about':'About',
+      'hero.sub':'타다 프리미엄 · 2026',
+      'hero.eyebrow':'Airport Mobility · B2C · Service Design',
+      'hero.h1':'공항 이동에서 중요한 건 빠름이 아니다.<br><em>도착 보장</em>이다.',
+      'hero.question':'온디맨드 배차 불확실성으로 예약 완료율 25%에 그치던 타다 프리미엄 공항 이동 서비스에,<br>항공편 연동 도착 보장과 주행 환경 개인화를 설계하여 예약 전환율과 재이용률을 개선한 프로젝트.',
+      'meta.role.l':'Role','meta.role.v':'PM · UX 기획 · 서비스 설계',
+      'meta.period.l':'Period','meta.domain.l':'Domain','meta.domain.v':'모빌리티 · B2C · 공항','meta.tools.l':'Tools',
+      's1.title':'배경 <em>·</em> Background',
+      's1.p1':'타다 프리미엄은 중형·고급차 기반의 예약 서비스로 B2B(타다 비즈니스)와 개인 고객을 타겟으로 한다. 기존 고급택시(392대)의 한계를 넘어 플랫폼을 확장했으나, <strong>택시 업계 규제 갈등으로 성장이 제약</strong>되어 있는 상황이었다.',
+      's1.bm':'Business Model','s1.bm1':'중형/고급차(프리미엄 택시) 예약 서비스','s1.bm2':'B2B(타다 비즈니스)와 개인 고객 동시 타겟','s1.bm3':'기존 고급택시 한계 넘어 플랫폼 확장 추구',
+      's1.risk':'핵심 리스크','s1.r1':'공항 이동 수요 설 연휴 +46% YoY 성장세','s1.r2':'온디맨드 구조로 배차 불확실성↑ → 예약 완료율 25% 제한','s1.r3':'재이용률 35%로 LTV 미달성 — 성장 구조 취약',
+      's2.title':'목표 <em>·</em> Goal',
+      's2.inp':'Input (선행 지표)','s2.i1':'예약 완료율 25% — 온디맨드 배차 불확실성으로 검색 후 이탈 다수','s2.i2':'주행 완료율 85% — 기사 취소/새벽 공급 부족으로 15% 실패',
+      's2.out':'Output (성과 지표)','s2.o1':'30일 재이용률 35% — 재이용 51%지만 공항 카테고리 제한적','s2.o2':'멤버십 가입률 5% — 기존 예약/카시트 옵션 한정',
+      's3.title':'원인 분석 <em>·</em> Data Analysis',
+      's3.bigstat':'공항 이동 이용자의 <strong>예약 완료율이 25%</strong>에 불과. 온디맨드 배차 불확실성으로 검색 후 이탈이 다수 발생하며, <strong>도착 확정성 부재가 핵심 원인</strong>으로 파악됐다.',
+      's3.quant':'정량 분석','s3.q1':'Lead Time: 이용 3~7일 전 사전 예약 비중 80% 이상','s3.q2':'AOV: 일반 타다 유저 대비 1.4~1.6배 높음','s3.q3':'새벽 시간대 매칭 성공률 99% 유지 시 NPS 2배 상승','s3.q4':'공항 서비스 경험 후 6개월 내 재이용률 51%',
+      's3.qual':'정성 분석 (유저 인터뷰)','s3.q5':'과잉 여유 (60%) — "비행기 놓칠까봐 3시간 일찍 출발"','s3.q6':'배차 불안 (25%) — "예약했는데 기사 취소돼 포기"','s3.q7':'새벽 공급 부족 (10%) — "새벽엔 택시 없어 가족 차 빌림"','s3.q8':'가족 리스크 (5%) — "카시트 없어 포기한 적 많음"',
+      'q1':'"불편하지만 비행기 놓칠까 봐 3시간 일찍 출발해요. 새벽 4시 비행기면 1시에 집 나서요. 대중교통 없고 택시 배차 안 돼서 공항버스나 자가용으로 대체."',
+      'q2':'"예약했는데 기사 취소돼 10분 기다리다 포기. 콜택시 비용 3만 원 물고 버스 탔어요. 확실한 게 제일 중요."',
+      'q3':'"새벽에 택시 없어서 가족 차 빌리거나 리무진 기다림. 짐 많아 불편하고, 가격보다 잡히는 게 급함."',
+      'q4':'"아이/짐 때문에 2시간 여유 필수. 실패하면 가족 일정 전체 망가져요. 카시트 없어 포기한 적 많음."',
+      's4.title':'문제 정의 <em>·</em> Problem',
+      's4.problem':'"공항이동 이용자에게 온디맨드 호출서비스는 도착 확정성의 리스크를 커버하지 못하기 때문에 사전 예약 서비스가 필요하다."',
+      's4.insight':'<strong>핵심 인사이트:</strong> 온디맨드 배차 불확실성으로 공항 유저의 \'도착 지연 리스크\' 인지 간극이 발생한다. 예약 완료율 25% 제한의 근본 원인이며, <strong>가족 High LTV 타겟으로 도착 확정 레버 발굴</strong>이 핵심이다.',
+      's5.title':'가설 <em>·</em> Hypothesis',
+      's5.hyp':'<em>도착확정성을 높이는 도착 보장 서비스</em>를 단계별로 설계하면 공항 예약 전환율과 <em>재이용률이 증가</em>한다.',
+      'hyp.c1':'항공편 연동 → 출발 시간 자동 추천','hyp.c2':'도착 보장 + 지연 크레딧 → 리스크 인지 해소','hyp.c3':'주행 환경 개인화 → 가족 타겟 AOV 상승','hyp.c4':'멤버십 → Repeat 세그먼트 Lock-in',
+      's5.strategy':'<strong>솔루션 전략:</strong> 입출국 이동 예약 + 주행환경 개인화로 Zero-learning UX(인지 부하 최소) 설계.',
+      'l1.name':'항공편 연동','l1.desc':'항공편 번호 입력 → 체크인 마감 기준 출발 시간 자동 추천. 사용자 판단 부담 제거.',
+      'l2.name':'도착 보장 표시','l2.desc':'보장 배지 + 지연 시 크레딧 약속 노출. 배차 불확실성 인지 불안 해소.',
+      'l3.name':'환경 개인화','l3.desc':'카시트 자동 제안(가족), 조용한 차량, 고정 기사 선택. Tier upsell로 AOV 상승.',
+      's6.title':'실행 <em>·</em> Execution',
+      's6.intro':'도착 확정성을 핵심 가치로 삼아 세 가지 솔루션을 단계적으로 설계했다. 예약 진입 시점부터 주행 완료까지 이용자의 불안을 제거하고 재이용을 유도하는 구조다.',
+      's6.asis':'As-is — 기존 상태','s6.a1':'기본 예약 서비스 — 온디맨드 배차 불확실성 노출','s6.a2':'카시트 요청 기능만 존재 — 환경 개인화 미흡','s6.a3':'도착 보장 없음 → 배차 불안 → 이탈 발생',
+      's6.tobe':'To-be — 개선 방향','s6.t1':'도착 보장 + 지연 크레딧 + 항공편 연동 출발 추천','s6.t2':'조용한 차량 · 자동 영수증 · 고정 기사 선택','s6.t3':'멤버십 — 우선 배차 · 설정 저장 · 가격 고정',
+      'st1.name':'도착 보장 서비스','st1.purpose':'온디맨드 배차 불확실성으로 발생하는 도착 지연 리스크를 제거하여 예약 전환율을 높인다.',
+      'st1.f1':'도착 보장 — 지연 시 전액 크레딧 환급 약속','st1.f2':'지연 크레딧 (자동 지급, 별도 신청 불필요)','st1.f3':'항공편 연동 — 편명 입력 시 체크인 마감 기준 출발 시간 자동 추천',
+      'st2.name':'주행 환경 개인화','st2.purpose':'가족·비즈니스 세그먼트의 특수 요구를 옵션화하여 AOV를 높이고 재이용 동기를 강화한다.',
+      'st2.f1':'조용한 차량 옵션 — 무음 주행 선호 이용자 대응','st2.f2':'자동 영수증 (법인/개인 영수증 자동 발행)','st2.f3':'고정 기사 선택 — 재이용 시 동일 기사 우선 배차',
+      'st3.name':'멤버십','st3.purpose':'연 3~5회 이용 공항 Repeat 세그먼트를 멤버십으로 Lock-in하여 LTV를 구조적으로 높인다.',
+      'st3.f1':'우선 배차 — 멤버 전용 기사 풀 우선 매칭','st3.f2':'주행환경 설정 저장 (카시트·조용한 차량 등 자동 적용)','st3.f3':'가격 고정 — 수요 급등 시에도 예약 당시 금액 유지',
+      's7.title':'결과 <em>·</em> Results',
+      'tbl.metric':'지표','tbl.before':'예상 (As-is)','tbl.after':'결과 (To-be)','tbl.delta':'개선 폭',
+      'tbl.r1':'예약 완료율','tbl.r2':'주행 완료율','tbl.r3':'30일 재이용률','tbl.r4':'멤버십 가입률',
+      'r1.desc':'예약 완료율 개선','r1.sub':'항공편 연동 추천 효과',
+      'r2.desc':'주행 완료율 개선','r2.sub':'도착 보장·이중 배차 백업',
+      'r3.desc':'30일 재이용률 개선','r3.sub':'Repeat 세그먼트 Lock-in',
+      'r4.desc':'멤버십 가입률 달성','r4.sub':'Family/Business Tier 채택',
+      's8.title':'레슨런 <em>·</em> Lessons',
+      'l1.h':'리스크 기반 세그먼트 정의와 레버 설계',
+      'l1.p':'Time-critical + Repeat 20% 집중으로 LTV 2배 효율을 확인했다. <strong style="color:var(--text)">비즈니스 임팩트가 큰 타겟부터 데이터로 정의</strong>하는 것이 앞으로 모든 프로젝트의 출발점이 될 것이다.',
+      'l2.h':'데이터 이터레이션 원칙',
+      'l2.p':'A/B 테스트로 보장 기능 전환율 상승을 증명하고, 실패 시 VOC+퍼널 교차 분석으로 재가설했다. <strong style="color:var(--text)">가설 검증 시 Input 지표부터 모니터링</strong>하는 원칙을 이 프로젝트에서 정립했다.',
+      'l3.h':'도메인 특화 BM 전환 인사이트',
+      'l3.p':'온디맨드 → Scheduled 구조 전환으로 공항 확정성이라는 신규 성장축을 발견했다. <strong style="color:var(--text)">도메인(인프라) 특성을 반영하여 BM 레버로 재정의</strong>하는 시각을 갖게 됐다.',
+      'next.label':'다음 케이스 스터디','next.title':'Airway UAM Booking Service →','footer.back':'← Projects',
+    },
+    en: {
+      'nav.work':'Projects','nav.about':'About',
+      'hero.sub':'Tada Premium · 2026',
+      'hero.eyebrow':'Airport Mobility · B2C · Service Design',
+      'hero.h1':'Airport mobility isn\'t about speed.<br>It\'s about <em>guaranteed arrival</em>.',
+      'hero.question':'Tada Premium\'s airport mobility service had a 25% booking completion rate due to on-demand dispatch uncertainty.<br>We redesigned the service with flight-linked arrival guarantees and personalized ride environments.',
+      'meta.role.l':'Role','meta.role.v':'PM · UX Planning · Service Design',
+      'meta.period.l':'Period','meta.domain.l':'Domain','meta.domain.v':'Mobility · B2C · Airport','meta.tools.l':'Tools',
+      's1.title':'Background',
+      's1.p1':'Tada Premium is a mid-to-luxury vehicle reservation service targeting both B2B (Tada Business) and individual customers. While expanding beyond the limit of existing premium taxis (392 units), <strong>growth was constrained by regulatory conflicts with the taxi industry</strong>.',
+      's1.bm':'Business Model','s1.bm1':'Mid-to-luxury vehicle reservation service','s1.bm2':'Dual target: B2B (Tada Business) + individual customers','s1.bm3':'Platform expansion beyond existing premium taxi limits',
+      's1.risk':'Key Risks','s1.r1':'Airport demand growing +46% YoY during Lunar New Year','s1.r2':'On-demand structure raises dispatch uncertainty → booking completion capped at 25%','s1.r3':'30-day retention at 35% — LTV unachieved',
+      's2.title':'Goal',
+      's2.inp':'Input Metrics','s2.i1':'Booking completion rate 25% — high drop-off after search due to dispatch uncertainty','s2.i2':'Ride completion rate 85% — 15% failure from driver cancellations / early-morning supply shortage',
+      's2.out':'Output Metrics','s2.o1':'30-day retention 35% — overall re-use 51% but limited in airport category','s2.o2':'Membership enrollment 5% — limited to basic booking / car seat options',
+      's3.title':'Data Analysis',
+      's3.bigstat':'Airport mobility users show a <strong>booking completion rate of only 25%</strong>. Drop-off after search is widespread due to on-demand dispatch uncertainty. <strong>Lack of arrival certainty is the core cause.</strong>',
+      's3.quant':'Quantitative Analysis','s3.q1':'Lead Time: 80%+ book 3–7 days in advance','s3.q2':'AOV: 1.4–1.6× higher than regular Tada users','s3.q3':'99% early-morning match rate → NPS doubles','s3.q4':'6-month re-use rate after first airport ride: 51%',
+      's3.qual':'Qualitative (User Interviews)','s3.q5':'Excessive buffer (60%) — "Leave 3 hours early just in case"','s3.q6':'Dispatch anxiety (25%) — "Driver canceled, gave up after 10 mins"','s3.q7':'Early-morning shortage (10%) — "No taxis at dawn, borrowed family car"','s3.q8':'Family risk (5%) — "Often gave up because no car seat"',
+      'q1':'"I leave 3 hours early just in case I miss my flight. For a 4AM flight I leave at 1AM. No public transport and taxis don\'t show up, so I take a bus or borrow a car."',
+      'q2':'"Driver canceled after I booked, waited 10 minutes then gave up. Took the bus but paid 30,000 won for a cab. Reliability is everything."',
+      'q3':'"No taxis at dawn — I borrow family car or wait for a limousine. Lots of luggage makes it tough. Getting a ride matters more than price."',
+      'q4':'"With kids and luggage I need 2 hours buffer minimum. If it fails the whole family itinerary falls apart. I\'ve given up many times because there was no car seat."',
+      's4.title':'Problem Statement',
+      's4.problem':'"On-demand ride-hailing cannot cover the arrival certainty risk for airport travelers. A pre-reservation service is needed."',
+      's4.insight':'<strong>Core Insight:</strong> On-demand dispatch uncertainty creates an \'arrival delay risk\' perception gap for airport users. This is the root cause of the 25% booking completion cap. <strong>The key lever is guaranteeing arrival for the high-LTV family segment.</strong>',
+      's5.title':'Hypothesis',
+      's5.hyp':'If we design an <em>arrival guarantee service</em> that increases arrival certainty step by step, <em>airport booking conversion and re-use rates will increase</em>.',
+      'hyp.c1':'Flight sync → auto-recommend departure time','hyp.c2':'Arrival guarantee + delay credits → eliminate risk perception','hyp.c3':'Personalized ride environment → higher AOV for family segment','hyp.c4':'Membership → Repeat segment lock-in',
+      's5.strategy':'<strong>Solution Strategy:</strong> Airport reservation + personalized ride environment with Zero-learning UX (minimize cognitive load).',
+      'l1.name':'Flight Sync','l1.desc':'Input flight number → auto-recommend departure time based on check-in deadline. Remove user judgment burden.',
+      'l2.name':'Arrival Guarantee','l2.desc':'Show guarantee badge + credit promise on delay. Eliminate dispatch uncertainty anxiety.',
+      'l3.name':'Environment Personalization','l3.desc':'Auto-suggest car seat (family), quiet vehicle, fixed driver. Tier upsell to raise AOV.',
+      's6.title':'Execution',
+      's6.intro':'We designed three solutions step-by-step with arrival certainty as the core value. The structure removes user anxiety from booking entry through ride completion and drives re-use.',
+      's6.asis':'As-is — Current State','s6.a1':'Basic reservation — exposes users to on-demand dispatch uncertainty','s6.a2':'Only car seat request — insufficient ride personalization','s6.a3':'No arrival guarantee → dispatch anxiety → drop-off',
+      's6.tobe':'To-be — Improved Direction','s6.t1':'Arrival guarantee + delay credits + flight-linked departure recommendation','s6.t2':'Quiet vehicle · auto receipt · fixed driver selection','s6.t3':'Membership — priority dispatch · saved settings · price lock',
+      'st1.name':'Arrival Guarantee Service','st1.purpose':'Eliminate arrival delay risk from on-demand dispatch uncertainty to improve booking conversion.',
+      'st1.f1':'Arrival guarantee — full credit refund if delayed','st1.f2':'Delay credits (auto-issued, no separate claim needed)','st1.f3':'Flight sync — auto-recommend departure time based on check-in deadline',
+      'st2.name':'Personalized Ride Environment','st2.purpose':'Optionalize special needs of family/business segments to raise AOV and strengthen re-use motivation.',
+      'st2.f1':'Quiet vehicle option — for users preferring silent rides','st2.f2':'Auto receipt (corporate/personal receipt auto-issued)','st2.f3':'Fixed driver — priority matching with same driver on re-use',
+      'st3.name':'Membership','st3.purpose':'Lock in the airport Repeat segment (3–5 rides/year) through membership to structurally raise LTV.',
+      'st3.f1':'Priority dispatch — priority matching from member-exclusive driver pool','st3.f2':'Saved ride settings (car seat, quiet vehicle auto-applied)','st3.f3':'Price lock — maintain booking price even during demand surges',
+      's7.title':'Results',
+      'tbl.metric':'Metric','tbl.before':'Before (As-is)','tbl.after':'After (To-be)','tbl.delta':'Improvement',
+      'tbl.r1':'Booking Completion Rate','tbl.r2':'Ride Completion Rate','tbl.r3':'30-day Re-use Rate','tbl.r4':'Membership Enrollment',
+      'r1.desc':'Booking completion improved','r1.sub':'Flight sync recommendation effect',
+      'r2.desc':'Ride completion improved','r2.sub':'Arrival guarantee + dual dispatch backup',
+      'r3.desc':'30-day re-use improved','r3.sub':'Repeat segment lock-in',
+      'r4.desc':'Membership enrollment achieved','r4.sub':'Family/Business Tier adoption',
+      's8.title':'Lessons Learned',
+      'l1.h':'Risk-based segment definition and lever design',
+      'l1.p':'Focusing on Time-critical + Repeat 20% confirmed 2× LTV efficiency. <strong style="color:var(--text)">Defining the highest-impact target with data first</strong> will be the starting point for all future projects.',
+      'l2.h':'Data iteration principles',
+      'l2.p':'A/B tests proved guarantee feature conversion uplift; failed cases were re-hypothesized via VOC + funnel cross-analysis. <strong style="color:var(--text)">Monitoring Input metrics first when validating hypotheses</strong> became a principle established here.',
+      'l3.h':'Domain-specific BM transformation insight',
+      'l3.p':'Shifting from on-demand to Scheduled unlocked airport certainty as a new growth axis. Gained the perspective to <strong style="color:var(--text)">redefine domain (infrastructure) characteristics as BM levers</strong>.',
+      'next.label':'Next Case Study','next.title':'Airway UAM Booking Service →','footer.back':'← Projects',
+    }
+  };
+
+  let currentLang = 'ko';
+  function applyLang(lang) {
+    currentLang = lang;
+    document.querySelectorAll('[data-i18n]').forEach(el => {
+      const key = el.getAttribute('data-i18n');
+      if (i18n[lang] && i18n[lang][key] !== undefined) {
+        el.innerHTML = i18n[lang][key];
+      }
+    });
+    document.querySelectorAll('.lang-btn').forEach(b => {
+      b.classList.toggle('active', b.dataset.lang === lang);
+    });
+  }
+
+  document.getElementById('langToggle').addEventListener('click', e => {
+    const btn = e.target.closest('.lang-btn');
+    if (btn) applyLang(btn.dataset.lang);
+  });
+
+  /* NAV scroll */
+  const nav = document.getElementById('nav');
+  const heroH = document.querySelector('.cs-hero').offsetHeight;
+  window.addEventListener('scroll', () => {
+    nav.classList.toggle('scrolled', window.scrollY > 40);
+    tocEl.classList.toggle('toc-visible', window.scrollY > heroH * 0.6);
+  });
+
+  /* Section reveal */
+  const sections = document.querySelectorAll('.cs-section');
+  const io = new IntersectionObserver(entries => {
+    entries.forEach(e => { if (e.isIntersecting) e.target.classList.add('visible'); });
+  }, { threshold: 0.07 });
+  sections.forEach(s => io.observe(s));
+
+  /* TOC */
+  const tocData = [
+    { id:'s1', label:'배경' }, { id:'s2', label:'목표' },
+    { id:'s3', label:'원인 분석' }, { id:'s4', label:'문제 정의' },
+    { id:'s5', label:'가설' }, { id:'s6', label:'실행' },
+    { id:'s7', label:'결과' }, { id:'s8', label:'레슨런' },
+  ];
+  const tocEl = document.getElementById('csToc');
+  tocData.forEach(({ id, label }) => {
+    const a = document.createElement('a');
+    a.className = 'cs-toc-link'; a.href = '#' + id;
+    a.innerHTML = `<span class="cs-toc-tick"></span>${label}`;
+    tocEl.appendChild(a);
+  });
+  const tocLinks = tocEl.querySelectorAll('.cs-toc-link');
+  const tocIo = new IntersectionObserver(entries => {
+    entries.forEach(e => {
+      const link = tocEl.querySelector(`[href="#${e.target.id}"]`);
+      if (link) link.classList.toggle('active', e.isIntersecting);
+    });
+  }, { rootMargin: '-30% 0px -60% 0px' });
+  sections.forEach(s => tocIo.observe(s));
+
+  /* Cursor */
+  const dot = document.getElementById('cur-dot');
+  const ring = document.getElementById('cur-ring');
+  let mx = 0, my = 0, rx = 0, ry = 0;
+  document.addEventListener('mousemove', e => { mx = e.clientX; my = e.clientY; dot.style.left = mx+'px'; dot.style.top = my+'px'; });
+  (function loop(){ rx+=(mx-rx)*.12; ry+=(my-ry)*.12; ring.style.left=rx+'px'; ring.style.top=ry+'px'; requestAnimationFrame(loop); })();
+  document.querySelectorAll('a, button').forEach(el => {
+    el.addEventListener('mouseenter', () => document.body.classList.add('cursor-link'));
+    el.addEventListener('mouseleave', () => document.body.classList.remove('cursor-link'));
+  });
+
+  // Hide broken images gracefully
+  document.querySelectorAll('img').forEach(img => {
+    const hide = () => { const w = img.closest('.img-wrap, .exec-img-wrap'); (w || img).style.display = 'none'; };
+    img.addEventListener('error', hide);
+    if (img.complete && img.naturalWidth === 0) hide();
+  });
+  </script>
+</body>
+</html>

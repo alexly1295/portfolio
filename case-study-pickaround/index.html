@@ -1,0 +1,1637 @@
+---
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+  <base href="/">
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>PickAround Seafood Commerce — Sumin Lee</title>
+  <link rel="icon" type="image/png" href="./favicon.png" />
+  <link rel="preconnect" href="https://fonts.googleapis.com" />
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+  <link href="https://fonts.googleapis.com/css2?family=Lexend:wght@300;400;500;600;700&family=Inter:wght@300;400;500;600&display=swap" rel="stylesheet" />
+  <style>
+    :root {
+      --bg:        #0B0C11;
+      --bg-2:      #111318;
+      --bg-card:   #15161C;
+      --bg-card-h: #1C1D25;
+      --accent:    #FF6B35;
+      --accent-dim:  rgba(255,107,53,.10);
+      --accent-glow: rgba(255,107,53,.22);
+      --text:      #F0ECE6;
+      --text-2:    #CCCAC6;
+      --text-3:    #5A5A66;
+      --border:    rgba(255,255,255,0.07);
+      --border-h:  rgba(255,255,255,0.13);
+    }
+    *, *::before, *::after { margin:0; padding:0; box-sizing:border-box; }
+    html { scroll-behavior: smooth; }
+    body {
+      background-color: var(--bg);
+      background-image:
+        radial-gradient(ellipse 80% 55% at -5% -5%, rgba(28,42,80,.55) 0%, transparent 50%),
+        radial-gradient(ellipse 50% 40% at 105% 105%, rgba(22,10,6,.95) 0%, transparent 48%),
+        radial-gradient(ellipse 60% 40% at 60% 0%, rgba(255,107,53,.025) 0%, transparent 55%);
+      color: var(--text); font-family: 'Inter', sans-serif;
+      font-size: 16px; line-height: 1.6; overflow-x: hidden;
+      -webkit-font-smoothing: antialiased; cursor: none;
+    }
+    a { color: inherit; text-decoration: none; cursor: none; }
+    button { cursor: none; }
+
+    /* GRAIN */
+    #grain {
+      position: fixed; inset: 0; z-index: 998; pointer-events: none; opacity: .038;
+      background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='256' height='256'%3E%3Cfilter id='n'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.85' numOctaves='4' stitchTiles='stitch'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23n)'/%3E%3C/svg%3E");
+      background-repeat: repeat; background-size: 256px 256px;
+    }
+
+    /* CURSOR */
+    #cur-dot {
+      position: fixed; width: 6px; height: 6px; background: var(--text);
+      border-radius: 50%; pointer-events: none; z-index: 9999;
+      transform: translate(-50%,-50%); transition: width .15s, height .15s, background .15s;
+    }
+    #cur-ring {
+      position: fixed; width: 34px; height: 34px;
+      border: 1px solid rgba(240,236,230,.22); border-radius: 50%;
+      pointer-events: none; z-index: 9998; transform: translate(-50%,-50%);
+      transition: width .3s, height .3s, border-color .3s, opacity .3s;
+    }
+    body.cursor-link #cur-dot { width:44px; height:44px; background:var(--accent-dim); border:1px solid var(--accent-glow); }
+    body.cursor-link #cur-ring { opacity:0; }
+
+    /* NAV */
+    nav {
+      position: fixed; inset: 0 0 auto; z-index: 200;
+      padding: 22px 64px; display: flex; justify-content: space-between; align-items: center;
+      transition: background .4s, border-color .4s; border-bottom: 1px solid transparent;
+    }
+    nav.scrolled { background: rgba(11,12,17,.88); backdrop-filter: blur(20px); border-color: var(--border); }
+    .nav-back {
+      display: flex; align-items: center; gap: 10px;
+      font-size: 12px; letter-spacing: 0.1em; text-transform: uppercase;
+      color: var(--text-3); transition: color .2s;
+    }
+    .nav-back:hover { color: var(--text); }
+    .nav-back:hover svg { transform: translateX(-3px); }
+    .nav-back svg { transition: transform .2s; }
+    .nav-right { display: flex; align-items: center; gap: 40px; }
+    .nav-links { display:flex; gap:36px; list-style:none; }
+    .nav-links a { font-size:13px; letter-spacing:.06em; color:var(--text-2); transition:color .2s; position:relative; }
+    .nav-links a::after { content:''; position:absolute; left:0; bottom:-3px; width:0; height:1px; background:var(--accent); transition:width .3s; }
+    .nav-links a:hover { color:var(--text); }
+    .nav-links a:hover::after { width:100%; }
+    .lang-toggle { display:flex; align-items:center; gap:4px; border:1px solid var(--border); border-radius:100px; padding:3px 4px; }
+    .lang-btn {
+      background:none; border:none; outline:none;
+      font-family:'Lexend',sans-serif; font-size:10px; font-weight:600; letter-spacing:0.1em;
+      color:var(--text-3); padding:4px 10px; border-radius:100px; transition:background .2s,color .2s;
+    }
+    .lang-btn.active { background:var(--accent); color:#fff; }
+    .lang-btn:hover:not(.active) { color:var(--text); }
+
+    /* HERO */
+    .cs-hero {
+      min-height: 100vh; display: flex; flex-direction: column;
+      justify-content: flex-end; padding: 0 64px 80px;
+      position: relative; overflow: hidden;
+    }
+    .cs-hero-bg {
+      position: absolute; inset: 0;
+      background:
+        radial-gradient(ellipse 70% 60% at 100% 0%, rgba(255,107,53,.05) 0%, transparent 55%),
+        radial-gradient(ellipse 50% 40% at 0% 100%, rgba(28,42,80,.4) 0%, transparent 50%);
+    }
+    .cs-hero-img {
+      position: absolute; inset: 0; width: 100%; height: 100%;
+      object-fit: cover; opacity: .18; z-index: 0; pointer-events: none;
+    }
+    .cs-hero-number {
+      font-family:'Lexend',sans-serif; font-size:180px; font-weight:700;
+      letter-spacing:-12px; color:rgba(255,107,53,.04); line-height:1;
+      position:absolute; right:40px; bottom:60px; user-select:none; pointer-events:none;
+    }
+    .cs-eyebrow {
+      display:inline-flex; align-items:center; gap:8px;
+      font-size:10px; font-weight:500; letter-spacing:0.22em; text-transform:uppercase;
+      color:var(--accent); margin-bottom:28px;
+      opacity:0; animation:fadeUp .7s .2s forwards;
+    }
+    .cs-eyebrow::before { content:''; width:3px; height:12px; background:var(--accent); border-radius:2px; }
+    .cs-hero h1 {
+      font-family:'Lexend',sans-serif; font-size:clamp(30px, 4.8vw, 70px);
+      font-weight:700; letter-spacing:-2px; line-height:1.05;
+      max-width:900px; margin-bottom:28px;
+      opacity:0; animation:fadeUp .9s .3s forwards;
+    }
+    .cs-hero h1 em { font-style:normal; color:var(--accent); }
+    .cs-hero-sub {
+      font-size:13px; letter-spacing:0.06em; text-transform:uppercase;
+      color:var(--text-3); margin-bottom:16px;
+      opacity:0; animation:fadeUp .7s .25s forwards;
+    }
+    .cs-hero-question {
+      font-size:clamp(14px,1.4vw,18px); color:var(--text-2);
+      max-width:620px; line-height:1.75; font-weight:300;
+      opacity:0; animation:fadeUp .8s .45s forwards;
+    }
+    .cs-hero-meta {
+      display:flex; gap:48px; flex-wrap:wrap; margin-top:56px;
+      padding-top:40px; border-top:1px solid var(--border);
+      opacity:0; animation:fadeUp .7s .6s forwards;
+    }
+    .meta-label { font-size:9px; letter-spacing:0.22em; text-transform:uppercase; color:var(--text-3); margin-bottom:6px; }
+    .meta-val { font-family:'Lexend',sans-serif; font-size:14px; font-weight:500; color:var(--text); }
+    @keyframes fadeUp { to { opacity:1; transform:translateY(0); } }
+
+    /* BODY */
+    .cs-body { max-width:900px; margin:0 auto; padding:0 64px 160px; }
+
+    /* SECTION */
+    .cs-section { padding:80px 0; border-top:1px solid var(--border); opacity:0; transform:translateY(28px); transition:opacity .75s,transform .75s; }
+    .cs-section.visible { opacity:1; transform:none; }
+    .cs-section-num { font-family:'Lexend',sans-serif; font-size:11px; font-weight:500; letter-spacing:0.22em; text-transform:uppercase; color:var(--accent); margin-bottom:8px; }
+    .cs-section-title { font-family:'Lexend',sans-serif; font-size:clamp(24px,3vw,36px); font-weight:700; letter-spacing:-1px; line-height:1.1; margin-bottom:40px; color:var(--text); }
+    .cs-section-title em { font-style:normal; color:var(--accent); }
+
+    .cs-p { font-size:15px; color:var(--text-2); line-height:1.85; margin-bottom:20px; }
+    .cs-p:last-child { margin-bottom:0; }
+    .cs-p strong { color:var(--text); font-weight:500; }
+
+    /* CALLOUT */
+    .cs-callout { border-left:3px solid var(--accent); padding:20px 24px; background:rgba(255,107,53,.04); border-radius:0 8px 8px 0; margin:32px 0; }
+    .cs-callout p { font-size:15px; color:var(--text); line-height:1.8; }
+    .cs-callout strong { color:var(--accent); }
+
+    /* BIG STAT */
+    .big-stat-block {
+      display:flex; align-items:center; gap:32px; padding:40px;
+      background:var(--bg-card); border:1px solid var(--border); border-radius:16px;
+      margin:36px 0; position:relative; overflow:hidden;
+    }
+    .big-stat-block::before {
+      content:''; position:absolute; inset:0;
+      background:radial-gradient(ellipse 60% 70% at 0% 50%, rgba(255,107,53,.07) 0%, transparent 60%);
+    }
+    .big-stat-num {
+      font-family:'Lexend',sans-serif; font-size:clamp(60px,8vw,100px);
+      font-weight:700; letter-spacing:-4px; color:var(--accent); line-height:1; flex-shrink:0;
+      position:relative;
+    }
+    .big-stat-desc { font-size:15px; color:var(--text-2); line-height:1.75; position:relative; }
+    .big-stat-desc strong { color:var(--text); font-weight:500; }
+
+    /* BACKGROUND IMAGES */
+    .cs-bg-img { width:100%; border-radius:16px; overflow:hidden; margin:32px 0; display:block; border:1px solid var(--border); }
+    .cs-bg-img img { width:100%; height:auto; display:block; }
+    /* 이미지 없을 때 placeholder — bg-02만 고정 비율 유지 */
+    .cs-bg-img.fixed-ratio { aspect-ratio:16/9; background:var(--bg-card); display:flex; align-items:center; justify-content:center; font-size:11px; letter-spacing:.12em; text-transform:uppercase; color:var(--text-3); position:relative; }
+
+    /* TWO COL */
+    .cs-two-col { display:grid; grid-template-columns:1fr 1fr; gap:24px; margin:28px 0; }
+    .cs-col-card { background:var(--bg-card); border:1px solid var(--border); border-radius:12px; padding:28px; }
+    .cs-col-card h4 { font-family:'Lexend',sans-serif; font-size:12px; font-weight:600; letter-spacing:0.1em; text-transform:uppercase; color:var(--text-3); margin-bottom:16px; }
+    .cs-col-card h4.accent { color:var(--accent); }
+    .cs-col-card ul { list-style:none; display:flex; flex-direction:column; gap:10px; }
+    .cs-col-card ul li { font-size:14px; color:var(--text-2); line-height:1.65; padding-left:16px; position:relative; }
+    .cs-col-card ul li::before { content:''; position:absolute; left:0; top:9px; width:5px; height:5px; border-radius:50%; background:var(--border-h); }
+    .cs-col-card.accent-border { border-color:rgba(255,107,53,.22); background:rgba(255,107,53,.025); }
+    .cs-col-card.accent-border ul li::before { background:var(--accent); opacity:.6; }
+
+    /* QUOTE GRID */
+    .quote-grid { display:grid; grid-template-columns:1fr 1fr; gap:16px; margin:28px 0; }
+    .quote-card {
+      background:var(--bg-card); border:1px solid var(--border); border-radius:10px;
+      padding:20px 20px 20px 24px; position:relative;
+    }
+    .quote-card::before { content:'"'; position:absolute; top:8px; left:14px; font-family:'Lexend',sans-serif; font-size:36px; color:var(--accent); opacity:.3; line-height:1; }
+    .quote-text { font-size:14px; color:var(--text-2); line-height:1.7; padding-top:12px; }
+
+    /* STATS GRID */
+    .cs-stats { display:grid; grid-template-columns:repeat(3,1fr); gap:2px; background:var(--border); margin:36px 0; }
+    .cs-stat { background:var(--bg-card); padding:28px 24px; }
+    .cs-stat-num { font-family:'Lexend',sans-serif; font-size:36px; font-weight:700; letter-spacing:-2px; color:var(--accent); line-height:1; margin-bottom:8px; }
+    .cs-stat-label { font-size:12px; color:var(--text-3); line-height:1.5; }
+
+    /* SEGMENTS */
+    .segments { display:grid; grid-template-columns:repeat(3,1fr); gap:12px; margin:28px 0; }
+    .segment-card { background:var(--bg-card); border:1px solid var(--border); border-radius:10px; padding:18px; transition:border-color .2s; }
+    .segment-card.target { border-color:rgba(255,107,53,.35); background:rgba(255,107,53,.03); }
+    .seg-icon { font-size:20px; margin-bottom:10px; }
+    .seg-name { font-family:'Lexend',sans-serif; font-size:13px; font-weight:600; color:var(--text); margin-bottom:4px; }
+    .seg-name .target-badge { font-size:9px; font-weight:600; letter-spacing:0.1em; text-transform:uppercase; color:var(--accent); background:rgba(255,107,53,.12); padding:2px 7px; border-radius:100px; margin-left:6px; }
+    .seg-desc { font-size:12px; color:var(--text-3); line-height:1.55; }
+
+    /* HYPOTHESIS */
+    .hypothesis-card {
+      background:var(--bg-card); border:1px solid rgba(255,107,53,.2); border-radius:12px;
+      padding:36px; margin:28px 0; position:relative; overflow:hidden;
+    }
+    .hypothesis-card::before {
+      content:'"'; position:absolute; top:-10px; left:20px; font-family:'Lexend',sans-serif;
+      font-size:120px; font-weight:700; color:rgba(255,107,53,.05); line-height:1; pointer-events:none;
+    }
+    .hypothesis-text { font-family:'Lexend',sans-serif; font-size:clamp(15px,1.8vw,20px); font-weight:500; line-height:1.65; color:var(--text); letter-spacing:-0.2px; position:relative; z-index:1; }
+    .hypothesis-text em { color:var(--accent); font-style:normal; }
+    .hyp-meta { margin-top:20px; padding-top:18px; border-top:1px solid var(--border); display:flex; flex-wrap:wrap; gap:8px; }
+    .hyp-chip { font-size:11px; padding:4px 12px; border:1px solid rgba(255,107,53,.2); border-radius:100px; color:var(--text-3); }
+
+    /* AS-IS TO-BE */
+    .as-is-tobe { display:grid; grid-template-columns:1fr 40px 1fr; gap:0; margin:36px 0; align-items:start; }
+    .arrow-col { display:flex; justify-content:center; align-items:center; padding-top:80px; }
+
+    /* FRAMEWORK (4-card grid) */
+    .framework { display:grid; grid-template-columns:repeat(4,1fr); gap:12px; margin:28px 0; }
+    .fw-card {
+      background:var(--bg-card); border:1px solid var(--border); border-radius:12px;
+      padding:22px 18px; position:relative; overflow:hidden; transition:border-color .25s;
+    }
+    .fw-card:hover { border-color:rgba(255,107,53,.3); }
+    .fw-rank { font-family:'Lexend',sans-serif; font-size:11px; font-weight:700; color:var(--accent); letter-spacing:0.1em; margin-bottom:10px; }
+    .fw-key { font-family:'Lexend',sans-serif; font-size:18px; font-weight:700; color:var(--text); margin-bottom:6px; }
+    .fw-label { font-size:12px; color:var(--text-3); margin-bottom:10px; }
+    .fw-example { font-size:12px; color:var(--text-2); line-height:1.6; padding:10px 12px; background:rgba(255,255,255,.03); border-radius:6px; }
+    .fw-example em { color:var(--accent); font-style:normal; font-weight:500; }
+
+    /* FUNNEL — ui-block style */
+    .ui-block-list { display:flex; flex-direction:column; gap:0; margin:0; }
+    .ui-block { padding:52px 0 0; border-top:1px solid var(--border); }
+    .ui-block-header { margin-bottom:32px; }
+    .ui-block-num { font-family:'Lexend',sans-serif; font-size:10px; font-weight:700; letter-spacing:.2em; text-transform:uppercase; color:var(--accent); margin-bottom:10px; }
+    .ui-block-name { font-family:'Lexend',sans-serif; font-size:clamp(20px,2.2vw,28px); font-weight:700; color:var(--text); line-height:1.15; }
+    .ui-block-meta { display:grid; grid-template-columns:1fr 1fr; gap:52px; margin-bottom:32px; }
+    @media(max-width:640px){ .ui-block-meta{ grid-template-columns:1fr; gap:20px; } }
+    .ui-block-left-sub { font-size:13px; color:var(--text-3); line-height:1.7; margin-top:8px; }
+    .ui-block-right p { font-size:14px; color:var(--text-2); line-height:1.9; margin-bottom:14px; }
+    .ui-block-right p:last-child { margin-bottom:0; }
+    .ui-block-right strong { color:var(--text); font-weight:500; }
+    .ui-block-right em { color:var(--accent); font-style:normal; }
+    .ui-voice::before { content:'\201C'; color:var(--accent); font-size:1.25em; line-height:0; vertical-align:-0.1em; margin-right:3px; }
+    .ui-voice::after  { content:'\201D'; color:var(--accent); font-size:1.25em; line-height:0; vertical-align:-0.1em; margin-left:3px; }
+    .ui-img-wrap { background:var(--bg-card-h); border:1px solid var(--border); border-radius:16px; overflow:hidden; margin:32px 0 60px; display:flex; align-items:center; justify-content:center; position:relative; min-height:120px; }
+    .ui-img-wrap img { width:100%; height:auto; display:block; object-fit:contain; }
+    .ui-img-hint { font-size:11px; color:var(--border-h); letter-spacing:.12em; text-transform:uppercase; user-select:none; pointer-events:none; position:absolute; }
+    .ui-img-wrap img ~ .ui-img-hint { display:none; }
+
+    /* STRATEGIES (3-col) */
+    .strategies { display:grid; grid-template-columns:repeat(3,1fr); gap:2px; background:var(--border); margin:28px 0; }
+    .strat-card { background:var(--bg-card); padding:28px; }
+    .exec-plan-wrap { margin-top:72px; }
+    .exec-plan-header { display:grid; grid-template-columns:1fr 1fr; gap:60px; margin-bottom:40px; align-items:start; }
+    @media(max-width:680px){ .exec-plan-header{grid-template-columns:1fr;gap:16px;} }
+    .exec-plan-htitle { font-family:'Lexend',sans-serif; font-size:clamp(18px,2vw,24px); font-weight:700; color:var(--text); line-height:1.35; }
+    .exec-plan-hdesc { font-size:14px; color:var(--text-2); line-height:1.9; }
+    .exec-plan-hdesc p { margin-bottom:14px; }
+    .exec-plan-hdesc p:last-child { margin-bottom:0; }
+    .exec-plan-hdesc strong { color:var(--text); font-weight:500; }
+    .exec-list { display:flex; flex-direction:column; gap:10px; }
+    .exec-item { display:grid; grid-template-columns:1fr 80px; gap:20px; align-items:center; background:var(--bg-card); border:1px solid var(--border); border-radius:14px; padding:20px 24px; }
+    @media(max-width:680px){ .exec-item{grid-template-columns:1fr;} .exec-item-img{display:none;} }
+    .exec-item-num { font-family:'Lexend',sans-serif; font-size:10px; font-weight:700; letter-spacing:.2em; color:var(--accent); margin-bottom:8px; }
+    .exec-item-title { font-family:'Lexend',sans-serif; font-size:16px; font-weight:700; color:var(--text); line-height:1.3; margin-bottom:5px; }
+    .exec-item-sub { font-size:13px; color:var(--text-3); line-height:1.6; }
+    .exec-item-img { width:80px; height:80px; border-radius:10px; background:var(--bg-card-h); border:1px solid var(--border); overflow:hidden; flex-shrink:0; display:flex; align-items:center; justify-content:center; font-size:9px; color:var(--text-3); letter-spacing:.1em; text-transform:uppercase; }
+    .exec-item-img img { width:100%; height:100%; object-fit:cover; display:block; }
+    .strat-num { font-size:10px; font-weight:600; letter-spacing:0.18em; text-transform:uppercase; color:var(--accent); margin-bottom:10px; }
+    .strat-name { font-family:'Lexend',sans-serif; font-size:16px; font-weight:600; color:var(--text); margin-bottom:8px; }
+    .strat-desc { font-size:13px; color:var(--text-2); line-height:1.65; }
+
+    /* A/B CHART */
+    .ab-chart { background:var(--bg-card); border:1px solid var(--border); border-radius:12px; padding:28px; margin:32px 0; }
+    .ab-legend { display:flex; gap:24px; margin-bottom:24px; }
+    .ab-legend-item { display:flex; align-items:center; gap:8px; font-size:12px; color:var(--text-2); }
+    .ab-legend-dot { width:10px; height:10px; border-radius:2px; flex-shrink:0; }
+    .ab-legend-dot.base { background:var(--text-3); }
+    .ab-legend-dot.impr { background:var(--accent); }
+    .ab-rows { display:flex; flex-direction:column; gap:16px; }
+    .ab-row { display:grid; grid-template-columns:160px 1fr; gap:16px; align-items:center; }
+    .ab-metric { font-size:12px; color:var(--text-2); }
+    .ab-bars { display:flex; flex-direction:column; gap:5px; }
+    .ab-bar-row { display:flex; align-items:center; gap:10px; }
+    .ab-bar-track { flex:1; height:7px; background:rgba(255,255,255,.04); border-radius:4px; overflow:hidden; }
+    .ab-bar-fill { height:100%; border-radius:4px; transition:width 1s cubic-bezier(.25,.46,.45,.94); }
+    .ab-bar-fill.base { background:var(--text-3); }
+    .ab-bar-fill.impr { background:var(--accent); }
+    .ab-val { font-family:'Lexend',sans-serif; font-size:12px; font-weight:600; width:48px; flex-shrink:0; text-align:right; }
+    .ab-val.base { color:var(--text-3); }
+    .ab-val.impr { color:var(--accent); }
+
+    /* RESULT GRID */
+    .result-grid { display:grid; grid-template-columns:repeat(2,1fr); gap:2px; background:var(--border); margin:36px 0; }
+    .result-cell { background:var(--bg-card); padding:32px 28px; position:relative; overflow:hidden; }
+    .result-cell::before { content:''; position:absolute; bottom:0; left:0; right:0; height:2px; background:linear-gradient(to right, var(--accent), transparent); }
+    .result-num { font-family:'Lexend',sans-serif; font-size:48px; font-weight:700; letter-spacing:-3px; color:var(--accent); line-height:1; margin-bottom:10px; }
+    .result-desc { font-size:13px; color:var(--text-2); line-height:1.6; }
+    .result-sub  { font-size:11px; color:var(--text-3); margin-top:4px; }
+
+    /* METRICS TABLE */
+    .metrics-table { width:100%; border-collapse:collapse; margin:28px 0; }
+    .metrics-table th { font-size:10px; letter-spacing:0.16em; text-transform:uppercase; color:var(--text-3); text-align:left; padding:10px 16px; border-bottom:1px solid var(--border); }
+    .metrics-table td { font-size:13px; color:var(--text-2); padding:14px 16px; border-bottom:1px solid var(--border); line-height:1.5; }
+    .metrics-table td:first-child { color:var(--text); font-weight:500; }
+    .metrics-table td.acc { color:var(--accent); font-weight:600; font-family:'Lexend',sans-serif; }
+    .metrics-table tr:last-child td { border-bottom:none; }
+    .metrics-table tr:hover td { background:rgba(255,255,255,.02); }
+
+    /* LESSONS */
+    .lesson-list { display:flex; flex-direction:column; gap:24px; margin:28px 0; }
+    .lesson-item { display:grid; grid-template-columns:40px 1fr; gap:16px; align-items:start; }
+    .lesson-icon { width:40px; height:40px; border-radius:50%; background:rgba(255,107,53,.1); border:1px solid rgba(255,107,53,.25); display:flex; align-items:center; justify-content:center; font-family:'Lexend',sans-serif; font-size:12px; font-weight:700; color:var(--accent); flex-shrink:0; }
+    .lesson-content h4 { font-family:'Lexend',sans-serif; font-size:15px; font-weight:600; color:var(--text); margin-bottom:8px; margin-top:10px; }
+    .lesson-content p { font-size:14px; color:var(--text-2); line-height:1.8; }
+    .lesson-content p strong { color:var(--text); font-weight:500; }
+
+    /* NEXT */
+    .cs-next { border-top:1px solid var(--border); padding:64px; display:flex; justify-content:space-between; align-items:center; }
+    .next-label { font-size:10px; letter-spacing:0.22em; text-transform:uppercase; color:var(--text-3); margin-bottom:12px; }
+    .next-title { font-family:'Lexend',sans-serif; font-size:22px; font-weight:600; color:var(--text); transition:color .2s; }
+    .next-link:hover .next-title { color:var(--accent); }
+    .next-arrow { font-size:28px; color:var(--text-3); transition:color .3s,transform .3s; }
+    .next-link:hover .next-arrow { color:var(--accent); transform:translate(6px,-6px); }
+
+    footer { padding:28px 64px; border-top:1px solid var(--border); display:flex; justify-content:space-between; align-items:center; }
+    footer p { font-size:11px; color:var(--text-3); }
+
+    .t-fade { transition:opacity .25s; }
+    .t-fade.fading { opacity:0; }
+
+    /* SEGMENT MATRIX TABLE */
+    .seg-matrix-wrap{margin:16px 0 48px;overflow:hidden;border-radius:12px;border:1px solid var(--border);}
+    .seg-matrix{width:100%;border-collapse:collapse;background:var(--bg-card);}
+    .seg-matrix th{font-size:10px;font-weight:600;letter-spacing:.14em;text-transform:uppercase;color:var(--text-3);padding:11px 16px;text-align:left;border-bottom:1px solid var(--border);white-space:nowrap;background:rgba(255,255,255,.02);}
+    .seg-matrix td{font-size:13px;color:var(--text-3);padding:14px 16px;border-bottom:1px solid var(--border);vertical-align:middle;white-space:nowrap;}
+    .seg-matrix tr:last-child td{border-bottom:none;}
+    .seg-matrix tr.row-target td{color:var(--text-2);background:rgba(255,107,53,.04);}
+    .seg-matrix tr.row-target td:first-child{border-left:2px solid var(--accent);}
+    .seg-name-wrap{display:flex;align-items:center;gap:8px;}
+    .seg-name-label{font-family:'Lexend',sans-serif;font-size:13px;font-weight:600;color:var(--text);white-space:nowrap;}
+    .seg-name-wrap .seg-tag{font-size:8px;font-weight:700;letter-spacing:.1em;text-transform:uppercase;background:var(--accent);color:#fff;border-radius:3px;padding:2px 6px;flex-shrink:0;}
+    .seg-val-accent{color:var(--accent);font-weight:600;}
+    .seg-val-green{color:#4ade80;font-weight:600;}
+    .seg-val-blue{color:#60a5fa;font-weight:600;}
+    .seg-stars{letter-spacing:1px;font-size:11px;}
+    .seg-stars .on{color:var(--accent);}
+    .seg-stars .off{color:var(--border-h);}
+    .seg-pill-primary{display:inline-flex;align-items:center;gap:5px;background:rgba(255,107,53,.12);border:1px solid rgba(255,107,53,.35);color:var(--accent);font-size:11px;font-weight:600;letter-spacing:.04em;padding:5px 14px;border-radius:100px;white-space:nowrap;}
+    .seg-pill{display:inline-flex;align-items:center;justify-content:center;background:var(--bg-card-h);border:1px solid var(--border);color:var(--text-3);font-size:11px;padding:5px 14px;border-radius:100px;white-space:nowrap;min-width:80px;}
+
+    /* PROBLEM SECTION REDESIGN */
+    .prob-statement-card{background:var(--bg-card);border:1px solid var(--border);border-radius:16px;padding:52px 48px;text-align:center;margin:32px 0;}
+    .prob-icon-wrap{width:48px;height:48px;border:1px solid var(--accent);border-radius:50%;display:flex;align-items:center;justify-content:center;margin:0 auto 14px;color:var(--accent);}
+    .prob-stmt-label{font-size:10px;font-weight:600;letter-spacing:.22em;text-transform:uppercase;color:var(--text-3);margin-bottom:22px;}
+    .prob-quote{font-family:'Lexend',sans-serif;font-size:clamp(15px,1.8vw,22px);font-weight:500;line-height:1.65;color:var(--text);max-width:720px;margin:0 auto;}
+    .prob-metrics{display:grid;grid-template-columns:1fr 1fr;gap:32px;align-items:center;margin-top:48px;padding-top:40px;border-top:1px solid var(--border);}
+    @media(max-width:640px){.prob-metrics{grid-template-columns:1fr;}}
+    .prob-metrics-q{font-family:'Lexend',sans-serif;font-size:clamp(16px,1.7vw,21px);font-weight:600;color:var(--text);line-height:1.35;}
+    .prob-pills{display:flex;flex-direction:column;gap:10px;}
+    .prob-pill{display:flex;align-items:center;gap:12px;background:var(--bg-card-h);border:1px solid var(--border);border-radius:100px;padding:12px 20px;font-size:13px;color:var(--text-2);}
+    .prob-pill-icon{width:26px;height:26px;border-radius:50%;border:1px solid var(--border-h);display:flex;align-items:center;justify-content:center;flex-shrink:0;font-size:11px;color:var(--text-3);}
+
+    /* ── FLOATING TOC ───────────────────── */
+    .cs-toc{position:fixed;right:28px;top:50%;transform:translateY(-50%);z-index:150;display:flex;flex-direction:column;gap:0;pointer-events:auto;align-items:flex-start;width:max-content;transition:opacity .35s,visibility .35s;}
+    .cs-toc-link{display:flex;align-items:center;gap:10px;padding:5px 0;color:var(--text-3);font-size:11px;font-family:'Inter',sans-serif;letter-spacing:.03em;white-space:nowrap;text-decoration:none;cursor:none;transition:color .25s,opacity .25s;opacity:.4;}
+    .cs-toc-link:hover{color:var(--text-2);opacity:.85;}
+    .cs-toc-link.active{color:var(--accent);opacity:1;font-weight:500;}
+    .cs-toc-tick{width:1.5px;height:12px;background:currentColor;border-radius:2px;flex-shrink:0;transition:height .25s,width .25s;}
+    .cs-toc-link.active .cs-toc-tick{height:20px;width:2px;}
+    @media(max-width:1260px){.cs-toc{display:none;}}
+
+    /* ── CONTEXT SUBSECTIONS ─────────────── */
+    .ctx-label{font-size:10px;font-weight:600;letter-spacing:.18em;text-transform:uppercase;color:var(--text-3);display:flex;align-items:center;gap:12px;margin:32px 0 16px;}
+    .ctx-label::after{content:'';flex:1;height:1px;background:var(--border);}
+    .ctx-chart{display:flex;flex-direction:column;gap:20px;padding:24px 28px;background:var(--bg-card);border:1px solid var(--border);border-radius:12px;}
+    .chart-item{display:flex;flex-direction:column;gap:8px;}
+    .chart-item-label{font-size:12px;color:var(--text-3);line-height:1.4;}
+    .chart-bar-row{display:flex;align-items:center;gap:12px;}
+    .chart-bar-wrap{flex:1;height:5px;background:rgba(255,255,255,.06);border-radius:3px;overflow:hidden;}
+    .chart-bar{height:100%;border-radius:3px;background:var(--accent);}
+    .chart-pct{font-family:'Lexend',sans-serif;font-size:13px;font-weight:700;color:var(--accent);min-width:38px;text-align:right;}
+    .ctx-quotes{display:flex;flex-direction:column;gap:10px;}
+    .ctx-quote{display:flex;align-items:flex-start;gap:16px;padding:16px 20px;background:var(--bg-card);border:1px solid var(--border);border-radius:10px;transition:border-color .2s;}
+    .ctx-quote:hover{border-color:var(--border-h);}
+    .ctx-num{font-family:'Lexend',sans-serif;font-size:11px;font-weight:700;color:var(--accent);background:rgba(255,107,53,.1);border:1px solid rgba(255,107,53,.25);border-radius:50%;width:26px;height:26px;display:flex;align-items:center;justify-content:center;flex-shrink:0;margin-top:1px;}
+    .ctx-text{font-size:14px;color:var(--text-2);line-height:1.7;}
+
+    @media (max-width:900px) {
+      .cs-body { padding:0 28px 100px; }
+      nav, .cs-hero, .cs-next, footer { padding-left:28px; padding-right:28px; }
+      .cs-hero { padding-bottom:60px; }
+      .ab-row { grid-template-columns:1fr; gap:6px; }
+    }
+    @media (max-width:700px) {
+      .segments, .framework, .funnel-flow, .cs-stats { grid-template-columns:1fr 1fr; }
+      .result-grid { grid-template-columns:1fr; }
+    }
+    @media (max-width:640px) {
+      body { cursor:auto; }
+      #cur-dot, #cur-ring { display:none; }
+      .cs-two-col, .quote-grid, .segments, .framework, .funnel-flow, .strategies { grid-template-columns:1fr; }
+      .as-is-tobe { grid-template-columns:1fr; }
+      .arrow-col { display:none; }
+      .cs-next, footer { flex-direction:column; align-items:flex-start; gap:16px; }
+      .cs-hero-meta { gap:24px; }
+    }
+  </style>
+</head>
+<body>
+  <div id="grain" aria-hidden="true"></div>
+  <div id="cur-dot"></div>
+  <div id="cur-ring"></div>
+  <nav class="cs-toc" id="csToc"></nav>
+
+  <!-- NAV -->
+  <nav id="nav">
+    <a href="/work" class="nav-back" onclick="if(history.length>1){history.back();return false;}">
+      <svg width="16" height="16" viewBox="0 0 16 16" fill="none" stroke="currentColor" stroke-width="1.5"><path d="M10 12L6 8l4-4"/></svg>
+    </a>
+    <div class="nav-right">
+      <ul class="nav-links">
+        <li><a href="/work" data-i18n="nav.work">Projects</a></li>
+        <li><a href="/contact" data-i18n="nav.about">About</a></li>
+      </ul>
+      <div class="lang-toggle" id="langToggle">
+        <button class="lang-btn active" data-lang="ko">KR</button>
+        <button class="lang-btn" data-lang="en">EN</button>
+      </div>
+    </div>
+  </nav>
+
+  <!-- HERO -->
+  <section class="cs-hero">
+    <div class="cs-hero-bg"></div>
+    <img class="cs-hero-img" src="./thumb-pickaround.jpg" alt="" />
+    <div class="cs-hero-number" aria-hidden="true">04</div>
+
+    <p class="cs-hero-sub" data-i18n="hero.sub">Noterindas · Seafood Commerce · 2025</p>
+    <div class="cs-eyebrow" data-i18n="hero.eyebrow">Seasonality Commerce · Information Asymmetry · Conversion</div>
+
+    <h1 data-i18n="hero.h1" style="white-space:nowrap;">
+      제철 어종 <em>재구매율 최적화</em> 케이스
+    </h1>
+
+    <p class="cs-hero-question" data-i18n="hero.question">
+      배달앱 수수료와 높은 이탈률로 악화되던 수익구조를 개선하기 위해,
+      수산물 구매에서 가장 큰 장벽이던 '제철·신선도 정보 비대칭'을
+      자사몰 경험 설계로 해소한 프로젝트입니다.
+    </p>
+
+    <div class="cs-hero-meta">
+      <div>
+        <div class="meta-label" data-i18n="meta.role.l">Role</div>
+        <div class="meta-val" data-i18n="meta.role.v">Product Owner</div>
+      </div>
+      <div>
+        <div class="meta-label" data-i18n="meta.period.l">Period</div>
+        <div class="meta-val">2025.01 – 2025.12</div>
+      </div>
+      <div>
+        <div class="meta-label" data-i18n="meta.domain.l">Domain</div>
+        <div class="meta-val" data-i18n="meta.domain.v">Seafood Commerce</div>
+      </div>
+      <div>
+        <div class="meta-label" data-i18n="meta.tools.l">Tools</div>
+        <div class="meta-val" data-i18n="meta.tools.v">Interview · Funnel Analysis · A/B Test · Cohort</div>
+      </div>
+    </div>
+  </section>
+
+  <!-- BODY -->
+  <div class="cs-body">
+
+    <!-- 01 BACKGROUND -->
+    <section class="cs-section" id="s1">
+      <div class="cs-section-num">01</div>
+      <h2 class="cs-section-title" data-i18n="s1.title">배경 <em>·</em> Background</h2>
+
+      <!-- Background Image 01 -->
+      <div class="cs-bg-img">
+        <img src="./Pickaround/bg-01.jpg" alt="수산물 유통 구조 — 어라운드 개선 전후" />
+      </div>
+
+      <p class="cs-p" data-i18n="s1.p1">
+        어라운드는 자체 상품 판매로 원산지 유통 구조를 <strong>7단계에서 2단계로 단축</strong>하며
+        가격 경쟁력을 확보했지만, 실제 판매의 상당 부분이 배달앱에 묶여 있어
+        수수료 20%가 원가 절감 효과를 상쇄하고 있었습니다.
+      </p>
+
+      <!-- Background Image 02 -->
+      <div class="cs-bg-img fixed-ratio">
+        <img src="./Pickaround/bg-02.jpg" alt="지역적 특성을 바탕으로 한 거점센터 확장 전략" style="position:absolute;inset:0;width:100%;height:100%;object-fit:cover;" />
+      </div>
+
+      <p class="cs-p" data-i18n="s1.p2">
+        광진구·성동구·동대문구 등 서울 내 지점 확장을 준비하면서,
+        배달 가능 주소에 종속되지 않는 <strong>온라인 통합 주문 시스템</strong>이 사업적으로 필수인 상황이었습니다.
+      </p>
+
+      <div class="cs-two-col">
+        <div class="cs-col-card">
+          <h4 data-i18n="s1.bm">비즈니스 모델</h4>
+          <ul>
+            <li data-i18n="s1.bm1">직접 소싱 기반의 자사 상품 판매</li>
+            <li data-i18n="s1.bm2">유통 원가 절감 후 배달앱·자사몰 병행 판매</li>
+            <li data-i18n="s1.bm3">서울 권역별 오프라인 지점 확대 예정</li>
+            <li data-i18n="s1.bm4">배달 주소 한계를 넘는 통합 주문 구조 필요</li>
+          </ul>
+        </div>
+        <div class="cs-col-card">
+          <h4 data-i18n="s1.risk">핵심 리스크</h4>
+          <ul>
+            <li data-i18n="s1.r1">배달앱 의존 시 매월 순수익의 최대 20% 수수료 부담</li>
+            <li data-i18n="s1.r2">배달앱 회·초밥 카테고리 경쟁으로 유입 단계 이탈 74%</li>
+            <li data-i18n="s1.r3">지점 확대 시 배달권역 외 주문 수용 불가</li>
+            <li data-i18n="s1.r4">자사몰 전환 실패 시 지속 가능한 성장 구조 붕괴</li>
+          </ul>
+        </div>
+      </div>
+
+      <div class="cs-callout">
+        <p data-i18n="s1.conclusion">
+          <strong>Business Insight:</strong> 유통 단계 축소로 확보한 경쟁력은 존재했지만,
+          이를 수익으로 연결하려면 반드시 <strong>플랫폼 의존도를 낮추고 자사몰 전환율을 높여야</strong> 했습니다.
+        </p>
+      </div>
+    </section>
+
+    <!-- 02 GOAL -->
+    <section class="cs-section" id="s2">
+      <div class="cs-section-num">02</div>
+      <h2 class="cs-section-title" data-i18n="s2.title">목표 <em>·</em> Goal</h2>
+
+      <div class="cs-stats">
+        <div class="cs-stat">
+          <div class="cs-stat-num">+10%p</div>
+          <div class="cs-stat-label" data-i18n="kpi1">제철 정보 콘텐츠 조회 및<br>장바구니 담기 CTR 상승</div>
+        </div>
+        <div class="cs-stat">
+          <div class="cs-stat-num">+12%p</div>
+          <div class="cs-stat-label" data-i18n="kpi2">자사몰 주문전환율<br>CVR 상승</div>
+        </div>
+        <div class="cs-stat">
+          <div class="cs-stat-num">32%</div>
+          <div class="cs-stat-label" data-i18n="kpi3">30일 재구매율 달성</div>
+        </div>
+      </div>
+
+      <div class="cs-two-col">
+        <div class="cs-col-card accent-border">
+          <h4 class="accent" data-i18n="s2.inp">Input (선행 지표)</h4>
+          <ul>
+            <li data-i18n="s2.i2"><strong>장바구니 담기 CTR 10%p 개선</strong></li>
+            <li data-i18n="s2.i1" style="color:var(--text-3)">제철 콘텐츠 조회수 상승</li>
+            <li data-i18n="s2.i3" style="color:var(--text-3)">콘텐츠 조회 후 장바구니 이탈률 감소</li>
+            <li data-i18n="s2.i4" style="color:var(--text-3)">탐색 비용 최소화 여부 검증</li>
+          </ul>
+        </div>
+        <div class="cs-col-card accent-border">
+          <h4 class="accent" data-i18n="s2.out">Output (성과 지표)</h4>
+          <ul>
+            <li data-i18n="s2.o1"><strong>자사몰 주문전환율(CVR) 12%p 상승</strong></li>
+            <li data-i18n="s2.o2" style="color:var(--text-3)"><strong>30일 재구매율 32% 달성</strong></li>
+            <li data-i18n="s2.o3" style="color:var(--text-3)"><strong>수익성 기반 마련 및 Unit Economics 개선</strong></li>
+            <li data-i18n="s2.o4" style="color:var(--text-3)">자사몰 중심 확장 전략 유효성 검증</li>
+          </ul>
+        </div>
+      </div>
+
+      <div class="cs-callout">
+        <p data-i18n="s2.method">
+          <strong>Validation Plan:</strong> 제철 콘텐츠 노출군과 비노출군의 장바구니·CVR 차이를 비교하는 A/B 테스트,
+          장바구니 증가 코호트의 재구매 추적, 퍼널 단계별 드롭오프 분석으로 사업 임팩트를 연결했습니다.
+        </p>
+      </div>
+    </section>
+
+    <!-- 03 ROOT CAUSE -->
+    <section class="cs-section" id="s3">
+      <div class="cs-section-num">03</div>
+      <h2 class="cs-section-title" data-i18n="s3.title">원인 분석 <em>·</em> Data Analysis</h2>
+
+      <!-- User Segments -->
+      <h3 style="font-family:'Lexend',sans-serif;font-size:12px;font-weight:600;color:var(--text-3);letter-spacing:0.14em;text-transform:uppercase;margin:0 0 16px;" data-i18n="s4.seg.title">사용자 세그먼트</h3>
+      <div class="segments" style="margin-bottom:16px;">
+        <div class="segment-card">
+          <div class="seg-icon">🐟</div>
+          <div class="seg-name" data-i18n="s4.seg1">단품 어종 구매자</div>
+          <div class="seg-desc" data-i18n="s4.seg1d">어종 중심 구매, 정보 탐색은 짧지만 확신이 중요</div>
+        </div>
+        <div class="segment-card">
+          <div class="seg-icon">🎉</div>
+          <div class="seg-name" data-i18n="s4.seg2">4인 이상 이벤트 구매</div>
+          <div class="seg-desc" data-i18n="s4.seg2d">양과 구성 중심, 실패 비용이 높아 후기 의존도가 큼</div>
+        </div>
+        <div class="segment-card target">
+          <div class="seg-icon">🍶</div>
+          <div class="seg-name">
+            <span data-i18n="s4.seg3">2인 식사(반주)</span>
+            <span class="target-badge">Target</span>
+          </div>
+          <div class="seg-desc" data-i18n="s4.seg3d">1–2주 주기 반복 구매, 구성·양 민감도 높고 선택 피로가 큼</div>
+        </div>
+      </div>
+
+      <!-- 시간대별 결제 히트맵 차트 -->
+      <div style="background:var(--bg-card);border:1px solid var(--border);border-radius:14px;padding:28px 32px;margin:0 0 24px;">
+        <div style="font-size:10px;font-weight:600;letter-spacing:.18em;text-transform:uppercase;color:var(--accent);margin-bottom:8px;" data-i18n="chart1.label">시간대별 결제 집중 분포</div>
+        <div style="font-family:'Lexend',sans-serif;font-size:20px;font-weight:700;color:var(--text);margin-bottom:4px;" data-i18n="chart1.title">오후 5시–10시 결제 히트맵</div>
+        <div style="font-size:12px;color:var(--text-3);margin-bottom:24px;" data-i18n="chart1.sub">목/금/토 오후 5–9시 구간에 결제 데이터 집중 → 계획된 식사 구매 패턴</div>
+        <svg viewBox="0 0 620 220" xmlns="http://www.w3.org/2000/svg" style="width:100%;height:auto;display:block;overflow:visible;">
+          <!-- Y-axis grid lines & labels -->
+          <line x1="48" y1="10"  x2="608" y2="10"  stroke="rgba(255,255,255,.06)" stroke-width="1"/>
+          <line x1="48" y1="57"  x2="608" y2="57"  stroke="rgba(255,255,255,.06)" stroke-width="1"/>
+          <line x1="48" y1="104" x2="608" y2="104" stroke="rgba(255,255,255,.06)" stroke-width="1"/>
+          <line x1="48" y1="151" x2="608" y2="151" stroke="rgba(255,255,255,.06)" stroke-width="1"/>
+          <line x1="48" y1="198" x2="608" y2="198" stroke="rgba(255,255,255,.06)" stroke-width="1"/>
+          <text x="40" y="14"  text-anchor="end" fill="#5A5A66" font-size="11" font-family="Inter,sans-serif">200</text>
+          <text x="40" y="61"  text-anchor="end" fill="#5A5A66" font-size="11" font-family="Inter,sans-serif">150</text>
+          <text x="40" y="108" text-anchor="end" fill="#5A5A66" font-size="11" font-family="Inter,sans-serif">100</text>
+          <text x="40" y="155" text-anchor="end" fill="#5A5A66" font-size="11" font-family="Inter,sans-serif">50</text>
+          <text x="40" y="202" text-anchor="end" fill="#5A5A66" font-size="11" font-family="Inter,sans-serif">0</text>
+          <!-- Bars: each bar width=56, gap=32, start x=60
+               Scale: 200→y=10, 0→y=198 (range=188px per 200units, 0.94px per unit)
+               Heights: 57→54px y=144, 110→104px y=94, 195→183px y=15, 180→169px y=29, 133→125px y=73, 73→69px y=129 -->
+          <!-- 17시 ~57 -->
+          <rect x="60"  y="144" width="56" height="54"  rx="4" fill="#FF6B35"/>
+          <!-- 18시 ~110 -->
+          <rect x="148" y="94"  width="56" height="104" rx="4" fill="#FF6B35"/>
+          <!-- 19시 ~195 -->
+          <rect x="236" y="15"  width="56" height="183" rx="4" fill="#FF6B35"/>
+          <!-- 20시 ~180 -->
+          <rect x="324" y="29"  width="56" height="169" rx="4" fill="#FF6B35"/>
+          <!-- 21시 ~133 -->
+          <rect x="412" y="73"  width="56" height="125" rx="4" fill="#FF6B35"/>
+          <!-- 22시 ~73 -->
+          <rect x="500" y="129" width="56" height="69"  rx="4" fill="#FF6B35"/>
+          <!-- X-axis labels -->
+          <text x="88"  y="216" text-anchor="middle" fill="#5A5A66" font-size="11" font-family="Inter,sans-serif">17시</text>
+          <text x="176" y="216" text-anchor="middle" fill="#5A5A66" font-size="11" font-family="Inter,sans-serif">18시</text>
+          <text x="264" y="216" text-anchor="middle" fill="#5A5A66" font-size="11" font-family="Inter,sans-serif">19시</text>
+          <text x="352" y="216" text-anchor="middle" fill="#5A5A66" font-size="11" font-family="Inter,sans-serif">20시</text>
+          <text x="440" y="216" text-anchor="middle" fill="#5A5A66" font-size="11" font-family="Inter,sans-serif">21시</text>
+          <text x="528" y="216" text-anchor="middle" fill="#5A5A66" font-size="11" font-family="Inter,sans-serif">22시</text>
+        </svg>
+      </div>
+
+      <!-- Segment Matrix Table -->
+      <div class="seg-matrix-wrap">
+        <table class="seg-matrix">
+          <thead>
+            <tr>
+              <th>유저 세그먼트</th>
+              <th>제철 정보 민감도</th>
+              <th>구매 빈도</th>
+              <th>장바구니 이탈률</th>
+              <th>LTV 잠재력</th>
+              <th>선택 피로도</th>
+              <th>전략 우선순위</th>
+            </tr>
+          </thead>
+          <tbody>
+            <tr class="row-target">
+              <td><div class="seg-name-wrap"><span class="seg-name-label">2인 식사 (반주)</span><span class="seg-tag">선정</span></div></td>
+              <td><span class="seg-val-accent">높음</span></td>
+              <td><span class="seg-val-blue">주 1–2회</span></td>
+              <td><span class="seg-val-accent">72%</span></td>
+              <td><span class="seg-stars"><span class="on">★★★★★</span></span></td>
+              <td><span class="seg-val-accent">높음</span></td>
+              <td><span class="seg-pill-primary">★ Primary Target</span></td>
+            </tr>
+            <tr>
+              <td><div class="seg-name-wrap"><span class="seg-name-label" style="color:var(--text-2)">4인 이상 이벤트</span></div></td>
+              <td>중간</td>
+              <td>월 1–2회</td>
+              <td>65%</td>
+              <td><span class="seg-stars"><span class="on">★★★★</span><span class="off">★</span></span></td>
+              <td>매우 높음</td>
+              <td><span class="seg-pill">Secondary</span></td>
+            </tr>
+            <tr>
+              <td><div class="seg-name-wrap"><span class="seg-name-label" style="color:var(--text-2)">단품 어종 구매자</span></div></td>
+              <td>낮음</td>
+              <td>월 2–3회</td>
+              <td>45%</td>
+              <td><span class="seg-stars"><span class="on">★★★</span><span class="off">★★</span></span></td>
+              <td>낮음</td>
+              <td><span class="seg-pill">3순위</span></td>
+            </tr>
+          </tbody>
+        </table>
+      </div>
+
+      <!-- Context · Product -->
+      <div class="ctx-label">Context · Product</div>
+      <div class="ctx-chart">
+        <div style="font-size:10px;font-weight:600;letter-spacing:.16em;text-transform:uppercase;color:var(--accent);margin-bottom:14px;" data-i18n="fchart.label">정량 분석 · 퍼널 비교</div>
+
+        <!-- 배달앱 -->
+        <div style="font-size:11px;font-weight:600;color:var(--text-2);margin-bottom:10px;" data-i18n="fchart.ch1">배달앱 (배민·쿠팡)</div>
+        <div style="display:flex;flex-direction:column;gap:8px;margin-bottom:20px;">
+          <div style="display:flex;align-items:center;gap:10px;">
+            <span style="font-size:11px;color:var(--text-3);width:28px;flex-shrink:0;" data-i18n="fchart.inflow">유입</span>
+            <div style="flex:1;height:32px;background:rgba(255,255,255,.05);border-radius:6px;overflow:hidden;">
+              <div style="height:100%;width:68%;background:#FFAB6E;border-radius:6px;display:flex;align-items:center;justify-content:flex-end;padding-right:10px;">
+                <span style="font-size:13px;font-weight:700;color:#fff;">68%</span>
+              </div>
+            </div>
+          </div>
+          <div style="display:flex;align-items:center;gap:10px;">
+            <span style="font-size:11px;color:var(--text-3);width:28px;flex-shrink:0;" data-i18n="fchart.conv">전환</span>
+            <div style="flex:1;height:32px;background:rgba(255,255,255,.05);border-radius:6px;overflow:hidden;position:relative;">
+              <div style="height:100%;width:22%;background:#FF6B35;border-radius:6px;"></div>
+              <span style="position:absolute;left:calc(22% + 10px);top:50%;transform:translateY(-50%);font-size:13px;font-weight:700;color:#FF6B35;">22%</span>
+            </div>
+          </div>
+          <div style="display:flex;align-items:center;gap:10px;">
+            <span style="font-size:11px;color:var(--text-3);width:28px;flex-shrink:0;" data-i18n="fchart.drop">이탈</span>
+            <div style="flex:1;height:32px;background:rgba(255,255,255,.05);border-radius:6px;overflow:hidden;">
+              <div style="height:100%;width:78%;background:#E8182E;border-radius:6px;display:flex;align-items:center;justify-content:flex-end;padding-right:10px;">
+                <span style="font-size:13px;font-weight:700;color:#fff;">78%</span>
+              </div>
+            </div>
+          </div>
+        </div>
+
+        <!-- 자사몰 -->
+        <div style="font-size:11px;font-weight:600;color:var(--text-2);margin-bottom:10px;" data-i18n="fchart.ch2">자사몰 MVP</div>
+        <div style="display:flex;flex-direction:column;gap:8px;">
+          <div style="display:flex;align-items:center;gap:10px;">
+            <span style="font-size:11px;color:var(--text-3);width:28px;flex-shrink:0;" data-i18n="fchart.inflow">유입</span>
+            <div style="flex:1;height:32px;background:rgba(255,255,255,.05);border-radius:6px;overflow:hidden;position:relative;">
+              <div style="height:100%;width:12%;background:#FFAB6E;border-radius:6px;"></div>
+              <span style="position:absolute;left:calc(12% + 10px);top:50%;transform:translateY(-50%);font-size:13px;font-weight:700;color:#FFAB6E;">12%</span>
+            </div>
+          </div>
+          <div style="display:flex;align-items:center;gap:10px;">
+            <span style="font-size:11px;color:var(--text-3);width:28px;flex-shrink:0;" data-i18n="fchart.drop">이탈</span>
+            <div style="flex:1;height:32px;background:rgba(255,255,255,.05);border-radius:6px;overflow:hidden;">
+              <div style="height:100%;width:88%;background:#E8182E;border-radius:6px;display:flex;align-items:center;justify-content:flex-end;padding-right:10px;">
+                <span style="font-size:13px;font-weight:700;color:#fff;">88%</span>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <!-- 88% stat callout -->
+      <div style="display:flex;align-items:flex-start;gap:28px;margin-top:36px;padding:28px 32px;background:var(--bg-card);border:1px solid var(--border);border-radius:16px;border-left:3px solid var(--accent);">
+        <div style="flex-shrink:0;">
+          <div style="font-size:72px;font-weight:700;line-height:1;color:var(--accent);font-family:'Lexend',sans-serif;letter-spacing:-.03em;">88<span style="font-size:36px;">%</span></div>
+        </div>
+        <div style="padding-top:6px;">
+          <p style="font-size:14px;line-height:1.75;color:var(--text-2);" data-i18n="s3.stat88">
+            신규 자사몰 MVP 유저의 <strong style="color:var(--text);">88%가 최종 구매 전 이탈</strong>했습니다. 배달앱 유입 유저 이탈률 78%보다 더 높았고, 이는 단순 유입 부족이 아니라 <strong style="color:var(--text);">구매 결정 단계의 심리적 허들</strong>이 더 컸음을 시사했습니다.
+          </p>
+        </div>
+      </div>
+
+      <!-- Context · User -->
+      <div class="ctx-label" style="margin-top:36px;">Context · User</div>
+      <div style="display:grid;grid-template-columns:1fr 1fr;gap:24px;align-items:start;">
+        <!-- User quotes -->
+        <div class="ctx-quotes">
+          <div class="ctx-quote">
+            <div class="ctx-num">1</div>
+            <div class="ctx-text" data-i18n="s3.p2">메뉴가 너무 많아 고르기 힘들다</div>
+          </div>
+          <div class="ctx-quote">
+            <div class="ctx-num">2</div>
+            <div class="ctx-text" data-i18n="s3.p3">제철을 확인하려고 시장에 직접 갔다</div>
+          </div>
+          <div class="ctx-quote">
+            <div class="ctx-num">3</div>
+            <div class="ctx-text" data-i18n="s3.p4">수산물은 직접 봐야 신선도를 안다</div>
+          </div>
+          <div class="ctx-quote">
+            <div class="ctx-num">4</div>
+            <div class="ctx-text" data-i18n="s3.p1">담았는데 왜 사야 하는지 모르겠어서 나왔어요</div>
+          </div>
+        </div>
+
+        <!-- KEY INSIGHT chart -->
+        <div style="background:var(--bg-card);border:1px solid var(--border);border-radius:16px;padding:24px 28px;">
+          <div style="font-size:9px;font-weight:700;letter-spacing:.18em;text-transform:uppercase;color:var(--accent);margin-bottom:20px;">KEY INSIGHT : 데이터로 보는 구매 전 이탈 요인 TOP 3</div>
+
+          <!-- Item 01 -->
+          <div style="margin-bottom:20px;">
+            <div style="display:flex;align-items:baseline;justify-content:space-between;margin-bottom:6px;">
+              <div style="display:flex;align-items:baseline;gap:8px;">
+                <span style="font-size:10px;font-weight:700;color:var(--accent);letter-spacing:.08em;">01</span>
+                <span style="font-size:13px;font-weight:600;color:var(--text);" data-i18n="s3.ki1.title">구성의 불확실성</span>
+              </div>
+              <span style="font-size:18px;font-weight:700;color:var(--accent);">42%</span>
+            </div>
+            <div style="height:6px;background:rgba(255,255,255,.07);border-radius:100px;overflow:hidden;margin-bottom:7px;">
+              <div style="height:100%;width:42%;background:var(--accent);border-radius:100px;"></div>
+            </div>
+            <div style="font-size:11px;color:var(--text-3);line-height:1.5;" data-i18n="s3.ki1.desc">"오늘 어떤 생선이 오는지 정확히 모르겠다."</div>
+          </div>
+
+          <!-- Item 02 -->
+          <div style="margin-bottom:20px;">
+            <div style="display:flex;align-items:baseline;justify-content:space-between;margin-bottom:6px;">
+              <div style="display:flex;align-items:baseline;gap:8px;">
+                <span style="font-size:10px;font-weight:700;color:var(--accent);letter-spacing:.08em;">02</span>
+                <span style="font-size:13px;font-weight:600;color:var(--text);" data-i18n="s3.ki2.title">양의 모호성</span>
+              </div>
+              <span style="font-size:18px;font-weight:700;color:var(--accent);">31%</span>
+            </div>
+            <div style="height:6px;background:rgba(255,255,255,.07);border-radius:100px;overflow:hidden;margin-bottom:7px;">
+              <div style="height:100%;width:31%;background:var(--accent);border-radius:100px;opacity:.78;"></div>
+            </div>
+            <div style="font-size:11px;color:var(--text-3);line-height:1.5;" data-i18n="s3.ki2.desc">"양의 기준이 대·중·소로 주관적이라 부족할까봐 걱정된다."</div>
+          </div>
+
+          <!-- Item 03 -->
+          <div>
+            <div style="display:flex;align-items:baseline;justify-content:space-between;margin-bottom:6px;">
+              <div style="display:flex;align-items:baseline;gap:8px;">
+                <span style="font-size:10px;font-weight:700;color:var(--accent);letter-spacing:.08em;">03</span>
+                <span style="font-size:13px;font-weight:600;color:var(--text);" data-i18n="s3.ki3.title">경험의 비일관성</span>
+              </div>
+              <span style="font-size:18px;font-weight:700;color:var(--accent);">18%</span>
+            </div>
+            <div style="height:6px;background:rgba(255,255,255,.07);border-radius:100px;overflow:hidden;margin-bottom:7px;">
+              <div style="height:100%;width:18%;background:var(--accent);border-radius:100px;opacity:.55;"></div>
+            </div>
+            <div style="font-size:11px;color:var(--text-3);line-height:1.5;" data-i18n="s3.ki3.desc">"지난번엔 좋았는데 이번에도 좋을지 확신이 없다."</div>
+          </div>
+        </div>
+      </div>
+
+      <div class="cs-callout">
+        <p data-i18n="s3.conclusion">
+          <strong>원인 분석 결론:</strong><br>
+          유저는 구매 의사는 있었지만, 수산물 특유의 <strong>제철성과 신선도에 대한 정보 비대칭</strong> 때문에
+          실패 리스크를 크게 느끼고 있었습니다. 정보 부족이 더 직접적으로 드러나는 자사몰에서 이탈이 더 높았습니다.
+        </p>
+      </div>
+    </section>
+
+    <!-- 04 PROBLEM -->
+    <section class="cs-section" id="s4">
+      <div class="cs-section-num">04</div>
+      <h2 class="cs-section-title" data-i18n="s4.title">문제 정의 <em>·</em> Problem</h2>
+
+      <div class="prob-statement-card">
+        <div class="prob-icon-wrap">
+          <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5"><circle cx="12" cy="12" r="10"/><text x="12" y="17" text-anchor="middle" fill="currentColor" stroke="none" font-size="13" font-weight="700" font-family="sans-serif">?</text></svg>
+        </div>
+        <div class="prob-stmt-label">Problem Statement</div>
+        <p class="prob-quote" data-i18n="s4.problem">판매자가 알고 있는 만큼 구매자에게 제철 어종 정보가 잘 전달되지 않아<br>유저 입장에서는 유입부터 주문까지의 정보 수집 단계에서 정보 공백이 있다.</p>
+      </div>
+
+      <div class="prob-metrics">
+        <p class="prob-metrics-q" data-i18n="s4.metrics.q">핵심 지표를 어떻게<br>개선할 수 있을까?</p>
+        <div class="prob-pills">
+          <div class="prob-pill">
+            <div class="prob-pill-icon">↓</div>
+            <span data-i18n="s4.m1">장바구니 이탈률 감소 — Cart-to-order CVR +12%p</span>
+          </div>
+          <div class="prob-pill">
+            <div class="prob-pill-icon">↑</div>
+            <span data-i18n="s4.m2">30일 재구매율 32% 달성</span>
+          </div>
+        </div>
+      </div>
+    </section>
+
+    <!-- 05 HYPOTHESIS -->
+    <section class="cs-section" id="s5">
+      <div class="cs-section-num">05</div>
+      <h2 class="cs-section-title" data-i18n="s5.title">가설 <em>·</em> Hypothesis</h2>
+
+      <div class="hypothesis-card">
+        <p class="hypothesis-text" data-i18n="s5.hyp">
+          판매자가 보유한 <em>어종별 제철 시기</em>와 <em>상세 주문 정보</em>를
+          사용자가 한눈에 예측 가능하게 시각화하면,
+          구매자는 실패 리스크를 낮게 인식하고
+          <em>장바구니 담기</em>와 <em>최종 주문전환</em>이 모두 상승할 것이다.
+        </p>
+        <div class="hyp-meta">
+          <span class="hyp-chip" data-i18n="h.c1">정보 예측 가능성 확보</span>
+          <span class="hyp-chip" data-i18n="h.c2">탐색 비용 최소화</span>
+          <span class="hyp-chip" data-i18n="h.c3">구매 확신 형성</span>
+        </div>
+      </div>
+
+      <table class="metrics-table">
+        <thead>
+          <tr>
+            <th data-i18n="hm.comp">Component</th>
+            <th data-i18n="hm.prob">Problem</th>
+            <th data-i18n="hm.hyp">Hypothesis</th>
+            <th data-i18n="hm.kpi">Validation KPI</th>
+          </tr>
+        </thead>
+        <tbody>
+          <tr>
+            <td>Home</td>
+            <td data-i18n="hm1p">후기 중심 구조로 제철 정보 노출 부족</td>
+            <td data-i18n="hm1h">제철 정보를 1-depth 전면 배치</td>
+            <td class="acc">CTR +10%p</td>
+          </tr>
+          <tr>
+            <td>Cart</td>
+            <td data-i18n="hm2p">결정 직전 상품 확신 부족</td>
+            <td data-i18n="hm2h">주문 정보와 신뢰 신호를 동시 배치</td>
+            <td class="acc">CVR +12%p</td>
+          </tr>
+          <tr>
+            <td>Repeat</td>
+            <td data-i18n="hm3p">다시 방문할 이유가 약함</td>
+            <td data-i18n="hm3h">제철 정보 자체를 반복 방문 이유로 설계</td>
+            <td class="acc">30일 재구매율 32%</td>
+          </tr>
+        </tbody>
+      </table>
+
+      <h3 style="font-family:'Lexend',sans-serif;font-size:12px;font-weight:600;color:var(--text-3);letter-spacing:0.14em;text-transform:uppercase;margin:36px 0 18px;" data-i18n="s5.strat.title">3가지 실행 전략</h3>
+      <div class="strategies">
+        <div class="strat-card">
+          <div class="strat-num">전략 01</div>
+          <div class="strat-name" data-i18n="st1.name">제철 정보 시각화 (Visualize)</div>
+          <div class="strat-desc" data-i18n="st1.desc">어종별 제철 시기와 신선도 기준을 캘린더 UI로 표현. 사용자가 '지금 사야 하는 이유'를 즉시 이해할 수 있게 한다.</div>
+        </div>
+        <div class="strat-card">
+          <div class="strat-num">전략 02</div>
+          <div class="strat-name" data-i18n="st2.name">확신 요소 통합 (Commit)</div>
+          <div class="strat-desc" data-i18n="st2.desc">주문 정보·신선도 보장·구매자 후기를 장바구니 단계에 집중 배치. 결정 직전 불확실성을 제거하는 것이 핵심.</div>
+        </div>
+        <div class="strat-card">
+          <div class="strat-num">전략 03</div>
+          <div class="strat-name" data-i18n="st3.name">반복 방문 설계 (Retain)</div>
+          <div class="strat-desc" data-i18n="st3.desc">다음 제철 알림과 맞춤 추천으로 재방문 이유를 만든다. 제철 정보 자체를 서비스 재사용 동기로 전환.</div>
+        </div>
+      </div>
+    </section>
+
+    <!-- 06 ACTION -->
+    <section class="cs-section" id="s6">
+      <div class="cs-section-num">06</div>
+      <h2 class="cs-section-title" data-i18n="s6.title">실행 <em>·</em> Execution</h2>
+
+      <div class="cs-bg-img" style="margin:36px 0;">
+        <img src="./Pickaround/execution-overview.jpg" alt="Execution overview" style="width:100%;height:auto;border-radius:16px;display:block;" />
+      </div>
+
+      <div class="as-is-tobe">
+        <div class="cs-col-card">
+          <h4 data-i18n="s6.asis">As-is — 기존 상태</h4>
+          <ul>
+            <li data-i18n="s6.a1">후기 나열형 홈 화면 중심</li>
+            <li data-i18n="s6.a2">제철/신선도 판단 정보가 분산됨</li>
+            <li data-i18n="s6.a3">어종 비교와 선택 피로가 큼</li>
+            <li data-i18n="s6.a4">장바구니-주문 단계에서 확신을 주지 못함</li>
+          </ul>
+        </div>
+        <div class="arrow-col">
+          <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="var(--accent)" stroke-width="1.5" opacity=".6"><path d="M5 12h14M12 5l7 7-7 7"/></svg>
+        </div>
+        <div class="cs-col-card accent-border">
+          <h4 class="accent" data-i18n="s6.tobe">To-be — 개선 방향</h4>
+          <ul>
+            <li data-i18n="s6.t1">제철 정보 시각화형 홈 화면 개편</li>
+            <li data-i18n="s6.t2">1-depth부터 제철 중심 정보 위계 재설계</li>
+            <li data-i18n="s6.t3">장바구니-주문 단계에 핵심 확신 요소 배치</li>
+            <li data-i18n="s6.t4">반복 방문 이유가 되는 콘텐츠 경험 설계</li>
+          </ul>
+        </div>
+      </div>
+
+      <div class="cs-callout">
+        <p data-i18n="s6.direction">
+          <strong>솔루션 방향:</strong> 구매 결정 시점의 탐색 비용을 줄이는 것이 핵심이었기 때문에,
+          후기보다 <strong>제철 정보의 우선순위</strong>를 높이고,
+          선택·신뢰·주문 정보가 한 흐름 안에서 연결되도록 구조를 재설계했습니다.
+        </p>
+      </div>
+
+      <!-- Visual Priority Framework -->
+      <h3 style="font-family:'Lexend',sans-serif;font-size:12px;font-weight:600;color:var(--text-3);letter-spacing:0.14em;text-transform:uppercase;margin:36px 0 18px;" data-i18n="s6.fw.title">Visual Priority Framework</h3>
+
+      <div class="framework">
+        <div class="fw-card">
+          <div class="fw-rank">1순위</div>
+          <div class="fw-key">제철</div>
+          <div class="fw-label" data-i18n="fw1.label">객관적 어종 시기 정보</div>
+          <div class="fw-example" data-i18n="fw1.ex"><em>지금 가장 맛있는 이유</em>를 먼저 이해시키는 정보</div>
+        </div>
+        <div class="fw-card">
+          <div class="fw-rank">2순위</div>
+          <div class="fw-key">후기</div>
+          <div class="fw-label" data-i18n="fw2.label">실사용자 신뢰 신호</div>
+          <div class="fw-example" data-i18n="fw2.ex">제철 정보 뒤에 배치해 <em>선택 확신</em>을 강화</div>
+        </div>
+        <div class="fw-card">
+          <div class="fw-rank">3순위</div>
+          <div class="fw-key">주문정보</div>
+          <div class="fw-label" data-i18n="fw3.label">구성·양·가격 예측</div>
+          <div class="fw-example" data-i18n="fw3.ex"><em>실패 리스크</em>를 줄이는 실질 정보</div>
+        </div>
+        <div class="fw-card">
+          <div class="fw-rank">4순위</div>
+          <div class="fw-key">배달정보</div>
+          <div class="fw-label" data-i18n="fw4.label">수령 맥락 정보</div>
+          <div class="fw-example" data-i18n="fw4.ex">구매 의사결정 이후 확인되는 보조 정보</div>
+        </div>
+      </div>
+
+      <!-- Conversion Funnel -->
+      <h3 style="font-family:'Lexend',sans-serif;font-size:12px;font-weight:600;color:var(--text-3);letter-spacing:0.14em;text-transform:uppercase;margin:36px 0 18px;" data-i18n="s6.flow.title">Conversion Funnel Redesign</h3>
+
+      <div class="ui-block-list">
+
+        <!-- Step 01 -->
+        <div class="ui-block">
+          <div class="ui-block-header">
+            <div class="ui-block-num" data-i18n="f1.tag">Step 01 · 제철 발견</div>
+            <div class="ui-block-name" data-i18n="f1.t">첫 화면에서 지금 먹어야 할 이유를 바로 보여줍니다</div>
+          </div>
+          <div class="ui-block-meta">
+            <div class="ui-block-left">
+              <p class="ui-voice" style="font-family:'Lexend',sans-serif;font-size:15px;font-weight:600;color:var(--text);margin-bottom:6px;" data-i18n="f1.voice">지금 이 생선이 제철인 이유, 한눈에 보입니다</p>
+              <p class="ui-block-left-sub" data-i18n="f1.sub">사용자는 앱을 열자마자 '지금 뭐가 좋은지' 알 수 있다.</p>
+            </div>
+            <div class="ui-block-right">
+              <p data-i18n="f1.rd1"><strong>Home 화면 재설계:</strong> 제철 어종을 히어로 컴포넌트로 배치. 어종명·시즌 이유·산지를 첫 스크롤 안에 전달해 탐색 비용을 최소화한다.</p>
+              <p data-i18n="f1.rd2"><em>CTR 목표 +10%p</em> — 제철 정보 노출만으로 장바구니 담기까지의 단계를 줄이는 것이 1차 목표.</p>
+            </div>
+          </div>
+          <div class="ui-img-wrap">
+            <img src="./Pickaround/step-01.jpg" alt="Step 01 — 제철 발견" />
+            <span class="ui-img-hint">Image</span>
+          </div>
+        </div>
+
+        <!-- Step 02 -->
+        <div class="ui-block">
+          <div class="ui-block-header">
+            <div class="ui-block-num" data-i18n="f2.tag">Step 02 · 확신 형성</div>
+            <div class="ui-block-name" data-i18n="f2.t">후기와 신선도 정보로 구매 확신을 만들어줍니다</div>
+          </div>
+          <div class="ui-block-meta">
+            <div class="ui-block-left">
+              <p class="ui-voice" style="font-family:'Lexend',sans-serif;font-size:15px;font-weight:600;color:var(--text);margin-bottom:6px;" data-i18n="f2.voice">다른 사람들도 지금 이걸 사고 있어요</p>
+              <p class="ui-block-left-sub" data-i18n="f2.sub">온라인 수산물 구매의 가장 큰 장벽은 '신선도 불신'이다.</p>
+            </div>
+            <div class="ui-block-right">
+              <p data-i18n="f2.rd1"><strong>Info 페이지 강화:</strong> 실사 포장 이미지·구매자 후기·신선도 등급 배지를 판단 근거로 구조화. 불확실성을 줄여 이탈을 방지한다.</p>
+              <p data-i18n="f2.rd2"><em>사회적 증거(Social Proof)</em> 패턴 적용 — "이번 주 OO명 구매" 같은 실시간 구매 신호를 노출해 확신을 가속화.</p>
+            </div>
+          </div>
+          <div class="ui-img-wrap">
+            <img src="./Pickaround/step-02.jpg" alt="Step 02 — 확신 형성" />
+            <span class="ui-img-hint">Image</span>
+          </div>
+        </div>
+
+        <!-- Step 03 -->
+        <div class="ui-block">
+          <div class="ui-block-header">
+            <div class="ui-block-num" data-i18n="f3.tag">Step 03 · 주문 결정</div>
+            <div class="ui-block-name" data-i18n="f3.t">장바구니에서 구성과 가격을 한 번에 재확인합니다</div>
+          </div>
+          <div class="ui-block-meta">
+            <div class="ui-block-left">
+              <p class="ui-voice" style="font-family:'Lexend',sans-serif;font-size:15px;font-weight:600;color:var(--text);margin-bottom:6px;" data-i18n="f3.voice">수량·옵션·가격, 주문 전 마지막으로 확인하세요</p>
+              <p class="ui-block-left-sub" data-i18n="f3.sub">결제 직전 불안감을 해소하는 것이 전환율 방어의 핵심.</p>
+            </div>
+            <div class="ui-block-right">
+              <p data-i18n="f3.rd1"><strong>Cart 페이지 개선:</strong> 구성·양·가격·옵션을 명확하게 요약하고 결제 CTA를 단일화. 불필요한 단계를 제거해 이탈 구간을 줄인다.</p>
+              <p data-i18n="f3.rd2">장바구니 → 결제 전환율 분석 데이터를 기반으로 <em>드롭 구간을 3단계에서 1단계로</em> 단축하는 플로우 재설계.</p>
+            </div>
+          </div>
+          <div class="ui-img-wrap">
+            <img src="./Pickaround/step-03.jpg" alt="Step 03 — 주문 결정" />
+            <span class="ui-img-hint">Image</span>
+          </div>
+        </div>
+
+        <!-- Step 04 -->
+        <div class="ui-block">
+          <div class="ui-block-header">
+            <div class="ui-block-num" data-i18n="f4.tag">Step 04 · 반복 방문</div>
+            <div class="ui-block-name" data-i18n="f4.t">제철 정보 자체가 주기적 재방문의 이유가 됩니다</div>
+          </div>
+          <div class="ui-block-meta">
+            <div class="ui-block-left">
+              <p class="ui-voice" style="font-family:'Lexend',sans-serif;font-size:15px;font-weight:600;color:var(--text);margin-bottom:6px;" data-i18n="f4.voice">다음 달엔 전어 시즌이에요. 미리 알림 받으실래요?</p>
+              <p class="ui-block-left-sub" data-i18n="f4.sub">제철 콘텐츠는 그 자체로 재방문 트리거가 된다.</p>
+            </div>
+            <div class="ui-block-right">
+              <p data-i18n="f4.rd1"><strong>재방문 루프 설계:</strong> 제철 알림 구독·다음 시즌 예고를 통해 앱을 주기적으로 열어야 할 이유를 만든다. 콘텐츠가 리텐션을 구동하는 구조.</p>
+              <p data-i18n="f4.rd2"><em>30일 재구매율 +32%p 목표</em> — 단발 구매가 아닌 시즌 기반 습관 형성으로 LTV를 높이는 핵심 루프.</p>
+            </div>
+          </div>
+          <div class="ui-img-wrap">
+            <img src="./Pickaround/step-04.jpg" alt="Step 04 — 반복 방문" />
+            <span class="ui-img-hint">Image</span>
+          </div>
+        </div>
+
+      </div>
+
+      <!-- Collaboration -->
+      <div class="strategies" style="margin-top:4px;">
+        <div class="strat-card">
+          <div class="strat-num">Operations</div>
+          <div class="strat-name" data-i18n="s6.c.ops">운영팀 협업</div>
+          <div class="strat-desc" data-i18n="s6.c.ops.d">실시간 제철 데이터 업데이트 주기 합의 및 매장 기준과 웹 노출 정보 간 정확도 정렬</div>
+        </div>
+        <div class="strat-card">
+          <div class="strat-num">Design</div>
+          <div class="strat-name" data-i18n="s6.c.des">디자인팀 협업</div>
+          <div class="strat-desc" data-i18n="s6.c.des.d">어종별 신선도 등급 시각화 컴포넌트 설계 및 사용자가 신뢰로 인지하는 정보 위계 정렬</div>
+        </div>
+        <div class="strat-card">
+          <div class="strat-num">Validation</div>
+          <div class="strat-name" data-i18n="s6.c.val">검증 구조</div>
+          <div class="strat-desc" data-i18n="s6.c.val.d">제철 정보 노출군·비노출군 A/B 비교 설계, 장바구니 증가 코호트의 30일 재구매 추적</div>
+        </div>
+      </div>
+
+      <!-- MVP Iteration -->
+      <div class="exec-plan-wrap">
+        <div class="exec-plan-header">
+          <div class="exec-plan-htitle" data-i18n="mvp.title">MVP 제작 실행<br>총 7차 Iteration</div>
+          <div class="exec-plan-hdesc">
+            <p data-i18n="mvp.desc">2025.06–2025.10 동안 <strong>7차 이터레이션</strong>을 통해 정보 수집부터 런칭까지 전 과정을 직접 실행했습니다. 유저 인터뷰 · A/B 테스트 · 데이터 검증을 반복하며 제품을 점진적으로 고도화했습니다.</p>
+          </div>
+        </div>
+
+        <div class="exec-list">
+          <div class="exec-item">
+            <div class="exec-item-left">
+              <div class="exec-item-num" data-i18n="mvp.n1">01</div>
+              <div class="exec-item-title" data-i18n="mvp.t1">정보 수집</div>
+              <div class="exec-item-sub" data-i18n="mvp.s1">VOC 분석, 배달앱 주문 퍼널 조사, 어라운드 자사몰 유저 인터뷰, 수산시장 방문 인터뷰</div>
+            </div>
+            <div class="exec-item-img"><img src="./Pickaround/iter-01.jpg" alt="" /></div>
+          </div>
+          <div class="exec-item">
+            <div class="exec-item-left">
+              <div class="exec-item-num" data-i18n="mvp.n2">02</div>
+              <div class="exec-item-title" data-i18n="mvp.t2">A/B 테스트 · Activation 정의</div>
+              <div class="exec-item-sub" data-i18n="mvp.s2">2차 유저 인터뷰 기반 Activation 지표 정의 및 가설 검증</div>
+            </div>
+            <div class="exec-item-img"><img src="./Pickaround/iter-02.jpg" alt="" /></div>
+          </div>
+          <div class="exec-item">
+            <div class="exec-item-left">
+              <div class="exec-item-num" data-i18n="mvp.n3">03</div>
+              <div class="exec-item-title" data-i18n="mvp.t3">타겟 세그먼트 유저 플로우 정의</div>
+              <div class="exec-item-sub" data-i18n="mvp.s3">User Journey 설계, CTA 이벤트 정의</div>
+            </div>
+            <div class="exec-item-img"><img src="./Pickaround/iter-03.jpg" alt="" /></div>
+          </div>
+          <div class="exec-item">
+            <div class="exec-item-left">
+              <div class="exec-item-num" data-i18n="mvp.n4">04</div>
+              <div class="exec-item-title" data-i18n="mvp.t4">화면 설계 / Hi-Fi 와이어프레임 설계</div>
+              <div class="exec-item-sub" data-i18n="mvp.s4">3차 유저 테스트 및 피드백 수집 (UTM 연결, GA4 확인)</div>
+            </div>
+            <div class="exec-item-img"><img src="./Pickaround/iter-04.jpg" alt="" /></div>
+          </div>
+          <div class="exec-item">
+            <div class="exec-item-left">
+              <div class="exec-item-num" data-i18n="mvp.n5">05</div>
+              <div class="exec-item-title" data-i18n="mvp.t5">피드백 반영 화면 설계 / 기능정의서 / 정책서 제작</div>
+              <div class="exec-item-sub" data-i18n="mvp.s5">토스페이먼츠 연동, 개발 핸드오프 문서 완성</div>
+            </div>
+            <div class="exec-item-img"><img src="./Pickaround/iter-05.jpg" alt="" /></div>
+          </div>
+          <div class="exec-item">
+            <div class="exec-item-left">
+              <div class="exec-item-num" data-i18n="mvp.n6">06</div>
+              <div class="exec-item-title" data-i18n="mvp.t6">어라운드 오프라인 매장 / 토스 플레이스 연동</div>
+              <div class="exec-item-sub" data-i18n="mvp.s6">주문 시 배달까지 연동되는 통합 플로우 구현</div>
+            </div>
+            <div class="exec-item-img"><img src="./Pickaround/iter-06.jpg" alt="" /></div>
+          </div>
+          <div class="exec-item">
+            <div class="exec-item-left">
+              <div class="exec-item-num" data-i18n="mvp.n7">07</div>
+              <div class="exec-item-title" data-i18n="mvp.t7">개발 착수 및 최종 배포</div>
+              <div class="exec-item-sub" data-i18n="mvp.s7">QA · 엣지케이스 정의 · CTA 이벤트 정의서 · GA4 & Amplitude 연동 · 데이터로 골든패스 검증 · 런칭 이벤트 운영</div>
+            </div>
+            <div class="exec-item-img"><img src="./Pickaround/iter-07.jpg" alt="" /></div>
+          </div>
+        </div>
+      </div>
+
+    </section>
+
+    <!-- 07 RESULTS -->
+    <section class="cs-section" id="s7">
+      <div class="cs-section-num">07</div>
+      <h2 class="cs-section-title" data-i18n="s7.title">결과 <em>·</em> Results</h2>
+
+      <div class="result-grid">
+        <div class="result-cell">
+          <div class="result-num">+10%p</div>
+          <div class="result-desc" data-i18n="r1.d">제철 정보 콘텐츠 조회 및 장바구니 담기 CTR 상승</div>
+          <div class="result-sub" data-i18n="r1.s">탐색 비용 감소가 활성화 지표로 연결</div>
+        </div>
+        <div class="result-cell">
+          <div class="result-num">+12%p</div>
+          <div class="result-desc" data-i18n="r2.d">자사몰 주문전환율 CVR 상승</div>
+          <div class="result-sub" data-i18n="r2.s">장바구니 이후 심리적 허들 완화</div>
+        </div>
+        <div class="result-cell">
+          <div class="result-num">32%</div>
+          <div class="result-desc" data-i18n="r3.d">30일 재구매율 달성</div>
+          <div class="result-sub" data-i18n="r3.s">신뢰 기반의 반복 구매 구조 형성</div>
+        </div>
+        <div class="result-cell">
+          <div class="result-num">UE↑</div>
+          <div class="result-desc" data-i18n="r4.d">수익성 기반 및 Unit Economics 개선</div>
+          <div class="result-sub" data-i18n="r4.s">자사몰 중심 성장 구조 검증</div>
+        </div>
+      </div>
+
+      <!-- A/B Chart -->
+      <h3 style="font-family:'Lexend',sans-serif;font-size:12px;font-weight:600;color:var(--text-3);letter-spacing:0.14em;text-transform:uppercase;margin:36px 0 18px;" data-i18n="s7.ab.title">A/B Test — 기존 후기 중심 vs. 제철 정보 중심</h3>
+
+      <div class="ab-chart">
+        <div class="ab-legend">
+          <div class="ab-legend-item"><div class="ab-legend-dot base"></div><span data-i18n="ab.base">기존 후기 중심 홈</span></div>
+          <div class="ab-legend-item"><div class="ab-legend-dot impr"></div><span data-i18n="ab.impr">제철 정보 중심 홈</span></div>
+        </div>
+        <div class="ab-rows">
+          <div class="ab-row">
+            <div class="ab-metric" data-i18n="abm1">콘텐츠 조회율</div>
+            <div class="ab-bars">
+              <div class="ab-bar-row"><div class="ab-bar-track"><div class="ab-bar-fill base" style="width:58%"></div></div><div class="ab-val base">58%</div></div>
+              <div class="ab-bar-row"><div class="ab-bar-track"><div class="ab-bar-fill impr" style="width:68%"></div></div><div class="ab-val impr">68%</div></div>
+            </div>
+          </div>
+          <div class="ab-row">
+            <div class="ab-metric" data-i18n="abm2">장바구니 담기 CTR</div>
+            <div class="ab-bars">
+              <div class="ab-bar-row"><div class="ab-bar-track"><div class="ab-bar-fill base" style="width:36%"></div></div><div class="ab-val base">36%</div></div>
+              <div class="ab-bar-row"><div class="ab-bar-track"><div class="ab-bar-fill impr" style="width:46%"></div></div><div class="ab-val impr">46%</div></div>
+            </div>
+          </div>
+          <div class="ab-row">
+            <div class="ab-metric" data-i18n="abm3">주문전환율 CVR</div>
+            <div class="ab-bars">
+              <div class="ab-bar-row"><div class="ab-bar-track"><div class="ab-bar-fill base" style="width:22%"></div></div><div class="ab-val base">22%</div></div>
+              <div class="ab-bar-row"><div class="ab-bar-track"><div class="ab-bar-fill impr" style="width:34%"></div></div><div class="ab-val impr">34%</div></div>
+            </div>
+          </div>
+          <div class="ab-row">
+            <div class="ab-metric" data-i18n="abm4">장바구니 이탈률</div>
+            <div class="ab-bars">
+              <div class="ab-bar-row"><div class="ab-bar-track"><div class="ab-bar-fill base" style="width:70%"></div></div><div class="ab-val base">70%</div></div>
+              <div class="ab-bar-row"><div class="ab-bar-track"><div class="ab-bar-fill impr" style="width:52%"></div></div><div class="ab-val impr">52%</div></div>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <!-- Input → Output table -->
+      <table class="metrics-table">
+        <thead>
+          <tr>
+            <th data-i18n="io.inp">Input</th>
+            <th data-i18n="io.ab">Validation</th>
+            <th data-i18n="io.out">Output</th>
+          </tr>
+        </thead>
+        <tbody>
+          <tr>
+            <td data-i18n="io1i">제철 정보 조회 증가</td>
+            <td class="acc">CTR +10%p</td>
+            <td data-i18n="io1o">장바구니 진입 증가</td>
+          </tr>
+          <tr>
+            <td data-i18n="io2i">탐색 비용 감소</td>
+            <td class="acc">CVR +12%p</td>
+            <td data-i18n="io2o">주문 완료율 상승</td>
+          </tr>
+          <tr>
+            <td data-i18n="io3i">신뢰 기반 구매 경험</td>
+            <td class="acc">30일 재구매 32%</td>
+            <td data-i18n="io3o">반복 방문 및 수익성 개선</td>
+          </tr>
+        </tbody>
+      </table>
+
+      <div class="cs-callout">
+        <p data-i18n="s7.summary">
+          <strong>Core Achievement:</strong> 수산물 커머스에서 핵심은 기능 추가가 아니라,
+          사용자가 모르던 정보를 <strong>예측 가능한 신뢰 신호</strong>로 바꾸는 것이었습니다.
+          제철 정보 경험은 조회에서 장바구니, 결제, 재구매까지 이어지는 퍼널을 실제로 개선했습니다.
+        </p>
+      </div>
+    </section>
+
+    <!-- 08 LESSONS -->
+    <section class="cs-section" id="s8">
+      <div class="cs-section-num">08</div>
+      <h2 class="cs-section-title" data-i18n="s8.title">레슨런 <em>·</em> Lessons</h2>
+
+      <div class="lesson-list">
+        <div class="lesson-item">
+          <div class="lesson-icon">L1</div>
+          <div class="lesson-content">
+            <h4 data-i18n="l1.h">표면 지표 뒤의 불확실성을 찾아야 진짜 문제를 정의할 수 있다</h4>
+            <p data-i18n="l1.p">높은 이탈률만으로는 답을 찾을 수 없었습니다. 인터뷰를 통해 사용자의 핵심 심리가 <strong>정보 부족으로 인한 실패 불안</strong>임을 파악했고, 이를 다시 CTR·CVR로 검증하는 구조를 학습했습니다.</p>
+          </div>
+        </div>
+        <div class="lesson-item">
+          <div class="lesson-icon">L2</div>
+          <div class="lesson-content">
+            <h4 data-i18n="l2.h">도메인 특화된 정보 비대칭 해결이 가장 큰 비즈니스 레버다</h4>
+            <p data-i18n="l2.p">기술 구현 자체보다 중요한 것은 도메인 안에서만 성립하는 불확실성을 해소하는 일이었습니다. 수산물 커머스에서는 <strong>제철·신선도 정보</strong>가 바로 전환의 레버였습니다.</p>
+          </div>
+        </div>
+        <div class="lesson-item">
+          <div class="lesson-icon">L3</div>
+          <div class="lesson-content">
+            <h4 data-i18n="l3.h">Build-Measure-Learn 사이클은 설득과 협업의 언어가 된다</h4>
+            <p data-i18n="l3.p">운영팀과는 데이터 업데이트 프로세스를, 디자인팀과는 신뢰 시각화 컴포넌트를, 외부 파트너와는 실제 운영 가능 구조를 맞췄습니다. <strong>실험과 검증을 반복하는 구조</strong>가 협업의 기준점이 되었습니다.</p>
+          </div>
+        </div>
+        <div class="lesson-item">
+          <div class="lesson-icon">L4</div>
+          <div class="lesson-content">
+            <h4 data-i18n="l4.h">실제 매출 구조와 연결되는 PM 역량은 오프라인 시스템까지 설계하는 데서 나온다</h4>
+            <p data-i18n="l4.p">이번 프로젝트는 단순 웹 개선이 아니라 오프라인 매장과 연결되는 주문 시스템 구조를 설계한 경험이었습니다. <strong>서비스가 실제로 굴러가고 수익성에 기여하도록</strong> 만드는 관점을 강화했습니다.</p>
+          </div>
+        </div>
+      </div>
+    </section>
+
+  </div><!-- /cs-body -->
+
+  <div class="cs-next">
+    <div>
+      <div class="next-label" data-i18n="next.label">다음 케이스 스터디</div>
+      <a href="/case-study-kakao" class="next-link" style="display:block;">
+        <div class="next-title" data-i18n="next.title">Explainable UX for AV →</div>
+      </a>
+    </div>
+    <a href="/case-study-kakao" class="next-link next-arrow">↗</a>
+  </div>
+
+  <footer>
+    <p>© 2026 Sumin Lee</p>
+    <p>
+      <a href="/index"
+         style="font-size:11px;color:var(--text-3);transition:color .2s;"
+         onmouseover="this.style.color='var(--accent)'"
+         onmouseout="this.style.color='var(--text-3)'"
+         data-i18n="footer.back">← Projects</a>
+    </p>
+  </footer>
+
+  <script>
+    /* ── i18n ───────────────────────────────────────── */
+    const en = {
+      'nav.work':'Projects','nav.about':'About','nav.contact':'Contact',
+      'hero.sub':'Noterindas · Seafood Commerce · 2025',
+      'hero.eyebrow':'Seasonality Commerce · Information Asymmetry · Conversion',
+      'hero.h1':'Seasonality-Based Seafood <em>Reorder Rate Optimization</em> Case',
+      'hero.question':'This project tackled the core business problem behind high delivery-platform fees and weak profitability by redesigning the direct mall experience around the biggest seafood purchase barrier: information asymmetry in seasonality and freshness.',
+      'meta.role.l':'Role','meta.role.v':'Product Owner',
+      'meta.period.l':'Period','meta.domain.l':'Domain','meta.domain.v':'Seafood Commerce',
+      'meta.tools.l':'Tools','meta.tools.v':'Interview · Funnel Analysis · A/B Test · Cohort',
+      's1.title':'Background <em>·</em> Context',
+      's1.p1':'Around shortened the seafood distribution chain from <strong>7 steps to 2</strong>, creating a real cost advantage. But a large share of sales still depended on delivery platforms, so fees of up to 20% erased that structural benefit.',
+      's1.p2':'At the same time, the company planned to expand to multiple Seoul districts, making a <strong>unified online ordering system</strong> essential beyond address-limited delivery zones.',
+      's1.bm':'Business Model','s1.bm1':'Direct commerce based on in-house sourcing',
+      's1.bm2':'Reduced distribution cost with delivery-app and D2C parallel sales',
+      's1.bm3':'Planned district-based offline store expansion in Seoul',
+      's1.bm4':'Need for an integrated online ordering structure beyond delivery radius',
+      's1.risk':'Key Risk','s1.r1':'Up to 20% of monthly net profit lost to platform fees',
+      's1.r2':'74% drop-off in crowded sashimi/sushi category on delivery apps',
+      's1.r3':'Store expansion still constrained by delivery coverage limits',
+      's1.r4':'Without D2C conversion, sustainable growth becomes impossible',
+      's1.conclusion':'<strong>Business Insight:</strong> The cost advantage already existed. The real challenge was converting that advantage into profit by <strong>reducing platform dependency and increasing direct-mall conversion</strong>.',
+      's2.title':'Goal <em>·</em> KPIs',
+      'kpi1':'Seasonality-content CTR<br>and add-to-cart uplift',
+      'kpi2':'Direct-mall order<br>CVR increase',
+      'kpi3':'30-day repurchase<br>rate target',
+      's2.inp':'Input (leading metrics)','s2.i1':'Grow seasonality-content consumption',
+      's2.i2':'<strong>Improve add-to-cart CTR by +10%p</strong>','s2.i3':'Reduce post-content cart abandonment',
+      's2.i4':'Validate lower search cost in decision-making',
+      's2.out':'Output (outcome metrics)','s2.o1':'<strong>Direct-mall order CVR +12%p</strong>',
+      's2.o2':'<strong>Achieve 32% 30-day repurchase rate</strong>','s2.o3':'<strong>Profitability foundation & Unit Economics improvement</strong>',
+      's2.o4':'Validate a D2C-led expansion strategy',
+      's2.method':'<strong>Validation Plan:</strong> A/B test comparing exposed vs. non-exposed groups, cohort repurchase tracking, and funnel drop-off analysis to connect leading metrics with business impact.',
+      's3.title':'Data Analysis',
+      's3.bigstat':'<strong>88% of new direct-mall MVP users</strong> dropped before purchase — worse than the 78% drop-off from delivery-app users. This showed the core issue was not traffic but a <strong>psychological decision barrier</strong>.',
+      's3.quant':'Quantitative','s3.q1':'Delivery-app funnel: inflow 68% → conversion 22% → drop-off 78%',
+      's3.q2':'New MVP share 12%, but drop-off 88%','s3.q3':'Cart abandonment remained consistently high',
+      's3.q4':'Steep drop between exploration and checkout',
+      's3.qual':'Qualitative — User interviews',
+      's3.p1':'"I added it to my cart but didn\'t know why I should buy it, so I left."',
+      's3.p2':'"There are too many menus and it is hard to choose."',
+      's3.p3':'"I went to the fish market to check what is in season."',
+      's3.p4':'"You need to see seafood in person to know if it is fresh."',
+      'q1':'There were too many options, so I postponed the decision.',
+      'q2':'Without knowing what was in season, I had no strong reason to buy now.',
+      'q3':'Reviews were helpful, but not enough to judge product condition objectively.',
+      'q4':'I was afraid of making a bad choice, so I left after adding items to cart.',
+      's3.stat88':'<strong style="color:var(--text);">88% of new direct-mall MVP users dropped off before completing a purchase.</strong> This exceeded the 78% drop-off rate seen in delivery-app users — suggesting the barrier wasn\'t just low traffic, but a stronger <strong style="color:var(--text);">psychological hurdle at the purchase decision stage.</strong>',
+      's3.conclusion':'<strong>Root Cause Conclusion:</strong><br>Users wanted to buy, but the <strong>information asymmetry in seasonality and freshness</strong> made the purchase feel risky. The direct mall, where users had to judge more on their own, showed even higher drop-off.',
+      's3.ki1.title':'Composition Uncertainty',
+      's3.ki1.desc':'"I never know exactly which fish will arrive today."',
+      's3.ki2.title':'Quantity Ambiguity',
+      's3.ki2.desc':'"The size labels — large, medium, small — are so subjective I worry it won\'t be enough."',
+      's3.ki3.title':'Experience Inconsistency',
+      's3.ki3.desc':'"It was great last time, but I\'m not sure it will be this time."',
+      's4.title':'Finding the Problem',
+      'fchart.label':'Quantitative Analysis · Funnel Comparison',
+      'fchart.ch1':'Delivery Apps (Baemin·Coupang)',
+      'fchart.ch2':'Own Mall MVP',
+      'fchart.inflow':'Entry','fchart.conv':'Conv.','fchart.drop':'Drop',
+      'chart1.label':'Payment Concentration by Hour',
+      'chart1.title':'5–10 PM Payment Heatmap',
+      'chart1.sub':'Payment data concentrated Thu/Fri/Sat 5–9 PM → planned meal purchase pattern',
+      's4.seg.title':'User Segment',
+      's4.seg1':'Single-species buyers','s4.seg1d':'Shorter search, but high need for confidence',
+      's4.seg2':'Group / event buyers','s4.seg2d':'High failure cost, stronger reliance on reviews',
+      's4.seg3':'2-person meal + drinks','s4.seg3d':'Repeat buying every 1–2 weeks, high sensitivity to composition',
+      's4.problem':'Sellers know their seasonal catch well, but that knowledge doesn\'t reach buyers — leaving users with an information gap from the moment they arrive to the moment they order.',
+      's4.metrics.q':'How do we improve<br>our key metrics?',
+      's4.m1':'Reduce cart abandonment — Cart-to-order CVR +12%p',
+      's4.m2':'Achieve 30-day repurchase rate of 32%',
+      's5.title':'Hypothesis',
+      's5.hyp':'If seller-owned data such as <em>species seasonality</em> and <em>order details</em> are visualized in a predictable and transparent way, users will feel lower purchase risk, leading to higher <em>add-to-cart</em> and <em>final conversion</em>.',
+      'h.c1':'Predictable information','h.c2':'Lower search cost','h.c3':'Higher purchase confidence',
+      'hm.comp':'Component','hm.prob':'Problem','hm.hyp':'Hypothesis','hm.kpi':'Validation KPI',
+      'hm1p':'Review-led home gives weak seasonality cues','hm1h':'Expose seasonality at 1-depth',
+      'hm2p':'Low confidence right before payment','hm2h':'Place trust signals with order info',
+      'hm3p':'Weak reason to revisit','hm3h':'Turn seasonality into repeat-visit content',
+      's5.strat.title':'3 Execution Strategies',
+      'st1.name':'Visualize Seasonal Data',
+      'st1.desc':'Display species seasonality and freshness standards as a calendar UI — so users instantly understand why they should buy now.',
+      'st2.name':'Consolidate Commitment Signals',
+      'st2.desc':'Bundle order info, freshness guarantees, and buyer reviews at the cart stage — removing uncertainty right before the purchase decision.',
+      'st3.name':'Design for Repeat Visits',
+      'st3.desc':'Drive return trips with next-season alerts and personalized picks — turning seasonal data itself into a re-engagement engine.',
+      's6.title':'Execution',
+      's6.asis':'As-is — Current state','s6.a1':'Review-list home screen',
+      's6.a2':'Seasonality/freshness information scattered',
+      's6.a3':'High comparison fatigue across too many options',
+      's6.a4':'Cart-to-order step fails to build confidence',
+      's6.tobe':'To-be — Improved direction','s6.t1':'Seasonality-visualized home screen',
+      's6.t2':'Rebuilt information hierarchy from the first depth',
+      's6.t3':'Placed key confidence signals in the order decision step',
+      's6.t4':'Created a reason to revisit even without immediate purchase',
+      's6.direction':'<strong>Solution Direction:</strong> Because the real issue was search cost at the point of decision, we elevated <strong>seasonality information above reviews</strong> and redesigned the flow so selection, trust, and ordering logic worked as one experience.',
+      's6.fw.title':'Visual Priority Framework',
+      'fw1.label':'Objective species timing information',
+      'fw1.ex':'Explain <em>why this is the right moment to buy</em> first',
+      'fw2.label':'User trust signal',
+      'fw2.ex':'Place after seasonality to reinforce <em>decision confidence</em>',
+      'fw3.label':'Composition, quantity, and price predictability',
+      'fw3.ex':'Reduce <em>failure risk</em> with practical decision data',
+      'fw4.label':'Receiving-context information',
+      'fw4.ex':'Supportive information checked after purchase intent exists',
+      's6.flow.title':'Conversion Funnel Redesign',
+      'f1.tag':'Step 01 · Discover',
+      'f1.t':'Show users why to buy right now — before they even search.',
+      'f1.voice':'See exactly why this fish is in season right now.',
+      'f1.sub':'Users should know what\'s good the moment they open the app.',
+      'f1.rd1':'<strong>Home screen redesign:</strong> Seasonal catch as hero component. Species, season reason, and origin delivered within the first scroll — minimising discovery friction.',
+      'f1.rd2':'<em>Target: CTR +10%p</em> — reducing steps from seasonal exposure to cart is the primary goal.',
+      'f2.tag':'Step 02 · Build Confidence',
+      'f2.t':'Reviews and freshness data turn hesitation into conviction.',
+      'f2.voice':'Others are buying this right now.',
+      'f2.sub':'The biggest barrier to online seafood purchase is distrust of freshness.',
+      'f2.rd1':'<strong>Info page enhancement:</strong> Real product photos, buyer reviews, and freshness grade badges structured as judgment anchors. Reduces uncertainty and prevents drop-off.',
+      'f2.rd2':'<em>Social proof pattern</em> — real-time purchase signals like "OO people bought this week" accelerate conviction.',
+      'f3.tag':'Step 03 · Decide',
+      'f3.t':'Confirm everything in the cart before committing.',
+      'f3.voice':'Check quantity, options, and price one last time.',
+      'f3.sub':'Resolving last-second anxiety is the key to defending conversion rate.',
+      'f3.rd1':'<strong>Cart page improvement:</strong> Composition, quantity, price, and options clearly summarised; CTA consolidated. Removes unnecessary steps to reduce drop-off.',
+      'f3.rd2':'Based on cart-to-checkout funnel analysis, <em>drop-off points reduced from 3 steps to 1</em> through flow redesign.',
+      'f4.tag':'Step 04 · Return',
+      'f4.t':'Seasonality itself becomes the reason to come back.',
+      'f4.voice':'Next month is yellowtail season. Want a reminder?',
+      'f4.sub':'Seasonal content is its own re-visit trigger.',
+      'f4.rd1':'<strong>Return loop design:</strong> Season alerts and next-season previews give users a reason to reopen the app regularly. Content drives retention.',
+      'f4.rd2':'<em>Target: 30-day repurchase +32%p</em> — building seasonal habits rather than one-off purchases to raise LTV.',
+      's6.c.ops':'Operations Collaboration',
+      's6.c.ops.d':'Agreed update cycle for real-time seasonality data and aligned store standards with web-exposed information.',
+      's6.c.des':'Design Collaboration',
+      's6.c.des.d':'Designed freshness-grade visualization components and aligned information hierarchy with perceived trust.',
+      's6.c.val':'Validation Structure',
+      's6.c.val.d':'A/B test design comparing exposed vs. non-exposed groups; 30-day cohort repurchase tracking.',
+      'mvp.title':'MVP Execution<br>7 Iterations',
+      'mvp.desc':'Across <strong>7 iterations</strong> from June to October 2025, the full cycle from research to launch was executed end-to-end — progressively refining the product through user interviews, A/B tests, and data validation.',
+      'mvp.n1':'01','mvp.t1':'Research & Discovery','mvp.s1':'VOC analysis, delivery-app funnel research, direct-mall user interviews, fish market field visits',
+      'mvp.n2':'02','mvp.t2':'A/B Test · Activation Definition','mvp.s2':'2nd-round user interviews to define Activation metrics and validate hypotheses',
+      'mvp.n3':'03','mvp.t3':'Target Segment User Flow Definition','mvp.s3':'User Journey mapping, CTA event definition',
+      'mvp.n4':'04','mvp.t4':'Screen Design / Hi-Fi Wireframes','mvp.s4':'3rd-round usability test and feedback collection (UTM tracking, GA4 verification)',
+      'mvp.n5':'05','mvp.t5':'Revised Screens / Feature Spec / Policy Docs','mvp.s5':'Toss Payments integration, dev handoff documentation',
+      'mvp.n6':'06','mvp.t6':'Around Offline Store / Toss Place Integration','mvp.s6':'End-to-end flow connecting in-store orders through to delivery',
+      'mvp.n7':'07','mvp.t7':'Development Kickoff & Final Launch','mvp.s7':'QA · edge case definition · CTA event spec · GA4 & Amplitude integration · golden-path validation · launch event operations',
+      's7.title':'Results <em>·</em> Outcomes',
+      'r1.d':'Seasonality-content view and add-to-cart CTR increased','r1.s':'Lower search cost translated into activation',
+      'r2.d':'Direct-mall order CVR increased','r2.s':'Psychological barrier after cart was reduced',
+      'r3.d':'30-day repurchase rate reached 32%','r3.s':'Trust-led repeat purchase structure formed',
+      'r4.d':'Profitability base and improved unit economics','r4.s':'Validated a D2C-centered growth structure',
+      's7.ab.title':'A/B Test — Review-first vs. Seasonality-first',
+      'ab.base':'Review-first home','ab.impr':'Seasonality-first home',
+      'abm1':'Content view rate','abm2':'Add-to-cart CTR','abm3':'Order CVR','abm4':'Cart abandonment',
+      'io.inp':'Input','io.ab':'Validation','io.out':'Output',
+      'io1i':'Seasonality-content consumption increased','io1o':'More users entered cart',
+      'io2i':'Search cost decreased','io2o':'Checkout completion improved',
+      'io3i':'Trust-based purchase experience','io3o':'Repeat visits and profitability improved',
+      's7.summary':'<strong>Core Achievement:</strong> In seafood commerce, the biggest lever was not adding features but translating unknown domain knowledge into <strong>predictable trust signals</strong>. Seasonality content improved the full funnel from browse to cart, payment, and repurchase.',
+      's8.title':'Lessons <em>·</em> Learned',
+      'l1.h':'Real problem definition starts behind the surface metric',
+      'l1.p':'A high drop-off number alone was not enough. Interviews revealed that the core user emotion was <strong>fear of making the wrong choice because of missing information</strong>, and that insight was then validated again with CTR and CVR.',
+      'l2.h':'Solving domain-specific information asymmetry creates the strongest business lever',
+      'l2.p':'The key was not technical feature delivery by itself. In seafood commerce, <strong>seasonality and freshness information</strong> was the real conversion lever.',
+      'l3.h':'The Build-Measure-Learn cycle becomes the language of persuasion and collaboration',
+      'l3.p':'We aligned operations on update processes, design on trust visualization, and external partners on real execution structure. <strong>Repeated testing became the collaboration backbone.</strong>',
+      'l4.h':'PM capability grows when the system works beyond the screen',
+      'l4.p':'This was not just a web improvement project. It was an operational ordering structure connecting online and offline stores, strengthening my perspective on <strong>building revenue-linked systems</strong>.',
+      'next.label':'Next Case Study','next.title':'Explainable UX for AV →',
+      'footer.back':'← Projects'
+    };
+
+    const ko = {};
+    document.querySelectorAll('[data-i18n]').forEach(el => { ko[el.dataset.i18n] = el.innerHTML; });
+
+    let lang = 'ko';
+    function setLang(next) {
+      lang = next;
+      document.documentElement.lang = next;
+      const src = next === 'en' ? en : ko;
+      document.querySelectorAll('[data-i18n]').forEach(el => {
+        el.classList.add('t-fade','fading');
+        setTimeout(() => {
+          if (src[el.dataset.i18n] !== undefined) el.innerHTML = src[el.dataset.i18n];
+          el.classList.remove('fading');
+        }, 220);
+      });
+      document.querySelectorAll('.lang-btn').forEach(b => b.classList.toggle('active', b.dataset.lang === next));
+    }
+    document.getElementById('langToggle').addEventListener('click', e => {
+      const btn = e.target.closest('.lang-btn');
+      if (btn && btn.dataset.lang !== lang) setLang(btn.dataset.lang);
+    });
+
+    /* ── NAV scroll ─────────────── */
+    const nav = document.getElementById('nav');
+    window.addEventListener('scroll', () => nav.classList.toggle('scrolled', scrollY > 40), { passive:true });
+
+    /* ── CURSOR ─────────────────── */
+    const dot = document.getElementById('cur-dot');
+    const ring = document.getElementById('cur-ring');
+    let mx = innerWidth/2, my = innerHeight/2, rx = mx, ry = my;
+    window.addEventListener('mousemove', e => {
+      mx = e.clientX; my = e.clientY;
+      dot.style.left = mx+'px'; dot.style.top = my+'px';
+    });
+    (function anim() {
+      rx += (mx-rx)*.12; ry += (my-ry)*.12;
+      ring.style.left = rx+'px'; ring.style.top = ry+'px';
+      requestAnimationFrame(anim);
+    })();
+    document.querySelectorAll('a,button').forEach(el => {
+      el.addEventListener('mouseenter', () => document.body.classList.add('cursor-link'));
+      el.addEventListener('mouseleave', () => document.body.classList.remove('cursor-link'));
+    });
+
+    /* ── SCROLL REVEAL ───────────── */
+    const obs = new IntersectionObserver(entries => {
+      entries.forEach(e => { if (e.isIntersecting) e.target.classList.add('visible'); });
+    }, { threshold:.06 });
+    document.querySelectorAll('.cs-section').forEach(el => obs.observe(el));
+
+    (function(){
+      const toc=document.getElementById('csToc');
+      if(!toc)return;
+      const sections=document.querySelectorAll('.cs-section[id]');
+      const links=[];
+      sections.forEach(sec=>{
+        const titleEl=sec.querySelector('.cs-section-title,.cs-title');
+        if(!titleEl)return;
+        const parts=titleEl.textContent.split('·');
+        const label=(parts.length>1?parts[parts.length-1]:parts[0]).trim().split('—')[0].trim();
+        const a=document.createElement('a');
+        a.href='#'+sec.id; a.className='cs-toc-link'; a.dataset.target=sec.id;
+        a.innerHTML='<span class="cs-toc-tick"></span><span>'+label+'</span>';
+        toc.appendChild(a); links.push({el:a,sec});
+      });
+      const spy=new IntersectionObserver(entries=>{
+        entries.forEach(e=>{const l=links.find(x=>x.sec===e.target);if(l)l.el.classList.toggle('active',e.isIntersecting);});
+      },{rootMargin:'-20% 0px -65% 0px',threshold:0});
+      sections.forEach(s=>spy.observe(s));
+      toc.addEventListener('click',e=>{const a=e.target.closest('.cs-toc-link');if(!a)return;e.preventDefault();document.getElementById(a.dataset.target)?.scrollIntoView({behavior:'smooth'});});
+      const hero=document.querySelector('.cs-hero');
+      if(hero){toc.style.opacity='0';toc.style.visibility='hidden';new IntersectionObserver(es=>{const v=!es[0].isIntersecting;toc.style.opacity=v?'1':'0';toc.style.visibility=v?'visible':'hidden';toc.style.pointerEvents=v?'auto':'none';},{threshold:0.05}).observe(hero);}
+    })();
+  </script>
+</body>
+</html>

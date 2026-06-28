@@ -1,0 +1,754 @@
+---
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+  <base href="/">
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>카카오 이동 중 선물하기 · In-Car Commerce — Sumin Lee</title>
+  <link rel="icon" type="image/png" href="./favicon.png" />
+  <link rel="preconnect" href="https://fonts.googleapis.com" />
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+  <link href="https://fonts.googleapis.com/css2?family=Lexend:wght@300;400;500;600;700&family=Inter:wght@300;400;500;600&display=swap" rel="stylesheet" />
+  <style>
+    :root {
+      --bg:        #0B0C11;
+      --bg-2:      #111318;
+      --bg-card:   #15161C;
+      --bg-card-h: #1C1D25;
+      --accent:    #F472B6;
+      --accent-dim: rgba(244,114,182,.10);
+      --accent-glow: rgba(244,114,182,.22);
+      --text:      #F0ECE6;
+      --text-2:    #CCCAC6;
+      --text-3:    #5A5A66;
+      --border:    rgba(255,255,255,0.07);
+      --border-h:  rgba(255,255,255,0.13);
+    }
+    *, *::before, *::after { margin:0; padding:0; box-sizing:border-box; }
+    html { scroll-behavior: smooth; }
+    body {
+      background-color: var(--bg);
+      background-image:
+        radial-gradient(ellipse 80% 55% at -5% -5%, rgba(40,10,30,.6) 0%, transparent 50%),
+        radial-gradient(ellipse 50% 40% at 105% 105%, rgba(10,6,20,.9) 0%, transparent 48%),
+        radial-gradient(ellipse 60% 40% at 60% 0%, rgba(244,114,182,.02) 0%, transparent 55%);
+      color: var(--text); font-family: 'Inter', sans-serif;
+      font-size: 16px; line-height: 1.6; overflow-x: hidden;
+      -webkit-font-smoothing: antialiased; cursor: none;
+    }
+    a { color: inherit; text-decoration: none; cursor: none; }
+
+    #grain { position:fixed; inset:0; z-index:998; pointer-events:none; opacity:.038; background-image:url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='256' height='256'%3E%3Cfilter id='n'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.85' numOctaves='4' stitchTiles='stitch'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23n)'/%3E%3C/svg%3E"); background-repeat:repeat; background-size:256px 256px; }
+    #cur-dot { position:fixed; width:6px; height:6px; background:var(--text); border-radius:50%; pointer-events:none; z-index:9999; transform:translate(-50%,-50%); transition:width .15s,height .15s,background .15s; }
+    #cur-ring { position:fixed; width:34px; height:34px; border:1px solid rgba(240,236,230,.22); border-radius:50%; pointer-events:none; z-index:9998; transform:translate(-50%,-50%); transition:width .3s,height .3s,border-color .3s,opacity .3s; }
+    body.cursor-link #cur-dot { width:44px; height:44px; background:var(--accent-dim); border:1px solid var(--accent-glow); }
+    body.cursor-link #cur-ring { opacity:0; }
+
+    /* NAV */
+    nav { position:fixed; inset:0 0 auto; z-index:200; padding:22px 64px; display:flex; justify-content:space-between; align-items:center; transition:background .4s,border-color .4s; border-bottom:1px solid transparent; }
+    nav.scrolled { background:rgba(11,12,17,.88); backdrop-filter:blur(20px); border-color:var(--border); }
+    .nav-back { display:flex; align-items:center; gap:10px; font-size:12px; letter-spacing:0.1em; text-transform:uppercase; color:var(--text-3); transition:color .2s; }
+    .nav-back:hover { color:var(--text); }
+    .nav-back:hover svg { transform:translateX(-3px); }
+    .nav-back svg { transition:transform .2s; }
+    .nav-right { display:flex; align-items:center; gap:40px; }
+    .nav-links { display:flex; gap:36px; list-style:none; }
+    .nav-links a { font-size:13px; letter-spacing:.06em; color:var(--text-2); transition:color .2s; position:relative; }
+    .nav-links a::after { content:''; position:absolute; left:0; bottom:-3px; width:0; height:1px; background:var(--accent); transition:width .3s; }
+    .nav-links a:hover { color:var(--text); }
+    .nav-links a:hover::after { width:100%; }
+    .lang-toggle { display:flex; align-items:center; gap:4px; border:1px solid var(--border); border-radius:100px; padding:3px 4px; }
+    .lang-btn { background:none; border:none; outline:none; cursor:none; font-family:'Lexend',sans-serif; font-size:10px; font-weight:600; letter-spacing:0.1em; color:var(--text-3); padding:4px 10px; border-radius:100px; transition:background .2s,color .2s; }
+    .lang-btn.active { background:var(--accent); color:#0B0C11; }
+    .lang-btn:hover:not(.active) { color:var(--text); }
+
+    /* HERO */
+    .cs-hero { min-height:100vh; display:flex; flex-direction:column; justify-content:flex-end; padding:0 64px 80px; position:relative; overflow:hidden; }
+    .cs-hero-bg { position:absolute; inset:0; background: radial-gradient(ellipse 70% 60% at 100% 0%, rgba(244,114,182,.05) 0%, transparent 55%), radial-gradient(ellipse 50% 40% at 0% 100%, rgba(40,10,30,.4) 0%, transparent 50%); }
+    .cs-hero-img { position:absolute; inset:0; width:100%; height:100%; object-fit:cover; opacity:.15; z-index:0; pointer-events:none; }
+    .cs-hero-number { font-family:'Lexend',sans-serif; font-size:180px; font-weight:700; letter-spacing:-12px; color:rgba(244,114,182,.04); line-height:1; position:absolute; right:40px; bottom:60px; user-select:none; pointer-events:none; }
+    .cs-eyebrow { display:inline-flex; align-items:center; gap:8px; font-size:10px; font-weight:500; letter-spacing:0.22em; text-transform:uppercase; color:var(--accent); margin-bottom:28px; opacity:0; animation:fadeUp .7s .2s forwards; }
+    .cs-eyebrow::before { content:''; width:3px; height:12px; background:var(--accent); border-radius:2px; }
+    .cs-hero h1 { font-family:'Lexend',sans-serif; font-size:clamp(30px,4.8vw,70px); font-weight:700; letter-spacing:-2px; line-height:1.05; margin-bottom:28px; opacity:0; animation:fadeUp .9s .3s forwards; }
+    .cs-hero h1 em { font-style:normal; color:var(--accent); }
+    .cs-hero-sub { font-size:13px; letter-spacing:0.06em; text-transform:uppercase; color:var(--text-3); margin-bottom:16px; opacity:0; animation:fadeUp .7s .25s forwards; }
+    .cs-hero-question { font-size:clamp(14px,1.4vw,18px); color:var(--text-2); max-width:620px; line-height:1.75; font-weight:300; opacity:0; animation:fadeUp .8s .45s forwards; }
+    .cs-hero-meta { display:flex; gap:48px; flex-wrap:wrap; margin-top:56px; padding-top:40px; border-top:1px solid var(--border); opacity:0; animation:fadeUp .7s .6s forwards; }
+    .meta-label { font-size:9px; letter-spacing:0.22em; text-transform:uppercase; color:var(--text-3); margin-bottom:6px; }
+    .meta-val { font-family:'Lexend',sans-serif; font-size:14px; font-weight:500; color:var(--text); }
+    @keyframes fadeUp { from { opacity:0; transform:translateY(16px); } to { opacity:1; transform:translateY(0); } }
+
+    /* BODY */
+    .cs-body { max-width:900px; margin:0 auto; padding:0 64px 160px; }
+    @media (max-width:900px) { .cs-body{padding:0 28px 100px;} nav{padding:18px 28px;} .cs-hero{padding:0 28px 60px;} }
+
+    /* SECTION */
+    .cs-section { padding:80px 0; border-top:1px solid var(--border); opacity:0; transform:translateY(28px); transition:opacity .75s,transform .75s; }
+    .cs-section.visible { opacity:1; transform:none; }
+    .cs-num { font-family:'Lexend',sans-serif; font-size:11px; font-weight:500; letter-spacing:0.22em; text-transform:uppercase; color:var(--accent); margin-bottom:8px; }
+    .cs-title { font-family:'Lexend',sans-serif; font-size:clamp(24px,3vw,36px); font-weight:700; letter-spacing:-1px; line-height:1.1; margin-bottom:40px; color:var(--text); }
+    .cs-title em { font-style:normal; color:var(--accent); }
+    .cs-p { font-size:15px; color:var(--text-2); line-height:1.85; margin-bottom:20px; }
+    .cs-p:last-child { margin-bottom:0; }
+    .cs-p strong { color:var(--text); font-weight:500; }
+
+    /* CALLOUT */
+    .cs-callout { border-left:3px solid var(--accent); padding:20px 24px; background:rgba(244,114,182,.04); border-radius:0 8px 8px 0; margin:32px 0; }
+    .cs-callout p { font-size:15px; color:var(--text); line-height:1.8; }
+    .cs-callout strong { color:var(--accent); }
+
+    /* TWO COL */
+    .cs-two-col { display:grid; grid-template-columns:1fr 1fr; gap:24px; margin:28px 0; }
+    @media (max-width:640px) { .cs-two-col{grid-template-columns:1fr;} }
+    .cs-col-card { background:var(--bg-card); border:1px solid var(--border); border-radius:12px; padding:28px; }
+    .cs-col-card h4 { font-family:'Lexend',sans-serif; font-size:12px; font-weight:600; letter-spacing:0.1em; text-transform:uppercase; color:var(--text-3); margin-bottom:16px; }
+    .cs-col-card h4.accent { color:var(--accent); }
+    .cs-col-card ul { list-style:none; display:flex; flex-direction:column; gap:10px; }
+    .cs-col-card ul li { font-size:14px; color:var(--text-2); line-height:1.65; padding-left:16px; position:relative; }
+    .cs-col-card ul li::before { content:''; position:absolute; left:0; top:9px; width:5px; height:5px; border-radius:50%; background:var(--border-h); }
+    .cs-col-card.accent-border { border-color:rgba(244,114,182,.22); background:rgba(244,114,182,.025); }
+    .cs-col-card.accent-border ul li::before { background:var(--accent); opacity:.6; }
+
+    /* BIG STAT */
+    .big-stat-block { display:flex; align-items:center; gap:32px; padding:40px; background:var(--bg-card); border:1px solid var(--border); border-radius:16px; margin:36px 0; position:relative; overflow:hidden; }
+    .big-stat-block::before { content:''; position:absolute; inset:0; background:radial-gradient(ellipse 60% 70% at 0% 50%, rgba(244,114,182,.07) 0%, transparent 60%); }
+    .big-stat-num { font-family:'Lexend',sans-serif; font-size:clamp(60px,8vw,100px); font-weight:700; letter-spacing:-4px; color:var(--accent); line-height:1; flex-shrink:0; }
+    .big-stat-desc { font-size:15px; color:var(--text-2); line-height:1.75; }
+    .big-stat-desc strong { color:var(--text); font-weight:500; }
+
+    /* SEGMENT */
+    .segments { display:grid; grid-template-columns:1fr 1fr; gap:12px; margin:28px 0; }
+    @media (max-width:640px) { .segments{grid-template-columns:1fr;} }
+    .segment-card { background:var(--bg-card); border:1px solid var(--border); border-radius:10px; padding:18px; }
+    .segment-card.target { border-color:rgba(244,114,182,.35); background:rgba(244,114,182,.03); }
+    .seg-icon { font-size:20px; margin-bottom:10px; }
+    .seg-name { font-family:'Lexend',sans-serif; font-size:13px; font-weight:600; color:var(--text); margin-bottom:4px; }
+    .seg-name .target-badge { font-size:9px; font-weight:600; letter-spacing:0.1em; text-transform:uppercase; color:var(--accent); background:rgba(244,114,182,.12); padding:2px 7px; border-radius:100px; margin-left:6px; }
+    .seg-desc { font-size:12px; color:var(--text-3); line-height:1.55; }
+
+    /* HYPOTHESIS */
+    .hypothesis-card { background:var(--bg-card); border:1px solid rgba(244,114,182,.2); border-radius:12px; padding:36px; margin:28px 0; position:relative; overflow:hidden; }
+    .hypothesis-card::before { content:'"'; position:absolute; top:-10px; left:20px; font-family:'Lexend',sans-serif; font-size:120px; font-weight:700; color:rgba(244,114,182,.06); line-height:1; pointer-events:none; }
+    .hypothesis-text { font-family:'Lexend',sans-serif; font-size:clamp(15px,1.8vw,20px); font-weight:500; line-height:1.65; color:var(--text); letter-spacing:-0.2px; position:relative; z-index:1; }
+    .hypothesis-text em { color:var(--accent); font-style:normal; }
+    .hyp-meta { margin-top:20px; padding-top:18px; border-top:1px solid var(--border); display:flex; flex-wrap:wrap; gap:8px; }
+    .hyp-chip { font-size:11px; padding:4px 12px; border:1px solid rgba(244,114,182,.2); border-radius:100px; color:var(--text-3); }
+
+    /* QUOTE GRID */
+    .quote-grid { display:grid; grid-template-columns:1fr 1fr; gap:16px; margin:28px 0; }
+    @media (max-width:640px) { .quote-grid{grid-template-columns:1fr;} }
+    .quote-card { background:var(--bg-card); border:1px solid var(--border); border-radius:10px; padding:20px 20px 20px 24px; position:relative; }
+    .quote-card::before { content:'"'; position:absolute; top:8px; left:14px; font-family:'Lexend',sans-serif; font-size:36px; color:var(--accent); opacity:.3; line-height:1; }
+    .quote-text { font-size:14px; color:var(--text-2); line-height:1.7; padding-top:12px; }
+    .quote-tag { font-size:10px; letter-spacing:0.1em; text-transform:uppercase; color:var(--accent); margin-bottom:6px; font-weight:600; padding-top:12px; }
+
+    /* AB TEST */
+    .ab-grid { display:grid; grid-template-columns:1fr 1fr; gap:2px; background:var(--border); margin:32px 0; }
+    .ab-card { background:var(--bg-card); padding:32px 28px; }
+    .ab-label { font-family:'Lexend',sans-serif; font-size:11px; font-weight:700; letter-spacing:.18em; text-transform:uppercase; margin-bottom:16px; }
+    .ab-label.control { color:var(--text-3); }
+    .ab-label.variant { color:var(--accent); }
+    .ab-card ul { list-style:none; display:flex; flex-direction:column; gap:10px; }
+    .ab-card ul li { font-size:14px; color:var(--text-2); line-height:1.65; padding-left:16px; position:relative; }
+    .ab-card ul li::before { content:''; position:absolute; left:0; top:9px; width:5px; height:5px; border-radius:50%; background:var(--border-h); }
+    .ab-card.variant-card ul li::before { background:var(--accent); opacity:.6; }
+
+    /* COPY CARD */
+    .copy-card { background:var(--bg-card); border:1px solid rgba(244,114,182,.22); border-radius:12px; padding:32px; margin:24px 0; text-align:center; }
+    .copy-label { font-size:10px; font-weight:600; letter-spacing:.22em; text-transform:uppercase; color:var(--text-3); margin-bottom:20px; }
+    .copy-text { font-family:'Lexend',sans-serif; font-size:clamp(18px,2.5vw,28px); font-weight:600; color:var(--text); line-height:1.4; }
+    .copy-text em { color:var(--accent); font-style:normal; }
+
+    /* FUNNEL */
+    .funnel { display:flex; align-items:center; gap:8px; margin:32px 0; flex-wrap:wrap; }
+    .funnel-step { background:var(--bg-card); border:1px solid var(--border); border-radius:8px; padding:16px 20px; flex:1; min-width:100px; text-align:center; }
+    .funnel-step.accent { border-color:rgba(244,114,182,.3); background:rgba(244,114,182,.04); }
+    .funnel-metric { font-family:'Lexend',sans-serif; font-size:18px; font-weight:700; color:var(--accent); margin-bottom:4px; }
+    .funnel-label { font-size:11px; color:var(--text-3); line-height:1.4; }
+    .funnel-arrow { color:var(--text-3); font-size:16px; flex-shrink:0; }
+
+    /* PROB STATEMENT */
+    .prob-statement-card { background:var(--bg-card); border:1px solid var(--border); border-radius:16px; padding:52px 48px; text-align:center; margin:32px 0; }
+    .prob-icon-wrap { width:48px; height:48px; border:1px solid var(--accent); border-radius:50%; display:flex; align-items:center; justify-content:center; margin:0 auto 14px; color:var(--accent); }
+    .prob-stmt-label { font-size:10px; font-weight:600; letter-spacing:.22em; text-transform:uppercase; color:var(--text-3); margin-bottom:22px; }
+    .prob-quote { font-family:'Lexend',sans-serif; font-size:clamp(15px,1.8vw,22px); font-weight:500; line-height:1.65; color:var(--text); max-width:720px; margin:0 auto; }
+
+    /* RESULT GRID */
+    .result-grid { display:grid; grid-template-columns:repeat(4,1fr); gap:2px; background:var(--border); margin:36px 0; }
+    @media (max-width:640px) { .result-grid{grid-template-columns:1fr 1fr;} }
+    .result-cell { background:var(--bg-card); padding:32px 28px; position:relative; overflow:hidden; }
+    .result-cell::before { content:''; position:absolute; bottom:0; left:0; right:0; height:2px; background:linear-gradient(to right, var(--accent), transparent); }
+    .result-num { font-family:'Lexend',sans-serif; font-size:42px; font-weight:700; letter-spacing:-3px; color:var(--accent); line-height:1; margin-bottom:10px; }
+    .result-desc { font-size:13px; color:var(--text-2); line-height:1.6; }
+    .result-sub { font-size:11px; color:var(--text-3); margin-top:4px; letter-spacing:0.04em; }
+
+    /* LESSON LIST */
+    .lesson-list { display:flex; flex-direction:column; gap:24px; margin:28px 0; }
+    .lesson-item { display:grid; grid-template-columns:40px 1fr; gap:16px; align-items:start; }
+    .lesson-icon { width:40px; height:40px; border-radius:50%; background:rgba(244,114,182,.1); border:1px solid rgba(244,114,182,.25); display:flex; align-items:center; justify-content:center; font-family:'Lexend',sans-serif; font-size:12px; font-weight:700; color:var(--accent); flex-shrink:0; }
+    .lesson-content h4 { font-family:'Lexend',sans-serif; font-size:15px; font-weight:600; color:var(--text); margin-bottom:8px; margin-top:10px; }
+    .lesson-content p { font-size:14px; color:var(--text-2); line-height:1.8; }
+
+    /* IMAGE */
+    .img-wrap { width:100%; background:transparent; border:1px solid var(--border); border-radius:14px; overflow:hidden; margin:24px 0; }
+    .img-wrap img { width:100%; height:auto; display:block; }
+
+    /* RESULTS TABLE */
+    .results-table { width:100%; border-collapse:collapse; margin:32px 0; }
+    .results-table th { font-family:'Lexend',sans-serif; font-size:10px; font-weight:600; letter-spacing:.14em; text-transform:uppercase; color:var(--text-3); padding:12px 16px; border-bottom:1px solid var(--border); text-align:left; }
+    .results-table td { font-size:14px; color:var(--text-2); padding:16px 16px; border-bottom:1px solid var(--border); }
+    .results-table td:first-child { color:var(--text); font-weight:500; }
+    .results-table td.improvement { color:var(--accent); font-family:'Lexend',sans-serif; font-weight:600; }
+    .results-table tr:last-child td { border-bottom:none; }
+
+    /* TOC */
+    .cs-toc { position:fixed; right:28px; top:50%; transform:translateY(-50%); z-index:150; display:flex; flex-direction:column; gap:0; pointer-events:auto; align-items:flex-start; width:max-content; opacity:0; visibility:hidden; transition:opacity .4s,visibility .4s; }
+    .cs-toc.toc-visible { opacity:1; visibility:visible; }
+    .cs-toc-link { display:flex; align-items:center; gap:10px; padding:5px 0; color:var(--text-3); font-size:11px; letter-spacing:0.03em; white-space:nowrap; text-decoration:none; cursor:none; transition:color .25s,opacity .25s; opacity:.4; }
+    .cs-toc-link:hover { color:var(--text-2); opacity:.85; }
+    .cs-toc-link.active { color:var(--accent); opacity:1; font-weight:500; }
+    .cs-toc-tick { width:1.5px; height:12px; background:currentColor; border-radius:2px; flex-shrink:0; transition:height .25s,width .25s; }
+    .cs-toc-link.active .cs-toc-tick { height:20px; width:2px; }
+    @media (max-width:1260px) { .cs-toc { display:none; } }
+
+    /* NEXT */
+    .cs-next { border-top:1px solid var(--border); padding:64px; display:flex; justify-content:space-between; align-items:center; }
+    .next-label { font-size:10px; letter-spacing:0.22em; text-transform:uppercase; color:var(--text-3); margin-bottom:12px; }
+    .next-title { font-family:'Lexend',sans-serif; font-size:22px; font-weight:600; color:var(--text); transition:color .2s; }
+    .next-link:hover .next-title { color:var(--accent); }
+    .next-arrow { font-size:28px; color:var(--text-3); transition:color .3s,transform .3s; }
+    .next-link:hover .next-arrow { color:var(--accent); transform:translate(6px,-6px); }
+
+    footer { padding:28px 64px; border-top:1px solid var(--border); display:flex; justify-content:space-between; align-items:center; }
+    footer p { font-size:11px; color:var(--text-3); }
+  </style>
+</head>
+<body>
+  <div id="grain" aria-hidden="true"></div>
+  <div id="cur-dot"></div>
+  <div id="cur-ring"></div>
+
+  <!-- TOC -->
+  <nav class="cs-toc" id="csToc">
+    <a class="cs-toc-link active" href="#s1"><span class="cs-toc-tick"></span>배경</a>
+    <a class="cs-toc-link" href="#s2"><span class="cs-toc-tick"></span>목표</a>
+    <a class="cs-toc-link" href="#s3"><span class="cs-toc-tick"></span>원인 분석</a>
+    <a class="cs-toc-link" href="#s4"><span class="cs-toc-tick"></span>문제 정의</a>
+    <a class="cs-toc-link" href="#s5"><span class="cs-toc-tick"></span>가설</a>
+    <a class="cs-toc-link" href="#s6"><span class="cs-toc-tick"></span>액션</a>
+    <a class="cs-toc-link" href="#s7"><span class="cs-toc-tick"></span>결과</a>
+    <a class="cs-toc-link" href="#s8"><span class="cs-toc-tick"></span>레슨런</a>
+  </nav>
+
+  <!-- NAV -->
+  <nav id="nav">
+    <a href="/work" class="nav-back" onclick="if(history.length>1){history.back();return false;}">
+      <svg width="16" height="16" viewBox="0 0 16 16" fill="none" stroke="currentColor" stroke-width="1.5"><path d="M10 12L6 8l4-4"/></svg>
+    </a>
+    <div class="nav-right">
+      <ul class="nav-links">
+        <li><a href="/work" data-i18n="nav.work">Projects</a></li>
+        <li><a href="/contact" data-i18n="nav.about">About</a></li>
+      </ul>
+      <div class="lang-toggle" id="langToggle">
+        <button class="lang-btn active" data-lang="ko">KR</button>
+        <button class="lang-btn" data-lang="en">EN</button>
+      </div>
+    </div>
+  </nav>
+
+  <!-- HERO -->
+  <section class="cs-hero">
+    <div class="cs-hero-bg"></div>
+    <img class="cs-hero-img" src="./thumb-present.jpg" alt="" />
+    <div class="cs-hero-number" aria-hidden="true">SP</div>
+
+    <p class="cs-hero-sub" data-i18n="hero.sub">KakaoMobility · 2026</p>
+    <div class="cs-eyebrow" data-i18n="hero.eyebrow">In-Car Commerce · Growth · Recommendation UX</div>
+
+    <h1 data-i18n="hero.h1">
+      이동 중 소비가 없는 건<br>니즈가 없어서가 아니다. <em>트리거가 없어서</em>다.
+    </h1>
+
+    <p class="cs-hero-question" data-i18n="hero.question">
+      탑승 후 커머스 행동이 0에 수렴하던 카카오T에서,
+      카카오톡 관계 데이터 기반 선물 추천과 이동 맥락 트리거를 설계해
+      Zero intent 상황에서도 구매 전환을 만들어낸 In-Car Commerce 프로젝트.
+    </p>
+
+    <div class="cs-hero-meta">
+      <div>
+        <div class="meta-label" data-i18n="meta.role.l">Role</div>
+        <div class="meta-val" data-i18n="meta.role.v">PM · Growth 전략 · UX 기획</div>
+      </div>
+      <div>
+        <div class="meta-label" data-i18n="meta.period.l">Period</div>
+        <div class="meta-val">2026</div>
+      </div>
+      <div>
+        <div class="meta-label" data-i18n="meta.domain.l">Domain</div>
+        <div class="meta-val" data-i18n="meta.domain.v">모빌리티 · 커머스 · Growth</div>
+      </div>
+      <div>
+        <div class="meta-label" data-i18n="meta.tools.l">Tools</div>
+        <div class="meta-val">A/B Test · Figma · Notion</div>
+      </div>
+    </div>
+  </section>
+
+  <div class="cs-body">
+
+    <!-- 01 BACKGROUND -->
+    <section class="cs-section" id="s1">
+      <div class="cs-num">01</div>
+      <h2 class="cs-title" data-i18n="s1.title">배경 <em>·</em> Background</h2>
+
+      <p class="cs-p">카카오모빌리티는 호출 수수료 중심 BM에 의존하고 있으며, <strong>이동 중 발생하는 유휴 시간 내 커머스 전환이 이루어지지 않아</strong> 추가 수익 창출 기회가 제한적인 상태다. 글로벌 In-Car Commerce 및 자율주행 시장은 빠르게 성장 중이며, 이동 시간의 소비화는 핵심 수익 레버로 부상하고 있다.</p>
+
+      <div class="cs-two-col">
+        <div class="cs-col-card">
+          <h4>Business Model</h4>
+          <ul>
+            <li>호출 수수료 중심 BM — Ride당 추가 수익 구조 부재</li>
+            <li>이동 중 유휴 시간 커머스 전환 기회 미활용</li>
+            <li>카카오 선물하기 연동 가능한 관계 데이터 보유</li>
+          </ul>
+        </div>
+        <div class="cs-col-card accent-border">
+          <h4 class="accent">핵심 리스크</h4>
+          <ul>
+            <li>이동 데이터(시간·위치·관계)를 커머스로 연결하지 못할 경우 <strong style="color:var(--text)">Ride당 매출 0원 고착</strong></li>
+            <li>장기적으로 LTV 확장 기회 상실</li>
+            <li>BM 경쟁력 약화 — 수수료 외 수익 다각화 실패</li>
+          </ul>
+        </div>
+      </div>
+    </section>
+
+    <!-- 02 GOAL -->
+    <section class="cs-section" id="s2">
+      <div class="cs-num">02</div>
+      <h2 class="cs-title" data-i18n="s2.title">목표 <em>·</em> Goal</h2>
+
+      <div class="cs-two-col">
+        <div class="cs-col-card accent-border">
+          <h4 class="accent">Input (선행 지표)</h4>
+          <ul>
+            <li>노출 대비 클릭률 (CTR) <strong style="color:var(--text)">8% 이상</strong></li>
+            <li>클릭 대비 구매 전환율 <strong style="color:var(--text)">15% 이상</strong></li>
+            <li>탐색 시간 <strong style="color:var(--text)">20초 → 10초 이하</strong> 단축</li>
+            <li>사용자당 월 2회 이상 이용</li>
+          </ul>
+        </div>
+        <div class="cs-col-card">
+          <h4>Output (성과 지표)</h4>
+          <ul>
+            <li>Ride당 평균 커머스 매출 <strong style="color:var(--text)">0원 → 10~20원</strong></li>
+            <li>평균 객단가(AOV) <strong style="color:var(--text)">7,000원</strong></li>
+            <li>모빌리티 → 커머스 확장 기반 LTV 상승</li>
+          </ul>
+        </div>
+      </div>
+
+      <div class="funnel" style="margin-top:36px;">
+        <div class="funnel-step accent">
+          <div class="funnel-metric">CTR 8%↑</div>
+          <div class="funnel-label">노출 → 클릭</div>
+        </div>
+        <div class="funnel-arrow">→</div>
+        <div class="funnel-step accent">
+          <div class="funnel-metric">CVR 15%↑</div>
+          <div class="funnel-label">클릭 → 구매</div>
+        </div>
+        <div class="funnel-arrow">→</div>
+        <div class="funnel-step accent">
+          <div class="funnel-metric">거래 수 ↑</div>
+          <div class="funnel-label">Ride당 발생</div>
+        </div>
+        <div class="funnel-arrow">→</div>
+        <div class="funnel-step accent">
+          <div class="funnel-metric">LTV ↑</div>
+          <div class="funnel-label">BM 다각화</div>
+        </div>
+      </div>
+    </section>
+
+    <!-- 03 ANALYSIS -->
+    <section class="cs-section" id="s3">
+      <div class="cs-num">03</div>
+      <h2 class="cs-title" data-i18n="s3.title">원인 분석 <em>·</em> Analysis</h2>
+
+      <div class="big-stat-block">
+        <div class="big-stat-num">68%</div>
+        <p class="big-stat-desc">
+          택시 탑승 후 <strong>5분 내 앱 체류 시간 30초 미만 비율 68%.</strong><br>
+          커머스 탐색 진입 자체가 발생하지 않으며, Ride당 거래 발생률은 <strong>0에 수렴</strong>한다.<br>
+          문제는 구매 의지가 아닌 <strong>탐색을 시작하게 만드는 트리거의 부재</strong>다.
+        </p>
+      </div>
+
+      <p class="cs-p" style="margin-bottom:8px;"><strong>유저 세그먼트</strong></p>
+      <div class="segments">
+        <div class="segment-card target">
+          <div class="seg-icon">💼</div>
+          <div class="seg-name">관계 유지형 직장인 <span class="target-badge">TARGET</span></div>
+          <div class="seg-desc">25~39세 · 카카오톡·선물하기 사용 빈도 높음 · 퇴근/약속 이동 중 모바일 사용 빈도 높음 · 소액 선물 구매 경험 다수</div>
+        </div>
+        <div class="segment-card">
+          <div class="seg-icon">🎯</div>
+          <div class="seg-name">선택 이유</div>
+          <div class="seg-desc">카카오 선물하기 핵심 구매 유저층 · '관계 유지'라는 명확한 구매 동기 보유 · 탐색 없이 추천 기반 구매 전환이 가능한 세그먼트</div>
+        </div>
+      </div>
+
+      <p class="cs-p" style="margin-top:32px; margin-bottom:8px;"><strong>유저 VOC — Zero Intent 확인</strong></p>
+      <div class="quote-grid">
+        <div class="quote-card">
+          <div class="quote-tag">직장인 A</div>
+          <p class="quote-text">"뭘 해야 할지 모르겠다. 검색하기도 귀찮고, 이동 중에는 그냥 쉬고 싶다."</p>
+        </div>
+        <div class="quote-card">
+          <div class="quote-tag">직장인 B</div>
+          <p class="quote-text">"선물은 생각나야 사는 거지. 먼저 보여주면 살 것 같기도 한데."</p>
+        </div>
+        <div class="quote-card">
+          <div class="quote-tag">직장인 C</div>
+          <p class="quote-text">"검색하기 귀찮다. 딱 맞는 게 바로 뜨면 바로 살 것 같다."</p>
+        </div>
+        <div class="quote-card">
+          <div class="quote-tag">직장인 D</div>
+          <p class="quote-text">"기념일도 아닌데 선물할 이유가 뭔지 모르겠다. 그냥 연락할까 싶기도 하고."</p>
+        </div>
+      </div>
+
+      <div class="cs-callout" style="margin-top:12px;">
+        <p><strong>공통 인사이트:</strong> 사용자는 '의도 없는 상태(Zero Intent)'에 있다. 문제는 구매 의지가 아니라 <strong>행동 트리거의 부재</strong>다. 추천이 트리거가 되어야 한다.</p>
+      </div>
+    </section>
+
+    <!-- 04 PROBLEM DEFINITION -->
+    <section class="cs-section" id="s4">
+      <div class="cs-num">04</div>
+      <h2 class="cs-title" data-i18n="s4.title">문제 정의 <em>·</em> Problem Definition</h2>
+
+      <div class="prob-statement-card">
+        <div class="prob-icon-wrap">
+          <svg width="20" height="20" viewBox="0 0 20 20" fill="none" stroke="currentColor" stroke-width="1.5"><circle cx="10" cy="10" r="8"/><path d="M10 6v5l3 3"/></svg>
+        </div>
+        <p class="prob-stmt-label">Problem Statement</p>
+        <p class="prob-quote">
+          이동 중 사용자는 커머스 니즈가 없는 것이 아니라,<br>
+          <em>"무엇을 해야 할지 모르는 상태(Zero Intent)"</em>에서<br>
+          탐색을 시작하게 만드는 트리거가 부재하여<br>
+          커머스 행동으로 전환되지 않는 구조적 문제가 존재한다.
+        </p>
+      </div>
+
+      <div class="cs-col-card accent-border" style="margin-top:0;">
+        <h4 class="accent">타겟: 관계 유지형 직장인 (25~39세) 선정 이유</h4>
+        <ul>
+          <li>카카오 선물하기 핵심 구매 유저층으로 전환 가능성이 높음</li>
+          <li>'관계 유지'라는 명확한 구매 동기 보유 — 탐색 없이 추천 기반 구매 전환 가능</li>
+          <li>이동 맥락(퇴근·약속)과 선물 구매 동기가 자연스럽게 연결되는 세그먼트</li>
+        </ul>
+      </div>
+    </section>
+
+    <!-- 05 HYPOTHESIS -->
+    <section class="cs-section" id="s5">
+      <div class="cs-num">05</div>
+      <h2 class="cs-title" data-i18n="s5.title">가설 <em>·</em> Hypothesis</h2>
+
+      <div class="hypothesis-card">
+        <p class="hypothesis-text">
+          <em>관계 기반 추천 선물</em>을 이동 중 맥락(퇴근·약속 이동)에 맞춰 노출하면,<br>
+          탐색 과정 없이 즉시 행동을 유도할 수 있으며,<br>
+          <em>CTR 8% 이상, 구매 전환율 15% 이상</em>으로 상승할 것이다.
+        </p>
+        <div class="hyp-meta">
+          <span class="hyp-chip">Zero Intent → Trigger 설계</span>
+          <span class="hyp-chip">관계 데이터 기반 개인화</span>
+          <span class="hyp-chip">이동 맥락 연동</span>
+        </div>
+      </div>
+
+      <p class="cs-p" style="margin-bottom:16px;"><strong>솔루션 전략</strong></p>
+      <div class="cs-two-col">
+        <div class="cs-col-card accent-border">
+          <h4 class="accent">추천 중심 UX</h4>
+          <ul>
+            <li>Zero Intent 상황에서는 검색이 아닌 <strong style="color:var(--text)">추천 중심</strong> UX 설계</li>
+            <li>카카오톡 관계 데이터 기반 개인화 추천</li>
+            <li>탐색 시간 20초 → 10초 이하로 압축</li>
+          </ul>
+        </div>
+        <div class="cs-col-card">
+          <h4>타이밍 트리거</h4>
+          <ul>
+            <li>이동 맥락(시간·목적지·상황)에 맞는 타이밍 설계</li>
+            <li>탑승 후 2~5분 — 안정 후 관심 생기는 타이밍</li>
+            <li>카카오T / 카카오톡 상단 카드로 비침습적 노출</li>
+          </ul>
+        </div>
+      </div>
+    </section>
+
+    <!-- 06 ACTION -->
+    <section class="cs-section" id="s6">
+      <div class="cs-num">06</div>
+      <h2 class="cs-title" data-i18n="s6.title">액션 <em>·</em> Execution</h2>
+
+      <p class="cs-p">A/B Test를 설계해 관계 기반 추천 카드가 실제로 행동 전환을 만드는지 검증했다.</p>
+
+      <div class="ab-grid">
+        <div class="ab-card">
+          <div class="ab-label control">Control — 기존</div>
+          <ul>
+            <li>탑승 후 앱 체류 없음</li>
+            <li>커머스 노출 전무</li>
+            <li>Ride 중 커머스 행동 발생하지 않음</li>
+            <li>Ride당 매출 0원</li>
+          </ul>
+        </div>
+        <div class="ab-card variant-card">
+          <div class="ab-label variant">Variant — 추천 카드</div>
+          <ul>
+            <li>노출 타이밍: 탑승 후 2~5분</li>
+            <li>노출 위치: 카카오T / 카카오톡 상단 카드</li>
+            <li>추천 방식: 최근 대화 기반 지인 추천</li>
+            <li>1-tap 구매 플로우로 탐색 시간 최소화</li>
+          </ul>
+        </div>
+      </div>
+
+      <div class="copy-card">
+        <p class="copy-label">추천 카드 카피 예시</p>
+        <p class="copy-text">지금 <em>○○님</em>께 커피 한 잔 어때요? ☕</p>
+      </div>
+
+      <div class="img-wrap">
+        <img src="./Present/exec-01.jpg" alt="추천 카드 UX 설계" />
+      </div>
+
+      <div class="img-wrap">
+        <img src="./Present/exec-02.jpg" alt="A/B Test 설계 및 플로우" />
+      </div>
+    </section>
+
+    <!-- 07 RESULTS -->
+    <section class="cs-section" id="s7">
+      <div class="cs-num">07</div>
+      <h2 class="cs-title" data-i18n="s7.title">결과 <em>·</em> Results</h2>
+
+      <p class="cs-p">관계 기반 추천 트리거가 Zero Intent 상황에서 커머스 행동을 만들어낼 수 있음을 검증했다.</p>
+
+      <table class="results-table">
+        <thead>
+          <tr>
+            <th>Metric</th>
+            <th>As-is</th>
+            <th>To-be (목표)</th>
+            <th>Impact</th>
+          </tr>
+        </thead>
+        <tbody>
+          <tr>
+            <td>CTR (노출 → 클릭)</td>
+            <td>~0%</td>
+            <td>8% 이상</td>
+            <td class="improvement">트리거 설계 효과</td>
+          </tr>
+          <tr>
+            <td>구매 전환율 (CVR)</td>
+            <td>~0%</td>
+            <td>15% 이상</td>
+            <td class="improvement">추천 정확도 효과</td>
+          </tr>
+          <tr>
+            <td>탐색 시간</td>
+            <td>20초+</td>
+            <td>10초 이하</td>
+            <td class="improvement">-50%</td>
+          </tr>
+          <tr>
+            <td>Ride당 평균 매출</td>
+            <td>0원</td>
+            <td>10~20원</td>
+            <td class="improvement">신규 수익원 창출</td>
+          </tr>
+          <tr>
+            <td>AOV</td>
+            <td>—</td>
+            <td>7,000원</td>
+            <td class="improvement">선물하기 연동</td>
+          </tr>
+        </tbody>
+      </table>
+
+      <div class="result-grid">
+        <div class="result-cell">
+          <div class="result-num">8%</div>
+          <div class="result-desc">CTR 목표</div>
+          <div class="result-sub">0% → 8% 이상</div>
+        </div>
+        <div class="result-cell">
+          <div class="result-num">15%</div>
+          <div class="result-desc">구매 전환율</div>
+          <div class="result-sub">클릭 → 구매</div>
+        </div>
+        <div class="result-cell">
+          <div class="result-num">-50%</div>
+          <div class="result-desc">탐색 시간 단축</div>
+          <div class="result-sub">20초 → 10초 이하</div>
+        </div>
+        <div class="result-cell">
+          <div class="result-num">↑LTV</div>
+          <div class="result-desc">BM 다각화</div>
+          <div class="result-sub">수수료 외 수익원</div>
+        </div>
+      </div>
+    </section>
+
+    <!-- 08 LESSONS -->
+    <section class="cs-section" id="s8">
+      <div class="cs-num">08</div>
+      <h2 class="cs-title" data-i18n="s8.title">레슨런 <em>·</em> Lessons Learned</h2>
+
+      <div class="lesson-list">
+        <div class="lesson-item">
+          <div class="lesson-icon">01</div>
+          <div class="lesson-content">
+            <h4>사용자는 "시간이 남아서"가 아니라 "트리거가 있을 때" 소비한다</h4>
+            <p>이동 중 유휴 시간이 소비 기회가 되려면, 콘텐츠나 기능이 아니라 행동을 유발하는 맥락 기반 트리거가 먼저 설계되어야 한다. 기능보다 타이밍이 전환을 만든다.</p>
+          </div>
+        </div>
+        <div class="lesson-item">
+          <div class="lesson-icon">02</div>
+          <div class="lesson-content">
+            <h4>Zero Intent 상황에서는 검색이 아니라 추천이 핵심 레버다</h4>
+            <p>의도가 없는 상태에서 탐색을 요구하면 이탈한다. 관계 데이터 기반으로 "지금 이 사람에게 줄 것"을 먼저 보여줘야 행동이 시작된다. 추천의 정확도가 전환율을 결정한다.</p>
+          </div>
+        </div>
+        <div class="lesson-item">
+          <div class="lesson-icon">03</div>
+          <div class="lesson-content">
+            <h4>모빌리티 확장은 이동 자체가 아닌 "이동 맥락에서의 행동 설계"에 달려 있다</h4>
+            <p>앞으로는 기능 추가가 아닌 사용자의 맥락과 행동 트리거를 기반으로 Input 지표를 설계하고, 이를 Output(비즈니스 성과)으로 연결하는 방식으로 문제를 정의하고 해결하겠다.</p>
+          </div>
+        </div>
+      </div>
+    </section>
+
+  </div><!-- /cs-body -->
+
+  <div class="cs-next">
+    <a href="/case-study-icn" class="next-link">
+      <p class="next-label">Next Project</p>
+      <p class="next-title">ICN Airport · 보안검색 UX 개선</p>
+    </a>
+    <a href="/case-study-icn" class="next-link">
+      <span class="next-arrow">↗</span>
+    </a>
+  </div>
+
+  <footer>
+    <p>© 2026 Sumin Lee</p>
+    <p>Designed & Built by Sumin</p>
+  </footer>
+
+  <script>
+    /* ── i18n ──────────────────────────────────── */
+    const i18n = {
+      ko: {
+        'nav.work':'Projects','nav.about':'About',
+        'hero.sub':'KakaoMobility · 2026',
+        'hero.eyebrow':'In-Car Commerce · Growth · Recommendation UX',
+        'hero.h1':'이동 중 소비가 없는 건<br>니즈가 없어서가 아니다. <em>트리거가 없어서</em>다.',
+        'hero.question':'탑승 후 커머스 행동이 0에 수렴하던 카카오T에서, 카카오톡 관계 데이터 기반 선물 추천과 이동 맥락 트리거를 설계해 Zero Intent 상황에서도 구매 전환을 만들어낸 In-Car Commerce 프로젝트.',
+        'meta.role.l':'Role','meta.role.v':'PM · Growth 전략 · UX 기획',
+        'meta.period.l':'Period','meta.domain.l':'Domain','meta.domain.v':'모빌리티 · 커머스 · Growth',
+        's1.title':'배경 · Background',
+        's2.title':'목표 · Goal',
+        's3.title':'원인 분석 · Analysis',
+        's4.title':'문제 정의 · Problem Definition',
+        's5.title':'가설 · Hypothesis',
+        's6.title':'액션 · Execution',
+        's7.title':'결과 · Results',
+        's8.title':'레슨런 · Lessons Learned',
+      },
+      en: {
+        'nav.work':'Projects','nav.about':'About',
+        'hero.sub':'KakaoMobility · 2026',
+        'hero.eyebrow':'In-Car Commerce · Growth · Recommendation UX',
+        'hero.h1':'The absence of in-ride purchases isn\'t a lack of need.<br>It\'s a lack of <em>trigger</em>.',
+        'hero.question':'An In-Car Commerce project for KakaoT — designing relationship-based gift recommendations and context triggers to convert Zero Intent moments during rides into actual purchases.',
+        'meta.role.l':'Role','meta.role.v':'PM · Growth Strategy · UX Planning',
+        'meta.period.l':'Period','meta.domain.l':'Domain','meta.domain.v':'Mobility · Commerce · Growth',
+        's1.title':'Background',
+        's2.title':'Goal',
+        's3.title':'Analysis',
+        's4.title':'Problem Definition',
+        's5.title':'Hypothesis',
+        's6.title':'Execution',
+        's7.title':'Results',
+        's8.title':'Lessons Learned',
+      }
+    };
+
+    let lang = 'ko';
+    function applyLang(l) {
+      lang = l;
+      document.querySelectorAll('[data-i18n]').forEach(el => {
+        const key = el.getAttribute('data-i18n');
+        if (i18n[l][key] !== undefined) el.innerHTML = i18n[l][key];
+      });
+      document.querySelectorAll('.lang-btn').forEach(b => b.classList.toggle('active', b.dataset.lang === l));
+    }
+    document.getElementById('langToggle').addEventListener('click', e => {
+      const btn = e.target.closest('.lang-btn');
+      if (btn) applyLang(btn.dataset.lang);
+    });
+
+    const nav = document.getElementById('nav');
+    window.addEventListener('scroll', () => { nav.classList.toggle('scrolled', window.scrollY > 40); }, { passive:true });
+
+    const dot = document.getElementById('cur-dot');
+    const ring = document.getElementById('cur-ring');
+    let mx=0,my=0,rx=0,ry=0;
+    document.addEventListener('mousemove', e => { mx=e.clientX; my=e.clientY; dot.style.left=mx+'px'; dot.style.top=my+'px'; });
+    (function animRing(){ rx+=(mx-rx)*.12; ry+=(my-ry)*.12; ring.style.left=rx+'px'; ring.style.top=ry+'px'; requestAnimationFrame(animRing); })();
+    document.querySelectorAll('a,button').forEach(el => {
+      el.addEventListener('mouseenter', () => document.body.classList.add('cursor-link'));
+      el.addEventListener('mouseleave', () => document.body.classList.remove('cursor-link'));
+    });
+
+    const revealObs = new IntersectionObserver(entries => {
+      entries.forEach(e => { if (e.isIntersecting) { e.target.classList.add('visible'); revealObs.unobserve(e.target); } });
+    }, { threshold:0.08 });
+    document.querySelectorAll('.cs-section').forEach(s => revealObs.observe(s));
+
+    const toc = document.getElementById('csToc');
+    const hero = document.querySelector('.cs-hero');
+    const tocLinks = document.querySelectorAll('.cs-toc-link');
+    const sections = document.querySelectorAll('.cs-section');
+
+    function updateToc() {
+      const heroH = hero.offsetHeight;
+      toc.classList.toggle('toc-visible', window.scrollY > heroH * 0.6);
+      let current = '';
+      sections.forEach(sec => { if (window.scrollY >= sec.offsetTop - 160) current = sec.id; });
+      tocLinks.forEach(link => { link.classList.toggle('active', link.getAttribute('href') === '#' + current); });
+    }
+    window.addEventListener('scroll', updateToc, { passive:true });
+    updateToc();
+
+    // Hide broken images gracefully
+    document.querySelectorAll('img').forEach(img => {
+      const hide = () => { const w = img.closest('.img-wrap, .exec-img-wrap'); (w || img).style.display = 'none'; };
+      img.addEventListener('error', hide);
+      if (img.complete && img.naturalWidth === 0) hide();
+    });
+  </script>
+</body>
+</html>
