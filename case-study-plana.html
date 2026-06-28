@@ -1,6 +1,9 @@
+---
+---
 <!DOCTYPE html>
 <html lang="ko">
 <head>
+  <base href="/">
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
   <title>PLANA Flypad UX — Sumin Lee</title>
@@ -269,13 +272,13 @@
   <nav class="cs-toc" id="csToc"></nav>
 
   <nav id="nav">
-    <a href="./work.html" class="nav-back" onclick="if(history.length>1){history.back();return false;}">
+    <a href="/work" class="nav-back" onclick="if(history.length>1){history.back();return false;}">
       <svg width="16" height="16" viewBox="0 0 16 16" fill="none" stroke="currentColor" stroke-width="1.5"><path d="M10 12L6 8l4-4"/></svg>
     </a>
     <div class="nav-right">
       <ul class="nav-links">
-        <li><a href="./work.html" data-i18n="nav.work">Projects</a></li>
-        <li><a href="./contact.html" data-i18n="nav.about">About</a></li>
+        <li><a href="/work" data-i18n="nav.work">Projects</a></li>
+        <li><a href="/contact" data-i18n="nav.about">About</a></li>
       </ul>
       <div class="lang-toggle" id="langToggle">
         <button class="lang-btn active" data-lang="ko">KR</button>
@@ -985,16 +988,16 @@
   <div class="cs-next">
     <div>
       <div class="next-label" data-i18n="next.label">다음 케이스 스터디</div>
-      <a href="./case-study-pickaround.html" class="next-link" style="display:block;">
+      <a href="/case-study-pickaround" class="next-link" style="display:block;">
         <div class="next-title">PickAround · Seafood B2C Service →</div>
       </a>
     </div>
-    <a href="./case-study-pickaround.html" class="next-link next-arrow">↗</a>
+    <a href="/case-study-pickaround" class="next-link next-arrow">↗</a>
   </div>
 
   <footer>
     <p>© 2026 Sumin Lee</p>
-    <p><a href="./index.html" style="font-size:11px;color:var(--text-3);transition:color .2s;" onmouseover="this.style.color='var(--accent)'" onmouseout="this.style.color='var(--text-3)'" data-i18n="footer.back">← Projects</a></p>
+    <p><a href="/index" style="font-size:11px;color:var(--text-3);transition:color .2s;" onmouseover="this.style.color='var(--accent)'" onmouseout="this.style.color='var(--text-3)'" data-i18n="footer.back">← Projects</a></p>
   </footer>
 
   <script>
@@ -1021,7 +1024,10 @@
     'env.f1':'Low-altitude flight','env.f2':'Urban obstacles & dense traffic','env.f3':'Wind / weather / visibility','env.f4':'Airspace constraints & rerouting','env.f5':'Single-pilot multitasking burden',
     's1.biz.risk':'<strong>Business Risk:</strong> Existing visual clutter causes pilot judgment delays that increase mission failure rates, directly translating into <strong>vehicle loss and brand trust collapse</strong> — a massive business risk.',
     's2.title':'Goal',
-    'kpi1':'Safe Mission Completion Rate\nTarget (high-load scenarios)','kpi2':'Avg. Task Completion Time\nReduction Target','kpi3':'NASA-TLX\nCognitive Load Reduction',
+    'kpi1':'Safe Mission Completion Rate
+Target (high-load scenarios)','kpi2':'Avg. Task Completion Time
+Reduction Target','kpi3':'NASA-TLX
+Cognitive Load Reduction',
     's2.inp':'Input (Validation Metrics)','s2.i1':'Task completion time <strong style="color:var(--text)">−25%</strong>','s2.i2':'First-pass success rate <strong style="color:var(--text)">+20%</strong>','s2.i3':'Glance Time <strong style="color:var(--text)">−30%</strong>','s2.i4':'NASA-TLX <strong style="color:var(--text)">−15 points</strong>','s2.i5':'2s+ off-road glance <strong style="color:var(--text)">−40%</strong>',
     's2.out':'Output (Business Impact)','s2.o1':'High-load Safe Mission Completion Rate <strong style="color:var(--text)">95%+</strong>','s2.o2':'Pilot error rate reduction in complex airspace / weather avoidance','s2.o3':'Pilot survey "instrument comprehension & system trust" <strong style="color:var(--text)">+20pt</strong>','s2.o4':'Evidence to adopt new Flypad UI as standard cockpit configuration',
     's2.essence':'<strong>Core Goal:</strong> When visual information floods the display during critical flight segments (emergency instruments, rerouting, bird strike), <strong>surface only the information needed for that OODA stage first</strong> and defer the rest — improving decision speed and accuracy.',
@@ -1029,7 +1035,11 @@
     's3.qual.title':'Qualitative — Pilot Interview Insight Response Strength',
     'i1':'"I have to re-evaluate which information to look at first every single time."','i2':'"Critical warnings get buried in surrounding information."','i3':'"The higher the workload, the more my eyes jump between instruments."','i4':'"Maintaining situational awareness as a single pilot is very difficult."',
     's3.quant.title':'Quantitative — High-load Segment Performance Metrics',
-    'p1':'2s+ off-road\nglance rate','p2':'Judgment delay\nincrease','p3':'Input error\nincrease','p4':'Retry count\nincrease',
+    'p1':'2s+ off-road
+glance rate','p2':'Judgment delay
+increase','p3':'Input error
+increase','p4':'Retry count
+increase',
     's3.scenario.title':'Scenario-Level High-load Impact',
     'th.s':'Scenario','th.m':'Metric','th.base':'Baseline UI','th.hi':'High-load','th.src':'Source',
     'sc1':'Takeoff/Landing','sc1m':'Off-road glance rate','sc1s':'Eye-tracking',

@@ -1,6 +1,9 @@
+---
+---
 <!DOCTYPE html>
 <html lang="ko">
 <head>
+  <base href="/">
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
   <title>About — Sumin Lee</title>
@@ -238,13 +241,13 @@
   <div id="cur-ring"></div>
 
   <nav id="nav">
-    <a href="./index.html" class="nav-logo">
+    <a href="/index" class="nav-logo">
       <img src="./favicon.png" alt="Sumin Lee" onerror="this.style.opacity='.3'" />
     </a>
     <div class="nav-right">
       <ul class="nav-links">
-        <li><a href="./work.html" data-i18n="nav.work">Projects</a></li>
-        <li><a href="./contact.html" class="active" data-i18n="nav.about">About</a></li>
+        <li><a href="/work" data-i18n="nav.work">Projects</a></li>
+        <li><a href="/contact" class="active" data-i18n="nav.about">About</a></li>
       </ul>
       <div class="lang-toggle" id="langToggle">
         <button class="lang-btn active" data-lang="ko">KR</button>
@@ -422,7 +425,7 @@
 
   <footer>
     <p>© 2026 Sumin Lee</p>
-    <p><a href="./index.html" style="font-size:11px;color:var(--text-3);transition:color .2s;"
+    <p><a href="/index" style="font-size:11px;color:var(--text-3);transition:color .2s;"
           onmouseover="this.style.color='var(--accent)'" onmouseout="this.style.color='var(--text-3)'"
           data-i18n="footer.back">← Home</a></p>
   </footer>

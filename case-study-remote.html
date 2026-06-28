@@ -1,6 +1,9 @@
+---
+---
 <!DOCTYPE html>
 <html lang="ko">
 <head>
+  <base href="/">
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
   <title>Voice Driving OS — Sumin Lee</title>
@@ -267,13 +270,13 @@
   <nav class="cs-toc" id="csToc"></nav>
 
   <nav id="nav">
-    <a href="./work.html" class="nav-back" onclick="if(history.length>1){history.back();return false;}">
+    <a href="/work" class="nav-back" onclick="if(history.length>1){history.back();return false;}">
       <svg width="16" height="16" viewBox="0 0 16 16" fill="none" stroke="currentColor" stroke-width="1.5"><path d="M10 12L6 8l4-4"/></svg>
     </a>
     <div class="nav-right">
       <ul class="nav-links">
-        <li><a href="./work.html" data-i18n="nav.work">Projects</a></li>
-        <li><a href="./contact.html" data-i18n="nav.about">About</a></li>
+        <li><a href="/work" data-i18n="nav.work">Projects</a></li>
+        <li><a href="/contact" data-i18n="nav.about">About</a></li>
       </ul>
       <div class="lang-toggle" id="langToggle">
         <button class="lang-btn active" data-lang="ko">KR</button>
@@ -984,16 +987,16 @@
   <div class="cs-next">
     <div>
       <div class="next-label" data-i18n="next.label">다음 케이스 스터디</div>
-      <a href="./case-study-plana.html" class="next-link" style="display:block;">
+      <a href="/case-study-plana" class="next-link" style="display:block;">
         <div class="next-title">PLANA Flypad UX for UAM Pilots →</div>
       </a>
     </div>
-    <a href="./case-study-plana.html" class="next-link next-arrow">↗</a>
+    <a href="/case-study-plana" class="next-link next-arrow">↗</a>
   </div>
 
   <footer>
     <p>© 2026 Sumin Lee</p>
-    <p><a href="./index.html" style="font-size:11px;color:var(--text-3);transition:color .2s;" onmouseover="this.style.color='var(--accent)'" onmouseout="this.style.color='var(--text-3)'" data-i18n="footer.back">← Projects</a></p>
+    <p><a href="/index" style="font-size:11px;color:var(--text-3);transition:color .2s;" onmouseover="this.style.color='var(--accent)'" onmouseout="this.style.color='var(--text-3)'" data-i18n="footer.back">← Projects</a></p>
   </footer>
 
   <script>
@@ -1011,7 +1014,10 @@
     's1.bm.title':'Business Context','s1.bm1':'AV level 3–4 transition requires defined edge-case response structure','s1.bm2':'Remote support = safety net for service continuity','s1.bm3':'Novice driver success experience → adoption rate & retention↑',
     's1.risk.title':'Target & Risks','s1.risk1':'Target: 0–2 years driving experience + lapsed license holders','s1.risk2':'Service adoption drop · fear & distrust from failed rides','s1.risk3':'If remote driving is perceived as a substitute rather than a safety net, autonomy trade-off issues arise',
     's2.title':'Goal',
-    'kpi1':'Safe Route Completion Rate\nTarget (Baseline 70%)','kpi2':'Glance Time &\nReaction Time Reduction','kpi3':'NASA-TLX\nCognitive Load Decrease',
+    'kpi1':'Safe Route Completion Rate
+Target (Baseline 70%)','kpi2':'Glance Time &
+Reaction Time Reduction','kpi3':'NASA-TLX
+Cognitive Load Decrease',
     's2.inp':'Input (Validation Metrics)','s2.i1':'Safe Route Completion Rate 85%','s2.i2':'NASA-TLX cognitive load −15 points','s2.i3':'Guidance interpretation time −25%','s2.i4':'Glance Time −30%, Reaction Time −30%',
     's2.out':'Output (Business Metrics)','s2.o1':'Novice/new user service adoption <strong style="color:var(--text)">+10%p</strong>','s2.o2':'Accident/danger events <strong style="color:var(--text)">−20%</strong>','s2.o3':'Error rate <strong style="color:var(--text)">−30%</strong>','s2.o4':'30-day retention <strong style="color:var(--text)">+5–8%p</strong> (40% → 45–48%)',
     's3.title':'Data Analysis',
