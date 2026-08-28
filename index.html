@@ -1,5 +1,5 @@
 <!DOCTYPE html>
-<html lang="ko">
+<html lang="en">
 <head>
   <base href="/">
   <meta charset="UTF-8" />
@@ -415,8 +415,8 @@
         <li><a href="/contact" data-i18n="nav.about">About</a></li>
       </ul>
       <div class="lang-toggle" id="langToggle">
-        <button class="lang-btn active" data-lang="ko">KR</button>
-        <button class="lang-btn"        data-lang="en">EN</button>
+        <button class="lang-btn" data-lang="ko">KR</button>
+        <button class="lang-btn active"        data-lang="en">EN</button>
       </div>
     </div>
   </nav>
@@ -736,7 +736,7 @@
     }
   };
 
-  let currentLang = 'ko';
+  let currentLang = 'en';
 
   function setLang(lang) {
     currentLang = lang;
@@ -766,6 +766,7 @@
     const btn = e.target.closest('.lang-btn');
     if (btn && btn.dataset.lang !== currentLang) setLang(btn.dataset.lang);
   });
+  setLang('en');
 
   /* ── NAV scroll ────────────────────────────────────────── */
   const nav = document.getElementById('nav');

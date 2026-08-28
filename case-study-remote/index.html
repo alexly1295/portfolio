@@ -1,6 +1,6 @@
 ---
 <!DOCTYPE html>
-<html lang="ko">
+<html lang="en">
 <head>
   <base href="/">
   <meta charset="UTF-8" />
@@ -278,8 +278,8 @@
         <li><a href="/contact" data-i18n="nav.about">About</a></li>
       </ul>
       <div class="lang-toggle" id="langToggle">
-        <button class="lang-btn active" data-lang="ko">KR</button>
-        <button class="lang-btn" data-lang="en">EN</button>
+        <button class="lang-btn" data-lang="ko">KR</button>
+        <button class="lang-btn active" data-lang="en">EN</button>
       </div>
     </div>
   </nav>
@@ -1082,7 +1082,7 @@ Cognitive Load Decrease',
     'st3.desc':'A control instructor steps in immediately when novice judgment fails. Human oversight bridges the gap where system automation hits its limits.'
   };
 
-  let lang = 'ko';
+  let lang = 'en';
   function setLang(l) {
     lang = l; document.documentElement.lang = l;
     const els = document.querySelectorAll('[data-i18n]');
@@ -1105,6 +1105,7 @@ Cognitive Load Decrease',
     const btn = e.target.closest('.lang-btn');
     if (btn && btn.dataset.lang !== lang) setLang(btn.dataset.lang);
   });
+  setLang('en');
 
   const nav = document.getElementById('nav');
   window.addEventListener('scroll', () => nav.classList.toggle('scrolled', scrollY > 40), {passive:true});
