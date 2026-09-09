@@ -342,7 +342,7 @@
       </ul>
 
       <!-- 현재 리스크 -->
-      <div class="ctx-label">현재 리스크</div>
+      <div class="ctx-label" data-i18n="ctx.risk">현재 리스크</div>
       <ul style="list-style:none;display:flex;flex-direction:column;gap:12px;margin-bottom:36px;">
         <li style="display:flex;gap:10px;font-size:14px;line-height:1.75;color:var(--text-2);">
           <span style="color:var(--accent);flex-shrink:0;margin-top:2px;">●</span>
@@ -758,17 +758,17 @@
       <h3 style="font-family:'Lexend',sans-serif;font-size:12px;font-weight:600;color:var(--text-3);letter-spacing:0.14em;text-transform:uppercase;margin:36px 0 18px;" data-i18n="s5.strat.title">3가지 실행 전략</h3>
       <div class="strategies">
         <div class="strat-card">
-          <div class="strat-num">전략 01</div>
+          <div class="strat-num" data-i18n="strat.n1">전략 01</div>
           <div class="strat-name" data-i18n="st1.name">정보 우선순위 자동화 (Prioritize)</div>
           <div class="strat-desc" data-i18n="st1.desc">OODA 단계와 비행 Phase에 따라 핵심 정보를 자동으로 전면 정렬. 조종사의 탐색 비용 제로를 목표로 한다.</div>
         </div>
         <div class="strat-card">
-          <div class="strat-num">전략 02</div>
+          <div class="strat-num" data-i18n="strat.n2">전략 02</div>
           <div class="strat-name" data-i18n="st2.name">착시 보정 UI (Autocorrect)</div>
           <div class="strat-desc" data-i18n="st2.desc">오해가 잦은 정보(고도·기상·회피 권고)에 색·레이어·레이블을 재설계. 잘못된 해석과 재시도를 원천 제거한다.</div>
         </div>
         <div class="strat-card">
-          <div class="strat-num">전략 03</div>
+          <div class="strat-num" data-i18n="strat.n3">전략 03</div>
           <div class="strat-name" data-i18n="st3.name">임계치 기반 알림 (Alert)</div>
           <div class="strat-desc" data-i18n="st3.desc">규칙 기반 임계치 도달 시 청각+시각 복합 경보 자동 발령. 능동적 확인 없이도 위험을 인지할 수 있게 설계한다.</div>
         </div>
@@ -1089,7 +1089,32 @@
     'st2.name':'Autocorrection UI Design',
     'st2.desc':'Redesign color, layers, labels, and icons for frequently misread data (altitude, weather, avoidance advisories) — eliminating misinterpretation at source.',
     'st3.name':'Threshold-Based Alert System',
-    'st3.desc':'Trigger multimodal (audio + visual) alerts automatically when rule-based thresholds are reached — so pilots never miss critical signals without actively checking.'
+    'st3.desc':'Trigger multimodal (audio + visual) alerts automatically when rule-based thresholds are reached — so pilots never miss critical signals without actively checking.',
+    'bchart.title':'Baseline UI',
+    'bchart.legend':'Baseline UI',
+    'bchart.x1':'Mission Success Rate',
+    'bchart.x2':'Error Rate',
+    'bchart.x3':'Off-road Glance',
+    'bchart.x4':'First-pass Success Rate',
+    'bchart.rt':'Reaction Time',
+    'bchart.def.title':'Definition of NASA-TLX:',
+    'bchart.def.body':'A widely used metric developed by NASA to quantify the cognitive and emotional workload a pilot experiences while performing a task.<br>A lower value indicates the display is easier to understand, with less burden on decision-making and operation.',
+    'heatmap.title':'Heatmap of Metric Degradation by Scenario',
+    'hm.c1':'Off-road',
+    'hm.c2':'Error Rate',
+    'hm.c3':'Judgment Delay',
+    'hm.c4':'Alert Ignored',
+    'hm.danger':'Danger',
+    'hm.high':'High',
+    'hm.normal':'Normal',
+    'hm.r1':'Takeoff/Landing',
+    'hm.r2':'Rerouting',
+    'hm.r3':'Weather Avoidance',
+    'hm.r4':'Alert Handling',
+    'ctx.risk':'Current Risk',
+    'strat.n1':'Strategy 01',
+    'strat.n2':'Strategy 02',
+    'strat.n3':'Strategy 03'
   };
 
   let lang = 'en';

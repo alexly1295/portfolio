@@ -500,13 +500,13 @@
       <div class="segments">
         <div class="segment-card">
           <div class="seg-icon">✈️</div>
-          <div class="seg-name">일반 항공 이용객</div>
-          <div class="seg-desc">비용 민감도 높음 · 시간 유연성 상대적으로 높음</div>
+          <div class="seg-name" data-i18n="s4.seg1">일반 항공 이용객</div>
+          <div class="seg-desc" data-i18n="s4.seg1d">비용 민감도 높음 · 시간 유연성 상대적으로 높음</div>
         </div>
         <div class="segment-card target">
           <div class="seg-icon">💼</div>
-          <div class="seg-name">기업 출장자 (B2B) <span class="target-badge">TARGET</span></div>
-          <div class="seg-desc">시간 민감도 최고 수준 · 정시성이 비용보다 중요 · 고정 이동 패턴 보유</div>
+          <div class="seg-name"><span data-i18n="s4.seg2">기업 출장자 (B2B)</span> <span class="target-badge">TARGET</span></div>
+          <div class="seg-desc" data-i18n="s4.seg2d">시간 민감도 최고 수준 · 정시성이 비용보다 중요 · 고정 이동 패턴 보유</div>
         </div>
       </div>
 
@@ -533,26 +533,26 @@
 
       <!-- 가치 제안 전환 카드 -->
       <div style="background:var(--bg-card);border:1px solid var(--border);border-radius:16px;padding:28px;margin-top:24px;">
-        <div style="font-size:10px;font-weight:600;letter-spacing:.18em;text-transform:uppercase;color:var(--text-3);margin-bottom:20px;">핵심 Insight : 가치 제안의 전환</div>
+        <div style="font-size:10px;font-weight:600;letter-spacing:.18em;text-transform:uppercase;color:var(--text-3);margin-bottom:20px;" data-i18n="s4.vp.title">핵심 Insight : 가치 제안의 전환</div>
         <div style="display:grid;grid-template-columns:1fr 1fr;gap:16px;">
           <!-- 기존 접근 -->
           <div style="background:rgba(232,24,46,.06);border:1px solid rgba(232,24,46,.2);border-radius:12px;padding:24px;">
-            <div style="font-size:11px;font-weight:600;letter-spacing:.1em;color:#E8182E;margin-bottom:10px;">기존 접근 ×</div>
-            <div style="font-family:'Lexend',sans-serif;font-size:20px;font-weight:700;color:var(--text);margin-bottom:16px;">UAM = 프리미엄 택시</div>
+            <div style="font-size:11px;font-weight:600;letter-spacing:.1em;color:#E8182E;margin-bottom:10px;" data-i18n="s4.vp.old.label">기존 접근 ×</div>
+            <div style="font-family:'Lexend',sans-serif;font-size:20px;font-weight:700;color:var(--text);margin-bottom:16px;" data-i18n="s4.vp.old.title">UAM = 프리미엄 택시</div>
             <div style="display:flex;flex-direction:column;gap:8px;">
-              <div style="font-size:13px;color:var(--text-3);">× 수요 불확실</div>
-              <div style="font-size:13px;color:var(--text-3);">× 낮은 가동률</div>
-              <div style="font-size:13px;color:var(--text-3);">× 높은 CAC</div>
+              <div style="font-size:13px;color:var(--text-3);" data-i18n="s4.vp.old.1">× 수요 불확실</div>
+              <div style="font-size:13px;color:var(--text-3);" data-i18n="s4.vp.old.2">× 낮은 가동률</div>
+              <div style="font-size:13px;color:var(--text-3);" data-i18n="s4.vp.old.3">× 높은 CAC</div>
             </div>
           </div>
           <!-- 데이터 기반 재정의 -->
           <div style="background:rgba(167,139,250,.06);border:1px solid rgba(167,139,250,.2);border-radius:12px;padding:24px;">
-            <div style="font-size:11px;font-weight:600;letter-spacing:.1em;color:#4ade80;margin-bottom:10px;">데이터 기반 재정의 ✓</div>
+            <div style="font-size:11px;font-weight:600;letter-spacing:.1em;color:#4ade80;margin-bottom:10px;" data-i18n="s4.vp.new.label">데이터 기반 재정의 ✓</div>
             <div style="font-family:'Lexend',sans-serif;font-size:20px;font-weight:700;color:var(--text);margin-bottom:16px;">UAM = Scheduled Infrastructure</div>
             <div style="display:flex;flex-direction:column;gap:8px;">
-              <div style="font-size:13px;color:#4ade80;">✓ 도심 병목 건너뛰는 고정형</div>
-              <div style="font-size:13px;color:#4ade80;">✓ 예측 가능한 수요 Lock-in</div>
-              <div style="font-size:13px;color:#4ade80;">✓ BEP 조기 달성</div>
+              <div style="font-size:13px;color:#4ade80;" data-i18n="s4.vp.new.1">✓ 도심 병목 건너뛰는 고정형</div>
+              <div style="font-size:13px;color:#4ade80;" data-i18n="s4.vp.new.2">✓ 예측 가능한 수요 Lock-in</div>
+              <div style="font-size:13px;color:#4ade80;" data-i18n="s4.vp.new.3">✓ BEP 조기 달성</div>
             </div>
           </div>
         </div>
@@ -625,11 +625,11 @@
           </div>
           <div class="exec-block-meta">
             <div class="exec-block-left">
-              <div class="exec-block-label">목적</div>
+              <div class="exec-block-label" data-i18n="exec.purpose">목적</div>
               <p class="exec-block-purpose" data-i18n="st1.purpose">도착 시간 보장 및 출발 일정 제안</p>
             </div>
             <div class="exec-block-right">
-              <div class="exec-block-label">기능</div>
+              <div class="exec-block-label" data-i18n="exec.function">기능</div>
               <ul class="exec-block-features">
                 <li data-i18n="st1.f1">Arrival Guarantee 표시 <em>(공항 도착 보장 시간)</em></li>
                 <li data-i18n="st1.f2">Buffer Calculation — <strong>탑승 마감까지 여유 분 자동 계산</strong></li>
@@ -650,11 +650,11 @@
           </div>
           <div class="exec-block-meta">
             <div class="exec-block-left">
-              <div class="exec-block-label">목적</div>
+              <div class="exec-block-label" data-i18n="exec.purpose">목적</div>
               <p class="exec-block-purpose" data-i18n="st2.purpose"><em>Seamless Transfer Flow</em> — 집 앞 픽업부터 공항 터미널까지. UAM 비행 외의 지상 이동 공백을 메워 전체 정시성을 확보.</p>
             </div>
             <div class="exec-block-right">
-              <div class="exec-block-label">기능</div>
+              <div class="exec-block-label" data-i18n="exec.function">기능</div>
               <ul class="exec-block-features">
                 <li data-i18n="st2.f1">버티포트 이동 → UAM 비행 → 공항 환승 <strong>전 구간 시각화</strong></li>
                 <li data-i18n="st2.f2">지상 연결 차량 자동 배차 <em>(마지막 마일 연계)</em></li>
@@ -675,11 +675,11 @@
           </div>
           <div class="exec-block-meta">
             <div class="exec-block-left">
-              <div class="exec-block-label">목적</div>
+              <div class="exec-block-label" data-i18n="exec.purpose">목적</div>
               <p class="exec-block-purpose" data-i18n="st3.purpose">프리미엄 환경 설정 기능 및 휴식에 최적화된 환경 제안</p>
             </div>
             <div class="exec-block-right">
-              <div class="exec-block-label">기능</div>
+              <div class="exec-block-label" data-i18n="exec.function">기능</div>
               <ul class="exec-block-features">
                 <li data-i18n="st3.f1">Arrival Time + Flight Buffer + <strong>Guarantee Coverage 표시</strong></li>
                 <li data-i18n="st3.f2">법인 계정 통합 — 출장비 자동 정산·리포트 연동</li>
@@ -812,7 +812,27 @@
       's6.intro':'이동의 전 과정을 시각화하고 도착 시간을 보장하는 끊김 없는(Seamless) 통합 서비스로 재설계했다. B2B 구독 중심의 수요 고정 구조와 사용자 신뢰 회복을 위한 세 가지 솔루션 방향을 도출했다.',
       's6.asis':'As-is — 기존 상태','s6.a1':'사용자가 스스로 이동 경로와 시간을 판단','s6.a2':'파편화된 호출형 서비스 — 수요 예측 불가','s6.a3':'ETA 보장 없음 → 시간 불확실성으로 이탈',
       's6.tobe':'To-be — 개선 방향','s6.t1':'이동의 전 과정을 시각화한 Seamless 통합 서비스','s6.t2':'B2B 구독으로 고정 수요 선확보','s6.t3':'도착 시간 98% 보장 인터페이스',
+      's4.seg1':'일반 항공 이용객','s4.seg1d':'비용 민감도 높음 · 시간 유연성 상대적으로 높음',
+      's4.seg2':'기업 출장자 (B2B)','s4.seg2d':'시간 민감도 최고 수준 · 정시성이 비용보다 중요 · 고정 이동 패턴 보유',
+      's4.vp.title':'핵심 Insight : 가치 제안의 전환',
+      's4.vp.old.label':'기존 접근 ×','s4.vp.old.title':'UAM = 프리미엄 택시',
+      's4.vp.old.1':'× 수요 불확실','s4.vp.old.2':'× 낮은 가동률','s4.vp.old.3':'× 높은 CAC',
+      's4.vp.new.label':'데이터 기반 재정의 ✓',
+      's4.vp.new.1':'✓ 도심 병목 건너뛰는 고정형','s4.vp.new.2':'✓ 예측 가능한 수요 Lock-in','s4.vp.new.3':'✓ BEP 조기 달성',
+      'exec.purpose':'목적','exec.function':'기능',
       'st1.name':'ETA 보장 인터페이스','st1.desc':'정시성 표시 및 실시간 도착 예정 시간 보장. 시간 불확실성을 해소하여 출장자의 심리적 안전감을 확보한다.',
+      'st1.purpose':'도착 시간 보장 및 출발 일정 제안',
+      'st1.f1':'Arrival Guarantee 표시 <em>(공항 도착 보장 시간)</em>',
+      'st1.f2':'Buffer Calculation — <strong>탑승 마감까지 여유 분 자동 계산</strong>',
+      'st1.f3':'Reliability Indicator — 정시성 98% 실시간 표시',
+      'st2.purpose':'<em>Seamless Transfer Flow</em> — 집 앞 픽업부터 공항 터미널까지. UAM 비행 외의 지상 이동 공백을 메워 전체 정시성을 확보.',
+      'st2.f1':'버티포트 이동 → UAM 비행 → 공항 환승 <strong>전 구간 시각화</strong>',
+      'st2.f2':'지상 연결 차량 자동 배차 <em>(마지막 마일 연계)</em>',
+      'st2.f3':'멀티모달 타임라인 — 이동 전 구간 ETA 통합',
+      'st3.purpose':'프리미엄 환경 설정 기능 및 휴식에 최적화된 환경 제안',
+      'st3.f1':'Arrival Time + Flight Buffer + <strong>Guarantee Coverage 표시</strong>',
+      'st3.f2':'법인 계정 통합 — 출장비 자동 정산·리포트 연동',
+      'st3.f3':'이용 패턴 분석 인사이트 — <em>관리자 대시보드</em>',
       'st2.name':'Door-to-Door 모빌리티 통합','st2.desc':'UAM 탑승 전후 지상 이동을 하나의 플로우로 통합. 끊김 없는 이동 경험으로 전환율을 높인다.',
       'st3.name':'B2B 관리자 대시보드','st3.desc':'기업 담당자가 구독 관리·운항 현황·비용을 실시간으로 확인. 기업 도입 의사결정 장벽을 낮춘다.',
       's7.title':'결과 <em>·</em> Results',
@@ -856,7 +876,27 @@
       's6.intro':'Redesigned the service as a seamless, integrated mobility experience that visualizes the entire journey and guarantees arrival time.',
       's6.asis':'As-is — Current State','s6.a1':'Users must judge routes and timing themselves','s6.a2':'Fragmented on-demand service — unpredictable demand','s6.a3':'No ETA guarantee → time uncertainty drives churn',
       's6.tobe':'To-be — Improved Direction','s6.t1':'Seamless integrated service visualizing the full journey','s6.t2':'B2B subscription pre-secures fixed demand','s6.t3':'98% arrival time guarantee interface',
+      's4.seg1':'General Air Travelers','s4.seg1d':'High cost sensitivity · Relatively high time flexibility',
+      's4.seg2':'Corporate Business Travelers (B2B)','s4.seg2d':'Highest time sensitivity · Punctuality matters more than cost · Fixed travel patterns',
+      's4.vp.title':'Key Insight: A Shift in Value Proposition',
+      's4.vp.old.label':'Old Approach ×','s4.vp.old.title':'UAM = Premium Taxi',
+      's4.vp.old.1':'× Unpredictable demand','s4.vp.old.2':'× Low utilization rate','s4.vp.old.3':'× High CAC',
+      's4.vp.new.label':'Data-driven Redefinition ✓',
+      's4.vp.new.1':'✓ Fixed-route, bypassing urban bottlenecks','s4.vp.new.2':'✓ Predictable demand lock-in','s4.vp.new.3':'✓ Early break-even point',
+      'exec.purpose':'Purpose','exec.function':'Function',
       'st1.name':'ETA Guarantee Interface','st1.desc':'Real-time ETA and punctuality display. Eliminates time uncertainty to secure psychological confidence for business travelers.',
+      'st1.purpose':'Guarantee arrival time and suggest departure schedule',
+      'st1.f1':'Arrival Guarantee display <em>(guaranteed airport arrival time)</em>',
+      'st1.f2':'Buffer Calculation — <strong>auto-calculates slack minutes before boarding cutoff</strong>',
+      'st1.f3':'Reliability Indicator — real-time 98% on-time display',
+      'st2.purpose':'<em>Seamless Transfer Flow</em> — from doorstep pickup to airport terminal. Fills the ground-transport gap around the UAM flight to secure end-to-end punctuality.',
+      'st2.f1':'Vertiport transfer → UAM flight → airport transfer <strong>visualized across the entire journey</strong>',
+      'st2.f2':'Automatic dispatch of connecting ground vehicles <em>(last-mile connection)</em>',
+      'st2.f3':'Multimodal timeline — unified ETA across the entire trip',
+      'st3.purpose':'Premium environment settings and rest-optimized environment suggestions',
+      'st3.f1':'Arrival Time + Flight Buffer + <strong>Guarantee Coverage display</strong>',
+      'st3.f2':'Corporate account integration — automated expense settlement & reporting',
+      'st3.f3':'Usage pattern analytics insights — <em>admin dashboard</em>',
       'st2.name':'Door-to-Door Mobility Integration','st2.desc':'Integrate ground transport before and after UAM boarding into a single seamless flow.',
       'st3.name':'B2B Admin Dashboard','st3.desc':'Corporate managers can monitor subscriptions, flight status, and costs in real-time, lowering enterprise adoption barriers.',
       's7.title':'Results',

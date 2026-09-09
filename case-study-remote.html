@@ -392,49 +392,49 @@
         </div>
       </div>
 
-      <div class="ctx-label">Context · Product &nbsp;—&nbsp; <span style="font-weight:500;letter-spacing:.04em;text-transform:none;">구간별 오류 분포 &amp; 시선 분배 분석</span></div>
+      <div class="ctx-label">Context · Product &nbsp;—&nbsp; <span style="font-weight:500;letter-spacing:.04em;text-transform:none;" data-i18n="ctx.errdist">구간별 오류 분포 &amp; 시선 분배 분석</span></div>
       <div class="ctx-two-col">
 
         <!-- 차트 1: 오류 발생 구간 분포 -->
         <div class="ctx-chart">
           <div>
-            <div class="ctx-chart-title">오류 발생 구간 분포</div>
-            <div class="ctx-chart-sub">주행 로그 N=2,400 세션 분석</div>
+            <div class="ctx-chart-title" data-i18n="ec1.title">오류 발생 구간 분포</div>
+            <div class="ctx-chart-sub" data-i18n="ec1.sub">주행 로그 N=2,400 세션 분석</div>
           </div>
           <div class="hbar-rows">
             <div class="hbar-row">
-              <div class="hbar-label">복잡 교차로 진입</div>
+              <div class="hbar-label" data-i18n="ec1.l1">복잡 교차로 진입</div>
               <div class="hbar-track"><div class="hbar-fill acc" style="width:62%"></div></div>
               <div class="hbar-pct acc">62%</div>
-              <div class="hbar-tag">최다 발생</div>
+              <div class="hbar-tag" data-i18n="ec1.tag">최다 발생</div>
             </div>
             <div class="hbar-row">
-              <div class="hbar-label">로터리 구간</div>
+              <div class="hbar-label" data-i18n="ec1.l2">로터리 구간</div>
               <div class="hbar-track"><div class="hbar-fill amb" style="width:18%"></div></div>
               <div class="hbar-pct">18%</div>
             </div>
             <div class="hbar-row">
-              <div class="hbar-label">고속도로 진입</div>
+              <div class="hbar-label" data-i18n="ec1.l3">고속도로 진입</div>
               <div class="hbar-track"><div class="hbar-fill amb" style="width:15%"></div></div>
               <div class="hbar-pct">15%</div>
             </div>
             <div class="hbar-row">
-              <div class="hbar-label">일반 도로</div>
+              <div class="hbar-label" data-i18n="ec1.l4">일반 도로</div>
               <div class="hbar-track"><div class="hbar-fill" style="width:5%"></div></div>
               <div class="hbar-pct">5%</div>
             </div>
           </div>
-          <div class="ctx-chart-note">교차로 진입 직전 5초 구간에서 내비 고정 → 감속·오조작 반복 패턴</div>
+          <div class="ctx-chart-note" data-i18n="ec1.note">교차로 진입 직전 5초 구간에서 내비 고정 → 감속·오조작 반복 패턴</div>
 
           <!-- 보조 미니 스탯 -->
           <div style="display:grid;grid-template-columns:1fr 1fr;gap:10px;margin-top:16px;">
             <div style="background:var(--bg-2);border:1px solid var(--border);border-radius:10px;padding:12px 14px;">
-              <div style="font-size:22px;font-weight:700;color:var(--accent);line-height:1.1;">3.2<span style="font-size:13px;font-weight:500;">회</span></div>
-              <div style="font-size:11px;color:var(--text-3);margin-top:4px;line-height:1.4;">교차로 진입 시<br>평균 내비 응시 횟수</div>
+              <div style="font-size:22px;font-weight:700;color:var(--accent);line-height:1.1;">3.2<span style="font-size:13px;font-weight:500;" data-i18n="unit.times">회</span></div>
+              <div style="font-size:11px;color:var(--text-3);margin-top:4px;line-height:1.4;" data-i18n="ec1.mini1">교차로 진입 시<br>평균 내비 응시 횟수</div>
             </div>
             <div style="background:var(--bg-2);border:1px solid var(--border);border-radius:10px;padding:12px 14px;">
               <div style="font-size:22px;font-weight:700;color:var(--accent);line-height:1.1;">78<span style="font-size:13px;font-weight:500;">%</span></div>
-              <div style="font-size:11px;color:var(--text-3);margin-top:4px;line-height:1.4;">오류 발생 건이<br>내비 응시와 동시 발생</div>
+              <div style="font-size:11px;color:var(--text-3);margin-top:4px;line-height:1.4;" data-i18n="ec1.mini2">오류 발생 건이<br>내비 응시와 동시 발생</div>
             </div>
           </div>
         </div>
@@ -442,12 +442,12 @@
         <!-- 차트 2: 시선 분배 비교 (초보 vs 숙련) -->
         <div class="ctx-chart">
           <div>
-            <div class="ctx-chart-title">시선 분배 비교 · 초보 vs 숙련 운전자</div>
-            <div class="ctx-chart-sub">위험 구간 주행 중 시선 비율 (%) — 실험 관찰 데이터</div>
+            <div class="ctx-chart-title" data-i18n="ec2.title">시선 분배 비교 · 초보 vs 숙련 운전자</div>
+            <div class="ctx-chart-sub" data-i18n="ec2.sub">위험 구간 주행 중 시선 비율 (%) — 실험 관찰 데이터</div>
           </div>
           <div class="ctx-chart-legend">
-            <div class="ctx-legend-item"><div class="ctx-legend-dot" style="background:var(--accent)"></div>초보</div>
-            <div class="ctx-legend-item"><div class="ctx-legend-dot" style="background:#2C3042"></div>숙련</div>
+            <div class="ctx-legend-item"><div class="ctx-legend-dot" style="background:var(--accent)"></div><span data-i18n="ec2.leg1">초보</span></div>
+            <div class="ctx-legend-item"><div class="ctx-legend-dot" style="background:#2C3042"></div><span data-i18n="ec2.leg2">숙련</span></div>
           </div>
           <svg viewBox="0 0 480 240" xmlns="http://www.w3.org/2000/svg" style="width:100%;overflow:visible;">
             <!-- baseline -->
@@ -465,7 +465,7 @@
             <text x="54"  y="104" font-size="10" fill="#4A9EFF" text-anchor="middle" font-family="Inter,sans-serif" font-weight="600">38%</text>
             <rect x="78"  y="45"  width="36" height="145" fill="#2C3042" rx="3"/>
             <text x="96"  y="40"  font-size="10" fill="#7A7A88" text-anchor="middle" font-family="Inter,sans-serif">68%</text>
-            <text x="75"  y="210" font-size="10" fill="#5A5A66" text-anchor="middle" font-family="Inter,sans-serif">전방 주시</text>
+            <text x="75"  y="210" font-size="10" fill="#5A5A66" text-anchor="middle" font-family="Inter,sans-serif" data-i18n="ec2.g1">전방 주시</text>
             <!-- Group 2: 내비 화면 (초보42%, 숙련18%) -->
             <rect x="150" y="100" width="36" height="90"  fill="#4A9EFF" rx="3"/>
             <text x="168" y="95"  font-size="10" fill="#4A9EFF" text-anchor="middle" font-family="Inter,sans-serif" font-weight="600">42%</text>
@@ -474,21 +474,21 @@
             <!-- KEY badge -->
             <rect x="150" y="194" width="78" height="14" fill="rgba(74,158,255,0.15)" rx="3"/>
             <text x="189" y="204" font-size="9" fill="#4A9EFF" text-anchor="middle" font-family="Inter,sans-serif" font-weight="700">KEY</text>
-            <text x="189" y="222" font-size="10" fill="#5A5A66" text-anchor="middle" font-family="Inter,sans-serif">내비 화면</text>
+            <text x="189" y="222" font-size="10" fill="#5A5A66" text-anchor="middle" font-family="Inter,sans-serif" data-i18n="ec2.g2">내비 화면</text>
             <!-- Group 3: 좌우 미러 (초보12%, 숙련10%) -->
             <rect x="264" y="164" width="36" height="26"  fill="#4A9EFF" rx="3"/>
             <text x="282" y="159" font-size="10" fill="#4A9EFF" text-anchor="middle" font-family="Inter,sans-serif" font-weight="600">12%</text>
             <rect x="306" y="169" width="36" height="21"  fill="#2C3042" rx="3"/>
             <text x="324" y="164" font-size="10" fill="#7A7A88" text-anchor="middle" font-family="Inter,sans-serif">10%</text>
-            <text x="299" y="210" font-size="10" fill="#5A5A66" text-anchor="middle" font-family="Inter,sans-serif">좌우 미러</text>
+            <text x="299" y="210" font-size="10" fill="#5A5A66" text-anchor="middle" font-family="Inter,sans-serif" data-i18n="ec2.g3">좌우 미러</text>
             <!-- Group 4: 기타 (초보8%, 숙련4%) -->
             <rect x="378" y="173" width="36" height="17"  fill="#4A9EFF" rx="3"/>
             <text x="396" y="168" font-size="10" fill="#4A9EFF" text-anchor="middle" font-family="Inter,sans-serif" font-weight="600">8%</text>
             <rect x="420" y="181" width="36" height="9"   fill="#2C3042" rx="3"/>
             <text x="438" y="176" font-size="10" fill="#7A7A88" text-anchor="middle" font-family="Inter,sans-serif">4%</text>
-            <text x="417" y="210" font-size="10" fill="#5A5A66" text-anchor="middle" font-family="Inter,sans-serif">기타</text>
+            <text x="417" y="210" font-size="10" fill="#5A5A66" text-anchor="middle" font-family="Inter,sans-serif" data-i18n="ec2.g4">기타</text>
           </svg>
-          <div class="ctx-chart-note">초보: 내비 42% 응시 vs 숙련: 18% — 시각 의존도 <strong>2.3× 차이</strong></div>
+          <div class="ctx-chart-note" data-i18n="ec2.note">초보: 내비 42% 응시 vs 숙련: 18% — 시각 의존도 <strong>2.3× 차이</strong></div>
         </div>
       </div>
 
@@ -613,17 +613,17 @@
       <h3 style="font-family:'Lexend',sans-serif;font-size:12px;font-weight:600;color:var(--text-3);letter-spacing:0.14em;text-transform:uppercase;margin:36px 0 18px;" data-i18n="s5.strat.title">3가지 실행 전략</h3>
       <div class="strategies">
         <div class="strat-card">
-          <div class="strat-num">전략 01</div>
+          <div class="strat-num" data-i18n="strat.n1">전략 01</div>
           <div class="strat-name" data-i18n="st1.name">음성 선제 안내 (Voice-First)</div>
           <div class="strat-desc" data-i18n="st1.desc">상황 발생 전에 음성으로 다음 행동을 예고. 시선 이탈 없이 판단 부담을 줄이는 것이 1차 목표.</div>
         </div>
         <div class="strat-card">
-          <div class="strat-num">전략 02</div>
+          <div class="strat-num" data-i18n="strat.n2">전략 02</div>
           <div class="strat-name" data-i18n="st2.name">맥락 감지 UI 전환 (Simplify)</div>
           <div class="strat-desc" data-i18n="st2.desc">고위험 상황 감지 시 화면을 핵심 정보만 남기고 자동 축소. 인지 과부하를 방지해 집중력을 유지시킨다.</div>
         </div>
         <div class="strat-card">
-          <div class="strat-num">전략 03</div>
+          <div class="strat-num" data-i18n="strat.n3">전략 03</div>
           <div class="strat-name" data-i18n="st3.name">원격 개입 안전망 (Fallback)</div>
           <div class="strat-desc" data-i18n="st3.desc">판단 불가 상황에서 관제 강사가 즉시 개입. 시스템 자동화의 한계를 사람이 보완하는 최후 안전망.</div>
         </div>
@@ -768,7 +768,7 @@
 
       <!-- 관제 화면 이미지 -->
       <div style="margin-top:40px;">
-        <div style="font-size:10px;font-weight:600;letter-spacing:.16em;text-transform:uppercase;color:var(--text-3);margin-bottom:12px;">원격 지원 호출 시 관제 화면</div>
+        <div style="font-size:10px;font-weight:600;letter-spacing:.16em;text-transform:uppercase;color:var(--text-3);margin-bottom:12px;" data-i18n="ctrl.label">원격 지원 호출 시 관제 화면</div>
         <div style="width:100%;background:var(--bg-card);border:1px solid var(--border);border-radius:14px;overflow:hidden;">
           <img src="./Remote/control-screen.jpg" alt="원격 지원 관제 화면" style="width:100%;height:auto;display:block;" />
         </div>
@@ -855,20 +855,20 @@
             </div>
             <div class="result-row">
               <div class="result-cell label" data-i18n="m5">Completion Time</div>
-              <div class="result-cell before">10분 40초</div>
-              <div class="result-cell after">10분</div>
+              <div class="result-cell before" data-i18n="res.m5.before">10분 40초</div>
+              <div class="result-cell after" data-i18n="res.m5.after">10분</div>
               <div class="result-cell after">−8%</div>
             </div>
             <div class="result-row">
               <div class="result-cell label" data-i18n="m6">Reaction Time</div>
-              <div class="result-cell before">기준</div>
+              <div class="result-cell before" data-i18n="result.baseline">기준</div>
               <div class="result-cell after">−30%</div>
               <div class="result-cell after">−30%</div>
             </div>
             <div class="result-row">
               <div class="result-cell label" data-i18n="m7">Turns-to-success</div>
-              <div class="result-cell before">1.8회</div>
-              <div class="result-cell after">1.2회</div>
+              <div class="result-cell before" data-i18n="res.m7.before">1.8회</div>
+              <div class="result-cell after" data-i18n="res.m7.after">1.2회</div>
               <div class="result-cell after">−33%</div>
             </div>
           </div>
@@ -885,7 +885,7 @@
             </div>
             <div class="result-row">
               <div class="result-cell label" data-i18n="m8">Glance Time</div>
-              <div class="result-cell before">기준</div>
+              <div class="result-cell before" data-i18n="result.baseline">기준</div>
               <div class="result-cell after">−30%</div>
               <div class="result-cell after">−30%</div>
             </div>
@@ -897,7 +897,7 @@
             </div>
             <div class="result-row">
               <div class="result-cell label" data-i18n="m10">Error Rate</div>
-              <div class="result-cell before">기준</div>
+              <div class="result-cell before" data-i18n="result.baseline">기준</div>
               <div class="result-cell after">−30%</div>
               <div class="result-cell after">−30%</div>
             </div>
@@ -1075,7 +1075,41 @@
     'st2.name':'Context-Aware UI Reduction',
     'st2.desc':'Auto-collapse the screen to essential info when high-risk conditions are detected. Prevents cognitive overload at the moments that matter most.',
     'st3.name':'Remote Intervention Fallback',
-    'st3.desc':'A control instructor steps in immediately when novice judgment fails. Human oversight bridges the gap where system automation hits its limits.'
+    'st3.desc':'A control instructor steps in immediately when novice judgment fails. Human oversight bridges the gap where system automation hits its limits.',
+    's3.iq.label':'Additional User (Qualitative) Interview Directions',
+    's3.iq1':'Exactly when do you feel scared while driving?',
+    's3.iq2':'Why can\'t you look at the navigation at the same time?',
+    's3.iq3':'Which part makes you feel anxious?',
+    'ctx.errdist':'Error Distribution by Segment &amp; Gaze Allocation Analysis',
+    'ec1.title':'Error Occurrence by Road Segment',
+    'ec1.sub':'Driving log analysis, N=2,400 sessions',
+    'ec1.l1':'Complex Intersection Entry',
+    'ec1.tag':'Most Frequent',
+    'ec1.l2':'Roundabout Segment',
+    'ec1.l3':'Highway Merge',
+    'ec1.l4':'General Road',
+    'ec1.note':'In the 5 seconds before intersection entry, eyes lock onto navigation → a repeating pattern of deceleration and misoperation',
+    'ec1.mini1':'Average navigation glances<br>per intersection entry',
+    'ec1.mini2':'Of error events<br>coincide with a navigation glance',
+    'ec2.title':'Gaze Distribution Comparison · Novice vs. Experienced Drivers',
+    'ec2.sub':'Gaze ratio (%) while driving through risk segments — observational study data',
+    'ec2.leg1':'Novice',
+    'ec2.leg2':'Experienced',
+    'ec2.g1':'Forward Gaze',
+    'ec2.g2':'Nav Screen',
+    'ec2.g3':'Side Mirrors',
+    'ec2.g4':'Other',
+    'ec2.note':'Novice: 42% of glances on nav vs. Experienced: 18% — <strong>2.3× difference</strong> in visual dependence',
+    'strat.n1':'Strategy 01',
+    'strat.n2':'Strategy 02',
+    'strat.n3':'Strategy 03',
+    'ctrl.label':'Control Screen During a Remote Support Call',
+    'res.m5.before':'10 min 40 sec',
+    'res.m5.after':'10 min',
+    'result.baseline':'Baseline',
+    'res.m7.before':'1.8 times',
+    'res.m7.after':'1.2 times',
+    'unit.times':'x'
   };
 
   let lang = 'en';
