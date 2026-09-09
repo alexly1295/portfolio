@@ -846,6 +846,7 @@
       'l2.h':'UX는 기술을 경험으로 번역하는 과정이다',
       'l2.p':'정보 비대칭 해소를 통해 사용자의 심리적 통제감을 회복시키는 것이 유효한 UX 전략임을 배웠다. ETA 보장 인터페이스 하나가 <strong style="color:var(--text)">가격 저항을 낮추고 재이용률을 올리는</strong> 직접적 레버가 될 수 있다.',
       'next.label':'다음 케이스 스터디','footer.back':'← Projects',
+      'toc.s1':'배경','toc.s2':'목표','toc.s3':'원인 분석','toc.s4':'문제 정의','toc.s5':'가설','toc.s6':'실행','toc.s7':'결과','toc.s8':'레슨런',
     },
     en: {
       'nav.work':'Projects','nav.about':'About',
@@ -908,6 +909,7 @@
       'l1.h':'Business model growth starts from structural design, not technology','l1.p':'The role of a PM is to identify the key lever (fixed demand) through data analysis and connect it to the service model. <strong style="color:var(--text)">Changing the demand structure itself</strong> is a more powerful growth strategy than adding features.',
       'l2.h':'UX is the process of translating technology into experience','l2.p':'Resolving information asymmetry to restore the user\'s sense of psychological control is an effective UX strategy. A single ETA guarantee interface can directly <strong style="color:var(--text)">reduce price resistance and improve retention</strong>.',
       'next.label':'Next Case Study','footer.back':'← Projects',
+      'toc.s1':'Background','toc.s2':'Goal','toc.s3':'Data Analysis','toc.s4':'Problem Definition','toc.s5':'Hypothesis','toc.s6':'Execution','toc.s7':'Results','toc.s8':'Lessons Learned',
     }
   };
 
@@ -948,16 +950,17 @@
 
   /* ── TOC ── */
   const tocData = [
-    { id:'s1', label:'배경' }, { id:'s2', label:'목표' },
-    { id:'s3', label:'원인 분석' }, { id:'s4', label:'문제 정의' },
-    { id:'s5', label:'가설' }, { id:'s6', label:'실행' },
-    { id:'s7', label:'결과' }, { id:'s8', label:'레슨런' },
+    { id:'s1', key:'toc.s1' }, { id:'s2', key:'toc.s2' },
+    { id:'s3', key:'toc.s3' }, { id:'s4', key:'toc.s4' },
+    { id:'s5', key:'toc.s5' }, { id:'s6', key:'toc.s6' },
+    { id:'s7', key:'toc.s7' }, { id:'s8', key:'toc.s8' },
   ];
   const tocEl = document.getElementById('csToc');
-  tocData.forEach(({ id, label }) => {
+  tocData.forEach(({ id, key }) => {
     const a = document.createElement('a');
     a.className = 'cs-toc-link'; a.href = '#' + id;
-    a.innerHTML = `<span class="cs-toc-tick"></span>${label}`;
+    const label = (i18n[currentLang] && i18n[currentLang][key] !== undefined) ? i18n[currentLang][key] : i18n.ko[key];
+    a.innerHTML = `<span class="cs-toc-tick"></span><span data-i18n="${key}">${label}</span>`;
     tocEl.appendChild(a);
   });
   const tocLinks = tocEl.querySelectorAll('.cs-toc-link');
