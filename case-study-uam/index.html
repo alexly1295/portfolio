@@ -1,0 +1,1543 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <base href="/">
+  <script>
+  /* Local preview only: when this file is opened by double-click (file://), point <base> at the portfolio folder
+     so ./Uam/... images and /work, /contact links resolve. Has no effect on the deployed site. */
+  (function(){
+    if (location.protocol !== 'file:') return;
+    var u = location.href.split(/[?#]/)[0].replace(/case-study-uam(\/index)?(\.html)?$/, '');
+    document.querySelector('base').href = u;
+    document.addEventListener('DOMContentLoaded', function(){
+      document.querySelectorAll('a[href^="/"]').forEach(function(a){
+        var p = a.getAttribute('href');
+        if (p.length > 1 && !/\.[a-z]+$/i.test(p)) a.setAttribute('href', u + p.slice(1) + '.html');
+      });
+    });
+  })();
+  </script>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>UAM Interior Design — Sumin Lee</title>
+  <link rel="icon" type="image/png" href="./favicon.png" />
+  <link rel="preconnect" href="https://fonts.googleapis.com" />
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+  <link href="https://fonts.googleapis.com/css2?family=Lexend:wght@300;400;500;600;700&family=Inter:wght@300;400;500;600&display=swap" rel="stylesheet" />
+  <style>
+    :root {
+      --bg:        #0B0C11;
+      --bg-2:      #111318;
+      --bg-card:   #15161C;
+      --bg-card-h: #1C1D25;
+      --accent:    #E8182E;
+      --accent-dim:  rgba(232,24,46,.10);
+      --accent-glow: rgba(232,24,46,.22);
+      --text:      #F0ECE6;
+      --text-2:    #CCCAC6;
+      --text-3:    #5A5A66;
+      --border:    rgba(255,255,255,0.07);
+      --border-h:  rgba(255,255,255,0.13);
+    }
+    *, *::before, *::after { margin:0; padding:0; box-sizing:border-box; }
+    html { scroll-behavior: smooth; }
+    body {
+      background-color: var(--bg);
+      background-image:
+        radial-gradient(ellipse 80% 55% at -5% -5%, rgba(28,42,80,.55) 0%, transparent 50%),
+        radial-gradient(ellipse 50% 40% at 105% 105%, rgba(22,10,6,.95) 0%, transparent 48%),
+        radial-gradient(ellipse 60% 40% at 60% 0%, rgba(232,24,46,.025) 0%, transparent 55%);
+      color: var(--text); font-family: 'Inter', sans-serif;
+      font-size: 16px; line-height: 1.6; overflow-x: hidden;
+      -webkit-font-smoothing: antialiased; cursor: none;
+    }
+    a { color: inherit; text-decoration: none; cursor: none; }
+    button { cursor: none; }
+
+    /* GRAIN */
+    #grain {
+      position: fixed; inset: 0; z-index: 998; pointer-events: none; opacity: .038;
+      background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='256' height='256'%3E%3Cfilter id='n'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.85' numOctaves='4' stitchTiles='stitch'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23n)'/%3E%3C/svg%3E");
+      background-repeat: repeat; background-size: 256px 256px;
+    }
+
+    /* CURSOR */
+    #cur-dot {
+      position: fixed; width: 6px; height: 6px; background: var(--text);
+      border-radius: 50%; pointer-events: none; z-index: 9999;
+      transform: translate(-50%,-50%); transition: width .15s, height .15s, background .15s;
+    }
+    #cur-ring {
+      position: fixed; width: 34px; height: 34px;
+      border: 1px solid rgba(240,236,230,.22); border-radius: 50%;
+      pointer-events: none; z-index: 9998; transform: translate(-50%,-50%);
+      transition: width .3s, height .3s, border-color .3s, opacity .3s;
+    }
+    body.cursor-link #cur-dot { width:44px; height:44px; background:var(--accent-dim); border:1px solid var(--accent-glow); }
+    body.cursor-link #cur-ring { opacity:0; }
+
+    /* NAV */
+    nav {
+      position: fixed; inset: 0 0 auto; z-index: 200;
+      padding: 22px 64px; display: flex; justify-content: space-between; align-items: center;
+      transition: background .4s, border-color .4s; border-bottom: 1px solid transparent;
+    }
+    nav.scrolled { background: rgba(11,12,17,.88); backdrop-filter: blur(20px); border-color: var(--border); }
+    .nav-back {
+      display: flex; align-items: center; gap: 10px;
+      font-size: 12px; letter-spacing: 0.1em; text-transform: uppercase;
+      color: var(--text-3); transition: color .2s;
+    }
+    .nav-back:hover { color: var(--text); }
+    .nav-back:hover svg { transform: translateX(-3px); }
+    .nav-back svg { transition: transform .2s; }
+    .nav-right { display: flex; align-items: center; gap: 40px; }
+    .nav-links { display:flex; gap:36px; list-style:none; }
+    .nav-links a { font-size:13px; letter-spacing:.06em; color:var(--text-2); transition:color .2s; position:relative; }
+    .nav-links a::after { content:''; position:absolute; left:0; bottom:-3px; width:0; height:1px; background:var(--accent); transition:width .3s; }
+    .nav-links a:hover { color:var(--text); }
+    .nav-links a:hover::after { width:100%; }
+    .lang-toggle { display:flex; align-items:center; gap:4px; border:1px solid var(--border); border-radius:100px; padding:3px 4px; }
+    .lang-btn {
+      background:none; border:none; outline:none;
+      font-family:'Lexend',sans-serif; font-size:10px; font-weight:600; letter-spacing:0.1em;
+      color:var(--text-3); padding:4px 10px; border-radius:100px; transition:background .2s,color .2s;
+    }
+    .lang-btn.active { background:var(--accent); color:#fff; }
+    .lang-btn:hover:not(.active) { color:var(--text); }
+
+    /* HERO */
+    .cs-hero {
+      min-height: 100vh; display: flex; flex-direction: column;
+      justify-content: flex-end; padding: 0 64px 80px;
+      position: relative; overflow: hidden;
+    }
+    .cs-hero-bg {
+      position: absolute; inset: 0;
+      background:
+        radial-gradient(ellipse 70% 60% at 100% 0%, rgba(232,24,46,.05) 0%, transparent 55%),
+        radial-gradient(ellipse 50% 40% at 0% 100%, rgba(28,42,80,.4) 0%, transparent 50%);
+    }
+    .cs-hero-img {
+      position: absolute; inset: 0; width: 100%; height: 100%;
+      object-fit: cover; opacity: .18; z-index: 0; pointer-events: none;
+    }
+    .cs-hero-number {
+      font-family:'Lexend',sans-serif; font-size:180px; font-weight:700;
+      letter-spacing:-12px; color:rgba(232,24,46,.04); line-height:1;
+      position:absolute; right:40px; bottom:60px; user-select:none; pointer-events:none;
+    }
+    .cs-eyebrow {
+      display:inline-flex; align-items:center; gap:8px;
+      font-size:10px; font-weight:500; letter-spacing:0.22em; text-transform:uppercase;
+      color:var(--accent); margin-bottom:28px;
+      opacity:0; animation:fadeUp .7s .2s forwards;
+    }
+    .cs-eyebrow::before { content:''; width:3px; height:12px; background:var(--accent); border-radius:2px; }
+    .cs-hero h1 {
+      font-family:'Lexend',sans-serif; font-size:clamp(30px, 4.8vw, 70px);
+      font-weight:700; letter-spacing:-2px; line-height:1.05;
+      max-width:900px; margin-bottom:28px;
+      opacity:0; animation:fadeUp .9s .3s forwards;
+    }
+    .cs-hero h1 em { font-style:normal; color:var(--accent); }
+    .cs-hero-sub {
+      font-size:13px; letter-spacing:0.06em; text-transform:uppercase;
+      color:var(--text-3); margin-bottom:16px;
+      opacity:0; animation:fadeUp .7s .25s forwards;
+    }
+    .cs-hero-question {
+      font-size:clamp(14px,1.4vw,18px); color:var(--text-2);
+      max-width:620px; line-height:1.75; font-weight:300;
+      opacity:0; animation:fadeUp .8s .45s forwards;
+    }
+    .cs-hero-meta {
+      display:flex; gap:48px; flex-wrap:wrap; margin-top:56px;
+      padding-top:40px; border-top:1px solid var(--border);
+      opacity:0; animation:fadeUp .7s .6s forwards;
+    }
+    .meta-label { font-size:9px; letter-spacing:0.22em; text-transform:uppercase; color:var(--text-3); margin-bottom:6px; }
+    .meta-val { font-family:'Lexend',sans-serif; font-size:14px; font-weight:500; color:var(--text); }
+    @keyframes fadeUp { to { opacity:1; transform:translateY(0); } }
+
+    /* BODY */
+    .cs-body { max-width:900px; margin:0 auto; padding:0 64px 160px; }
+
+    /* SECTION */
+    .cs-section { padding:80px 0; border-top:1px solid var(--border); opacity:0; transform:translateY(28px); transition:opacity .75s,transform .75s; }
+    .cs-section.visible { opacity:1; transform:none; }
+    .cs-section-num { font-family:'Lexend',sans-serif; font-size:11px; font-weight:500; letter-spacing:0.22em; text-transform:uppercase; color:var(--accent); margin-bottom:8px; }
+    .cs-section-title { font-family:'Lexend',sans-serif; font-size:clamp(24px,3vw,36px); font-weight:700; letter-spacing:-1px; line-height:1.1; margin-bottom:40px; color:var(--text); }
+    .cs-section-title em { font-style:normal; color:var(--accent); }
+
+    .cs-p { font-size:15px; color:var(--text-2); line-height:1.85; margin-bottom:20px; }
+    .cs-p:last-child { margin-bottom:0; }
+    .cs-p strong { color:var(--text); font-weight:500; }
+
+    /* CALLOUT */
+    .cs-callout { border-left:3px solid var(--accent); padding:20px 24px; background:rgba(232,24,46,.04); border-radius:0 8px 8px 0; margin:32px 0; }
+    .cs-callout p { font-size:15px; color:var(--text); line-height:1.8; }
+    .cs-callout strong { color:var(--accent); }
+
+    /* BIG STAT */
+    .big-stat-block {
+      display:flex; align-items:center; gap:32px; padding:40px;
+      background:var(--bg-card); border:1px solid var(--border); border-radius:16px;
+      margin:36px 0; position:relative; overflow:hidden;
+    }
+    .big-stat-block::before {
+      content:''; position:absolute; inset:0;
+      background:radial-gradient(ellipse 60% 70% at 0% 50%, rgba(232,24,46,.07) 0%, transparent 60%);
+    }
+    .big-stat-num {
+      font-family:'Lexend',sans-serif; font-size:clamp(60px,8vw,100px);
+      font-weight:700; letter-spacing:-4px; color:var(--accent); line-height:1; flex-shrink:0;
+      position:relative;
+    }
+    .big-stat-desc { font-size:15px; color:var(--text-2); line-height:1.75; position:relative; }
+    .big-stat-desc strong { color:var(--text); font-weight:500; }
+
+    /* BACKGROUND IMAGES */
+    .cs-bg-img { width:100%; border-radius:16px; overflow:hidden; margin:32px 0; display:block; border:1px solid var(--border); }
+    .cs-bg-img img { width:100%; height:auto; display:block; }
+    /* 이미지 없을 때 placeholder — bg-02만 고정 비율 유지 */
+    .cs-bg-img.fixed-ratio { aspect-ratio:16/9; background:var(--bg-card); display:flex; align-items:center; justify-content:center; font-size:11px; letter-spacing:.12em; text-transform:uppercase; color:var(--text-3); position:relative; }
+
+    /* TWO COL */
+    .cs-two-col { display:grid; grid-template-columns:1fr 1fr; gap:24px; margin:28px 0; }
+    .cs-col-card { background:var(--bg-card); border:1px solid var(--border); border-radius:12px; padding:28px; }
+    .cs-col-card h4 { font-family:'Lexend',sans-serif; font-size:12px; font-weight:600; letter-spacing:0.1em; text-transform:uppercase; color:var(--text-3); margin-bottom:16px; }
+    .cs-col-card h4.accent { color:var(--accent); }
+    .cs-col-card ul { list-style:none; display:flex; flex-direction:column; gap:10px; }
+    .cs-col-card ul li { font-size:14px; color:var(--text-2); line-height:1.65; padding-left:16px; position:relative; }
+    .cs-col-card ul li::before { content:''; position:absolute; left:0; top:9px; width:5px; height:5px; border-radius:50%; background:var(--border-h); }
+    .cs-col-card.accent-border { border-color:rgba(232,24,46,.22); background:rgba(232,24,46,.025); }
+    .cs-col-card.accent-border ul li::before { background:var(--accent); opacity:.6; }
+
+    /* QUOTE GRID */
+    .quote-grid { display:grid; grid-template-columns:1fr 1fr; gap:16px; margin:28px 0; }
+    .quote-card {
+      background:var(--bg-card); border:1px solid var(--border); border-radius:10px;
+      padding:20px 20px 20px 24px; position:relative;
+    }
+    .quote-card::before { content:'"'; position:absolute; top:8px; left:14px; font-family:'Lexend',sans-serif; font-size:36px; color:var(--accent); opacity:.3; line-height:1; }
+    .quote-text { font-size:14px; color:var(--text-2); line-height:1.7; padding-top:12px; }
+
+    /* STATS GRID */
+    .cs-stats { display:grid; grid-template-columns:repeat(3,1fr); gap:2px; background:var(--border); margin:36px 0; }
+    .cs-stat { background:var(--bg-card); padding:28px 24px; }
+    .cs-stat-num { font-family:'Lexend',sans-serif; font-size:36px; font-weight:700; letter-spacing:-2px; color:var(--accent); line-height:1; margin-bottom:8px; }
+    .cs-stat-label { font-size:12px; color:var(--text-3); line-height:1.5; }
+
+    /* SEGMENTS */
+    .segments { display:grid; grid-template-columns:repeat(3,1fr); gap:12px; margin:28px 0; }
+    .segment-card { background:var(--bg-card); border:1px solid var(--border); border-radius:10px; padding:18px; transition:border-color .2s; }
+    .segment-card.target { border-color:rgba(232,24,46,.35); background:rgba(232,24,46,.03); }
+    .seg-icon { font-size:20px; margin-bottom:10px; }
+    .seg-name { font-family:'Lexend',sans-serif; font-size:13px; font-weight:600; color:var(--text); margin-bottom:4px; }
+    .seg-name .target-badge { font-size:9px; font-weight:600; letter-spacing:0.1em; text-transform:uppercase; color:var(--accent); background:rgba(232,24,46,.12); padding:2px 7px; border-radius:100px; margin-left:6px; }
+    .seg-desc { font-size:12px; color:var(--text-3); line-height:1.55; }
+
+    /* HYPOTHESIS */
+    .hypothesis-card {
+      background:var(--bg-card); border:1px solid rgba(232,24,46,.2); border-radius:12px;
+      padding:36px; margin:28px 0; position:relative; overflow:hidden;
+    }
+    .hypothesis-card::before {
+      content:'"'; position:absolute; top:-10px; left:20px; font-family:'Lexend',sans-serif;
+      font-size:120px; font-weight:700; color:rgba(232,24,46,.05); line-height:1; pointer-events:none;
+    }
+    .hypothesis-text { font-family:'Lexend',sans-serif; font-size:clamp(15px,1.8vw,20px); font-weight:500; line-height:1.65; color:var(--text); letter-spacing:-0.2px; position:relative; z-index:1; }
+    .hypothesis-text em { color:var(--accent); font-style:normal; }
+    .hyp-meta { margin-top:20px; padding-top:18px; border-top:1px solid var(--border); display:flex; flex-wrap:wrap; gap:8px; }
+    .hyp-chip { font-size:11px; padding:4px 12px; border:1px solid rgba(232,24,46,.2); border-radius:100px; color:var(--text-3); }
+
+    /* AS-IS TO-BE */
+    .as-is-tobe { display:grid; grid-template-columns:1fr 40px 1fr; gap:0; margin:36px 0; align-items:start; }
+    .arrow-col { display:flex; justify-content:center; align-items:center; padding-top:80px; }
+
+    /* FRAMEWORK (4-card grid) */
+    .framework { display:grid; grid-template-columns:repeat(4,1fr); gap:12px; margin:28px 0; }
+    .fw-card {
+      background:var(--bg-card); border:1px solid var(--border); border-radius:12px;
+      padding:22px 18px; position:relative; overflow:hidden; transition:border-color .25s;
+    }
+    .fw-card:hover { border-color:rgba(232,24,46,.3); }
+    .fw-rank { font-family:'Lexend',sans-serif; font-size:11px; font-weight:700; color:var(--accent); letter-spacing:0.1em; margin-bottom:10px; }
+    .fw-key { font-family:'Lexend',sans-serif; font-size:18px; font-weight:700; color:var(--text); margin-bottom:6px; }
+    .fw-label { font-size:12px; color:var(--text-3); margin-bottom:10px; }
+    .fw-example { font-size:12px; color:var(--text-2); line-height:1.6; padding:10px 12px; background:rgba(255,255,255,.03); border-radius:6px; }
+    .fw-example em { color:var(--accent); font-style:normal; font-weight:500; }
+
+    /* FUNNEL — ui-block style */
+    .ui-block-list { display:flex; flex-direction:column; gap:0; margin:0; }
+    .ui-block { padding:52px 0 0; border-top:1px solid var(--border); }
+    .ui-block-header { margin-bottom:32px; }
+    .ui-block-num { font-family:'Lexend',sans-serif; font-size:10px; font-weight:700; letter-spacing:.2em; text-transform:uppercase; color:var(--accent); margin-bottom:10px; }
+    .ui-block-name { font-family:'Lexend',sans-serif; font-size:clamp(20px,2.2vw,28px); font-weight:700; color:var(--text); line-height:1.15; }
+    .ui-block-meta { display:grid; grid-template-columns:1fr 1fr; gap:52px; margin-bottom:32px; }
+    @media(max-width:640px){ .ui-block-meta{ grid-template-columns:1fr; gap:20px; } }
+    .ui-block-left-sub { font-size:13px; color:var(--text-3); line-height:1.7; margin-top:8px; }
+    .ui-block-right p { font-size:14px; color:var(--text-2); line-height:1.9; margin-bottom:14px; }
+    .ui-block-right p:last-child { margin-bottom:0; }
+    .ui-block-right strong { color:var(--text); font-weight:500; }
+    .ui-block-right em { color:var(--accent); font-style:normal; }
+    .ui-voice::before { content:'\201C'; color:var(--accent); font-size:1.25em; line-height:0; vertical-align:-0.1em; margin-right:3px; }
+    .ui-voice::after  { content:'\201D'; color:var(--accent); font-size:1.25em; line-height:0; vertical-align:-0.1em; margin-left:3px; }
+    .ui-img-wrap { background:var(--bg-card-h); border:1px solid var(--border); border-radius:16px; overflow:hidden; margin:32px 0 60px; display:flex; align-items:center; justify-content:center; position:relative; min-height:120px; }
+    .ui-img-wrap img { width:100%; height:auto; display:block; object-fit:contain; }
+    .ui-img-hint { font-size:11px; color:var(--border-h); letter-spacing:.12em; text-transform:uppercase; user-select:none; pointer-events:none; position:absolute; }
+    .ui-img-wrap img ~ .ui-img-hint { display:none; }
+
+    /* STRATEGIES (3-col) */
+    .strategies { display:grid; grid-template-columns:repeat(3,1fr); gap:2px; background:var(--border); margin:28px 0; }
+    .strat-card { background:var(--bg-card); padding:28px; }
+    .exec-plan-wrap { margin-top:72px; }
+    .exec-plan-header { display:grid; grid-template-columns:1fr 1fr; gap:60px; margin-bottom:40px; align-items:start; }
+    @media(max-width:680px){ .exec-plan-header{grid-template-columns:1fr;gap:16px;} }
+    .exec-plan-htitle { font-family:'Lexend',sans-serif; font-size:clamp(18px,2vw,24px); font-weight:700; color:var(--text); line-height:1.35; }
+    .exec-plan-hdesc { font-size:14px; color:var(--text-2); line-height:1.9; }
+    .exec-plan-hdesc p { margin-bottom:14px; }
+    .exec-plan-hdesc p:last-child { margin-bottom:0; }
+    .exec-plan-hdesc strong { color:var(--text); font-weight:500; }
+    .exec-list { display:flex; flex-direction:column; gap:10px; }
+    .exec-item { display:grid; grid-template-columns:1fr 80px; gap:20px; align-items:center; background:var(--bg-card); border:1px solid var(--border); border-radius:14px; padding:20px 24px; }
+    @media(max-width:680px){ .exec-item{grid-template-columns:1fr;} .exec-item-img{display:none;} }
+    .exec-item-num { font-family:'Lexend',sans-serif; font-size:10px; font-weight:700; letter-spacing:.2em; color:var(--accent); margin-bottom:8px; }
+    .exec-item-title { font-family:'Lexend',sans-serif; font-size:16px; font-weight:700; color:var(--text); line-height:1.3; margin-bottom:5px; }
+    .exec-item-sub { font-size:13px; color:var(--text-3); line-height:1.6; }
+    .exec-item-img { width:80px; height:80px; border-radius:10px; background:var(--bg-card-h); border:1px solid var(--border); overflow:hidden; flex-shrink:0; display:flex; align-items:center; justify-content:center; font-size:9px; color:var(--text-3); letter-spacing:.1em; text-transform:uppercase; }
+    .exec-item-img img { width:100%; height:100%; object-fit:cover; display:block; }
+    .strat-num { font-size:10px; font-weight:600; letter-spacing:0.18em; text-transform:uppercase; color:var(--accent); margin-bottom:10px; }
+    .strat-name { font-family:'Lexend',sans-serif; font-size:16px; font-weight:600; color:var(--text); margin-bottom:8px; }
+    .strat-desc { font-size:13px; color:var(--text-2); line-height:1.65; }
+
+    /* A/B CHART */
+    .ab-chart { background:var(--bg-card); border:1px solid var(--border); border-radius:12px; padding:28px; margin:32px 0; }
+    .ab-legend { display:flex; gap:24px; margin-bottom:24px; }
+    .ab-legend-item { display:flex; align-items:center; gap:8px; font-size:12px; color:var(--text-2); }
+    .ab-legend-dot { width:10px; height:10px; border-radius:2px; flex-shrink:0; }
+    .ab-legend-dot.base { background:var(--text-3); }
+    .ab-legend-dot.impr { background:var(--accent); }
+    .ab-rows { display:flex; flex-direction:column; gap:16px; }
+    .ab-row { display:grid; grid-template-columns:160px 1fr; gap:16px; align-items:center; }
+    .ab-metric { font-size:12px; color:var(--text-2); }
+    .ab-bars { display:flex; flex-direction:column; gap:5px; }
+    .ab-bar-row { display:flex; align-items:center; gap:10px; }
+    .ab-bar-track { flex:1; height:7px; background:rgba(255,255,255,.04); border-radius:4px; overflow:hidden; }
+    .ab-bar-fill { height:100%; border-radius:4px; transition:width 1s cubic-bezier(.25,.46,.45,.94); }
+    .ab-bar-fill.base { background:var(--text-3); }
+    .ab-bar-fill.impr { background:var(--accent); }
+    .ab-val { font-family:'Lexend',sans-serif; font-size:12px; font-weight:600; width:48px; flex-shrink:0; text-align:right; }
+    .ab-val.base { color:var(--text-3); }
+    .ab-val.impr { color:var(--accent); }
+
+    /* RESULT GRID */
+    .result-grid { display:grid; grid-template-columns:repeat(2,1fr); gap:2px; background:var(--border); margin:36px 0; }
+    .result-cell { background:var(--bg-card); padding:32px 28px; position:relative; overflow:hidden; }
+    .result-cell::before { content:''; position:absolute; bottom:0; left:0; right:0; height:2px; background:linear-gradient(to right, var(--accent), transparent); }
+    .result-num { font-family:'Lexend',sans-serif; font-size:48px; font-weight:700; letter-spacing:-3px; color:var(--accent); line-height:1; margin-bottom:10px; }
+    .result-desc { font-size:13px; color:var(--text-2); line-height:1.6; }
+    .result-sub  { font-size:11px; color:var(--text-3); margin-top:4px; }
+
+    /* METRICS TABLE */
+    .metrics-table { width:100%; border-collapse:collapse; margin:28px 0; }
+    .metrics-table th { font-size:10px; letter-spacing:0.16em; text-transform:uppercase; color:var(--text-3); text-align:left; padding:10px 16px; border-bottom:1px solid var(--border); }
+    .metrics-table td { font-size:13px; color:var(--text-2); padding:14px 16px; border-bottom:1px solid var(--border); line-height:1.5; }
+    .metrics-table td:first-child { color:var(--text); font-weight:500; }
+    .metrics-table td.acc { color:var(--accent); font-weight:600; font-family:'Lexend',sans-serif; }
+    .metrics-table tr:last-child td { border-bottom:none; }
+    .metrics-table tr:hover td { background:rgba(255,255,255,.02); }
+
+    /* LESSONS */
+    .lesson-list { display:flex; flex-direction:column; gap:24px; margin:28px 0; }
+    .lesson-item { display:grid; grid-template-columns:40px 1fr; gap:16px; align-items:start; }
+    .lesson-icon { width:40px; height:40px; border-radius:50%; background:rgba(232,24,46,.1); border:1px solid rgba(232,24,46,.25); display:flex; align-items:center; justify-content:center; font-family:'Lexend',sans-serif; font-size:12px; font-weight:700; color:var(--accent); flex-shrink:0; }
+    .lesson-content h4 { font-family:'Lexend',sans-serif; font-size:15px; font-weight:600; color:var(--text); margin-bottom:8px; margin-top:10px; }
+    .lesson-content p { font-size:14px; color:var(--text-2); line-height:1.8; }
+    .lesson-content p strong { color:var(--text); font-weight:500; }
+
+    /* NEXT */
+    .cs-next { border-top:1px solid var(--border); padding:64px; display:flex; justify-content:space-between; align-items:center; }
+    .next-label { font-size:10px; letter-spacing:0.22em; text-transform:uppercase; color:var(--text-3); margin-bottom:12px; }
+    .next-title { font-family:'Lexend',sans-serif; font-size:22px; font-weight:600; color:var(--text); transition:color .2s; }
+    .next-link:hover .next-title { color:var(--accent); }
+    .next-arrow { font-size:28px; color:var(--text-3); transition:color .3s,transform .3s; }
+    .next-link:hover .next-arrow { color:var(--accent); transform:translate(6px,-6px); }
+
+    footer { padding:28px 64px; border-top:1px solid var(--border); display:flex; justify-content:space-between; align-items:center; }
+    footer p { font-size:11px; color:var(--text-3); }
+
+    .t-fade { transition:opacity .25s; }
+    .t-fade.fading { opacity:0; }
+
+    /* SEGMENT MATRIX TABLE */
+    .seg-matrix-wrap{margin:16px 0 48px;overflow:hidden;border-radius:12px;border:1px solid var(--border);}
+    .seg-matrix{width:100%;border-collapse:collapse;background:var(--bg-card);}
+    .seg-matrix th{font-size:10px;font-weight:600;letter-spacing:.14em;text-transform:uppercase;color:var(--text-3);padding:11px 16px;text-align:left;border-bottom:1px solid var(--border);white-space:nowrap;background:rgba(255,255,255,.02);}
+    .seg-matrix td{font-size:13px;color:var(--text-3);padding:14px 16px;border-bottom:1px solid var(--border);vertical-align:middle;white-space:nowrap;}
+    .seg-matrix tr:last-child td{border-bottom:none;}
+    .seg-matrix tr.row-target td{color:var(--text-2);background:rgba(232,24,46,.04);}
+    .seg-matrix tr.row-target td:first-child{border-left:2px solid var(--accent);}
+    .seg-name-wrap{display:flex;align-items:center;gap:8px;}
+    .seg-name-label{font-family:'Lexend',sans-serif;font-size:13px;font-weight:600;color:var(--text);white-space:nowrap;}
+    .seg-name-wrap .seg-tag{font-size:8px;font-weight:700;letter-spacing:.1em;text-transform:uppercase;background:var(--accent);color:#fff;border-radius:3px;padding:2px 6px;flex-shrink:0;}
+    .seg-val-accent{color:var(--accent);font-weight:600;}
+    .seg-val-green{color:#4ade80;font-weight:600;}
+    .seg-val-blue{color:#60a5fa;font-weight:600;}
+    .seg-stars{letter-spacing:1px;font-size:11px;}
+    .seg-stars .on{color:var(--accent);}
+    .seg-stars .off{color:var(--border-h);}
+    .seg-pill-primary{display:inline-flex;align-items:center;gap:5px;background:rgba(232,24,46,.12);border:1px solid rgba(232,24,46,.35);color:var(--accent);font-size:11px;font-weight:600;letter-spacing:.04em;padding:5px 14px;border-radius:100px;white-space:nowrap;}
+    .seg-pill{display:inline-flex;align-items:center;justify-content:center;background:var(--bg-card-h);border:1px solid var(--border);color:var(--text-3);font-size:11px;padding:5px 14px;border-radius:100px;white-space:nowrap;min-width:80px;}
+
+    /* PROBLEM SECTION REDESIGN */
+    .prob-statement-card{background:var(--bg-card);border:1px solid var(--border);border-radius:16px;padding:52px 48px;text-align:center;margin:32px 0;}
+    .prob-icon-wrap{width:48px;height:48px;border:1px solid var(--accent);border-radius:50%;display:flex;align-items:center;justify-content:center;margin:0 auto 14px;color:var(--accent);}
+    .prob-stmt-label{font-size:10px;font-weight:600;letter-spacing:.22em;text-transform:uppercase;color:var(--text-3);margin-bottom:22px;}
+    .prob-quote{font-family:'Lexend',sans-serif;font-size:clamp(15px,1.8vw,22px);font-weight:500;line-height:1.65;color:var(--text);max-width:720px;margin:0 auto;}
+    .prob-metrics{display:grid;grid-template-columns:1fr 1fr;gap:32px;align-items:center;margin-top:48px;padding-top:40px;border-top:1px solid var(--border);}
+    @media(max-width:640px){.prob-metrics{grid-template-columns:1fr;}}
+    .prob-metrics-q{font-family:'Lexend',sans-serif;font-size:clamp(16px,1.7vw,21px);font-weight:600;color:var(--text);line-height:1.35;}
+    .prob-pills{display:flex;flex-direction:column;gap:10px;}
+    .prob-pill{display:flex;align-items:center;gap:12px;background:var(--bg-card-h);border:1px solid var(--border);border-radius:100px;padding:12px 20px;font-size:13px;color:var(--text-2);}
+    .prob-pill-icon{width:26px;height:26px;border-radius:50%;border:1px solid var(--border-h);display:flex;align-items:center;justify-content:center;flex-shrink:0;font-size:11px;color:var(--text-3);}
+
+    /* ── FLOATING TOC ───────────────────── */
+    .cs-toc{position:fixed;right:28px;top:50%;transform:translateY(-50%);z-index:150;display:flex;flex-direction:column;gap:0;pointer-events:auto;align-items:flex-start;width:max-content;transition:opacity .35s,visibility .35s;}
+    .cs-toc-link{display:flex;align-items:center;gap:10px;padding:5px 0;color:var(--text-3);font-size:11px;font-family:'Inter',sans-serif;letter-spacing:.03em;white-space:nowrap;text-decoration:none;cursor:none;transition:color .25s,opacity .25s;opacity:.4;}
+    .cs-toc-link:hover{color:var(--text-2);opacity:.85;}
+    .cs-toc-link.active{color:var(--accent);opacity:1;font-weight:500;}
+    .cs-toc-tick{width:1.5px;height:12px;background:currentColor;border-radius:2px;flex-shrink:0;transition:height .25s,width .25s;}
+    .cs-toc-link.active .cs-toc-tick{height:20px;width:2px;}
+    @media(max-width:1260px){.cs-toc{display:none;}}
+
+    /* ── CONTEXT SUBSECTIONS ─────────────── */
+    .ctx-label{font-size:10px;font-weight:600;letter-spacing:.18em;text-transform:uppercase;color:var(--text-3);display:flex;align-items:center;gap:12px;margin:32px 0 16px;}
+    .ctx-label::after{content:'';flex:1;height:1px;background:var(--border);}
+    .ctx-chart{display:flex;flex-direction:column;gap:20px;padding:24px 28px;background:var(--bg-card);border:1px solid var(--border);border-radius:12px;}
+    .chart-item{display:flex;flex-direction:column;gap:8px;}
+    .chart-item-label{font-size:12px;color:var(--text-3);line-height:1.4;}
+    .chart-bar-row{display:flex;align-items:center;gap:12px;}
+    .chart-bar-wrap{flex:1;height:5px;background:rgba(255,255,255,.06);border-radius:3px;overflow:hidden;}
+    .chart-bar{height:100%;border-radius:3px;background:var(--accent);}
+    .chart-pct{font-family:'Lexend',sans-serif;font-size:13px;font-weight:700;color:var(--accent);min-width:38px;text-align:right;}
+    .ctx-quotes{display:flex;flex-direction:column;gap:10px;}
+    .ctx-quote{display:flex;align-items:flex-start;gap:16px;padding:16px 20px;background:var(--bg-card);border:1px solid var(--border);border-radius:10px;transition:border-color .2s;}
+    .ctx-quote:hover{border-color:var(--border-h);}
+    .ctx-num{font-family:'Lexend',sans-serif;font-size:11px;font-weight:700;color:var(--accent);background:rgba(232,24,46,.1);border:1px solid rgba(232,24,46,.25);border-radius:50%;width:26px;height:26px;display:flex;align-items:center;justify-content:center;flex-shrink:0;margin-top:1px;}
+    .ctx-text{font-size:14px;color:var(--text-2);line-height:1.7;}
+
+    @media (max-width:900px) {
+      .cs-body { padding:0 28px 100px; }
+      nav, .cs-hero, .cs-next, footer { padding-left:28px; padding-right:28px; }
+      .cs-hero { padding-bottom:60px; }
+      .ab-row { grid-template-columns:1fr; gap:6px; }
+    }
+    @media (max-width:700px) {
+      .segments, .framework, .funnel-flow, .cs-stats { grid-template-columns:1fr 1fr; }
+      .result-grid { grid-template-columns:1fr; }
+    }
+    @media (max-width:640px) {
+      body { cursor:auto; }
+      #cur-dot, #cur-ring { display:none; }
+      .cs-two-col, .quote-grid, .segments, .framework, .funnel-flow, .strategies { grid-template-columns:1fr; }
+      .as-is-tobe { grid-template-columns:1fr; }
+      .arrow-col { display:none; }
+      .cs-next, footer { flex-direction:column; align-items:flex-start; gap:16px; }
+      .cs-hero-meta { gap:24px; }
+    }
+  
+    /* ══ UAM INTERIOR — additions ══════════════════════════ */
+
+    /* Draft / TBD markers (local draft only — remove before publishing) */
+    .draft-pill{display:inline-flex;align-items:center;gap:8px;font-size:10px;font-weight:600;letter-spacing:.16em;text-transform:uppercase;color:var(--accent);border:1px dashed rgba(232,24,46,.5);border-radius:100px;padding:5px 14px;margin-bottom:22px;opacity:0;animation:fadeUp .7s .15s forwards;align-self:flex-start;}
+    .tbd{border:1px dashed rgba(232,24,46,.45);background:rgba(232,24,46,.04);border-radius:10px;padding:18px 20px;color:var(--text-2);font-size:14px;line-height:1.75;margin:20px 0;}
+    .tbd::before{content:'TBD';display:inline-block;font-family:'Lexend',sans-serif;font-size:9px;font-weight:700;letter-spacing:.16em;color:var(--accent);border:1px solid rgba(232,24,46,.5);border-radius:100px;padding:2px 9px;margin-right:10px;vertical-align:1px;}
+    .tbd small{display:block;color:var(--text-3);font-size:12px;line-height:1.6;margin-top:8px;}
+    .tbd-i{border:1px dashed rgba(232,24,46,.55);color:var(--accent);border-radius:4px;padding:0 6px;font-size:.92em;white-space:nowrap;}
+    .draft-tag{display:inline-block;font-family:'Lexend',sans-serif;font-size:9px;font-weight:700;letter-spacing:.16em;text-transform:uppercase;color:var(--text-3);border:1px solid var(--border-h);border-radius:100px;padding:2px 9px;margin-left:10px;vertical-align:3px;}
+    .sub-h{font-family:'Lexend',sans-serif;font-size:12px;font-weight:600;color:var(--text-3);letter-spacing:.14em;text-transform:uppercase;margin:44px 0 18px;}
+    .sub-h:first-of-type{margin-top:0;}
+
+    /* Figures */
+    .fig{margin:28px 0;}
+    .fig img{width:100%;height:auto;display:block;border-radius:12px;border:1px solid var(--border);background:var(--bg-card);cursor:none;transition:border-color .2s;}
+    .fig img:hover{border-color:var(--border-h);}
+    .fig figcaption{font-size:12px;color:var(--text-3);line-height:1.65;margin-top:10px;}
+    .fig figcaption strong{color:var(--text-2);font-weight:500;}
+    .fig-grid{display:grid;gap:16px;margin:28px 0;}
+    .fig-grid.g2{grid-template-columns:repeat(2,1fr);}
+    .fig-grid.g3{grid-template-columns:repeat(3,1fr);}
+    .fig-grid .fig{margin:0;}
+    .fig-grid .fig img{aspect-ratio:4/3;object-fit:cover;}
+    .fig-grid .fig.portrait img{aspect-ratio:3/4;}
+    .fig.wide img{aspect-ratio:auto;}
+
+    /* Lightbox */
+    #lb{position:fixed;inset:0;z-index:500;background:rgba(6,7,10,.94);display:none;align-items:center;justify-content:center;padding:32px;cursor:none;}
+    #lb.on{display:flex;}
+    #lb img{max-width:96vw;max-height:92vh;object-fit:contain;border-radius:8px;}
+
+    /* Stakeholder cards (reuse .framework) */
+    .framework.stk{grid-template-columns:repeat(4,1fr);}
+    .framework.stk .fw-key{font-size:15px;}
+    .framework.stk .fw-example{font-size:12px;}
+
+    /* Month timeline */
+    .months{display:grid;grid-template-columns:repeat(6,1fr);gap:2px;background:var(--border);margin:28px 0;border-radius:12px;overflow:hidden;}
+    .month{background:var(--bg-card);padding:20px 16px;min-height:150px;}
+    .month-n{font-family:'Lexend',sans-serif;font-size:10px;font-weight:700;letter-spacing:.2em;color:var(--accent);margin-bottom:10px;}
+    .month-name{font-family:'Lexend',sans-serif;font-size:14px;font-weight:600;color:var(--text);line-height:1.3;margin-bottom:8px;}
+    .month-d{font-size:12px;color:var(--text-3);line-height:1.6;}
+
+    /* Deliverable stat variant */
+    .cs-stat-num.sm{font-size:26px;letter-spacing:-1px;}
+
+    @media (max-width:900px){
+      .framework.stk{grid-template-columns:repeat(2,1fr);}
+      .months{grid-template-columns:repeat(3,1fr);}
+    }
+    @media (max-width:640px){
+      .fig-grid.g2,.fig-grid.g3{grid-template-columns:1fr;}
+      .framework.stk{grid-template-columns:1fr;}
+      .months{grid-template-columns:repeat(2,1fr);}
+    }
+
+    /* Source note + related link */
+    .src-note{font-size:11px;color:var(--text-3);line-height:1.6;margin:12px 0 0;}
+    .cs-col-card .src-note{margin-top:14px;}
+    .rel-wrap{margin-top:96px;padding-top:40px;border-top:1px solid var(--border);}
+    .rel-label{font-family:'Lexend',sans-serif;font-size:10px;font-weight:600;letter-spacing:.22em;text-transform:uppercase;color:var(--text-3);margin-bottom:16px;}
+    .rel-card{display:flex;justify-content:space-between;align-items:center;gap:24px;padding:24px 28px;background:var(--bg-card);border:1px solid var(--border);border-radius:14px;transition:border-color .25s,background .25s;}
+    .rel-card:hover{border-color:rgba(232,24,46,.4);background:var(--bg-card-h);}
+    .rel-meta{font-size:11px;letter-spacing:.08em;text-transform:uppercase;color:var(--text-3);margin-bottom:8px;}
+    .rel-title{font-family:'Lexend',sans-serif;font-size:clamp(15px,1.6vw,19px);font-weight:600;line-height:1.4;color:var(--text);transition:color .2s;}
+    .rel-card:hover .rel-title{color:var(--accent);}
+    .rel-arrow{font-size:26px;color:var(--text-3);flex-shrink:0;transition:color .3s,transform .3s;}
+    .rel-card:hover .rel-arrow{color:var(--accent);transform:translate(5px,-5px);}
+    .cs-stats.four{grid-template-columns:repeat(4,1fr);}
+    @media (max-width:900px){ .cs-stats.four{grid-template-columns:repeat(2,1fr);} }
+    .strategies{grid-template-columns:repeat(3,minmax(0,1fr));}
+    .strat-card{min-width:0;}
+    .strat-card .tbd-i{white-space:normal;display:inline-block;}
+    .cs-stats.five{grid-template-columns:repeat(5,1fr);}
+    @media (max-width:900px){ .cs-stats.five{grid-template-columns:repeat(3,1fr);} }
+    @media (max-width:520px){ .cs-stats.five{grid-template-columns:repeat(2,1fr);} }
+    .months.five{grid-template-columns:repeat(5,1fr);}
+    .months .month-d{overflow-wrap:anywhere;}
+    @media (max-width:900px){ .months.five{grid-template-columns:repeat(3,1fr);} }
+    @media (max-width:640px){ .months.five{grid-template-columns:repeat(2,1fr);} }
+    .fig.linked a{display:block;position:relative;cursor:none;}
+    .fig.linked a::after{content:'LinkedIn ↗';position:absolute;right:14px;top:14px;font-family:'Lexend',sans-serif;font-size:10px;font-weight:600;letter-spacing:.14em;text-transform:uppercase;color:#fff;background:rgba(6,7,10,.72);border:1px solid rgba(255,255,255,.25);border-radius:100px;padding:6px 12px;backdrop-filter:blur(6px);opacity:.9;transition:background .2s;}
+    .fig.linked a:hover::after{background:var(--accent);border-color:var(--accent);}
+    .study-spec{display:grid;grid-template-columns:130px 1fr;margin:24px 0;background:var(--bg-card);border:1px solid var(--border);border-radius:12px;overflow:hidden;}
+    .study-spec dt,.study-spec dd{padding:18px 22px;margin:0;border-top:1px solid var(--border);}
+    .study-spec dt:first-of-type,.study-spec dt:first-of-type + dd{border-top:none;}
+    .study-spec dt{font-family:'Lexend',sans-serif;font-size:11px;font-weight:600;letter-spacing:.14em;text-transform:uppercase;color:var(--accent);}
+    .study-spec dd{font-size:14px;line-height:1.75;color:var(--text-2);}
+    .study-spec dd strong{color:var(--text);font-weight:600;}
+    @media (max-width:640px){ .study-spec{grid-template-columns:1fr;} .study-spec dt{padding:16px 20px 0;border-top:1px solid var(--border);} .study-spec dt:first-of-type{border-top:none;} .study-spec dd{padding:6px 20px 16px;border-top:none;} }
+</style>
+</head>
+<body>
+  <div id="grain" aria-hidden="true"></div>
+  <div id="cur-dot"></div>
+  <div id="cur-ring"></div>
+  <nav class="cs-toc" id="csToc"></nav>
+
+  <!-- NAV -->
+  <nav id="nav">
+    <a href="/work" class="nav-back" onclick="if(history.length>1){history.back();return false;}">
+      <svg width="16" height="16" viewBox="0 0 16 16" fill="none" stroke="currentColor" stroke-width="1.5"><path d="M10 12L6 8l4-4"/></svg>
+    </a>
+    <div class="nav-right">
+      <ul class="nav-links">
+        <li><a href="/work" data-i18n="nav.work">Projects</a></li>
+        <li><a href="/contact" data-i18n="nav.about">About</a></li>
+      </ul>
+      <div class="lang-toggle" id="langToggle">
+        <button class="lang-btn" data-lang="ko">KR</button>
+        <button class="lang-btn active" data-lang="en">EN</button>
+      </div>
+    </div>
+  </nav>
+
+  <!-- HERO -->
+  <section class="cs-hero">
+    <div class="cs-hero-bg"></div>
+    <img class="cs-hero-img" src="./Uam/mockup-simulator.jpg" alt="" onerror="this.style.display='none'" />
+    <div class="cs-hero-number" aria-hidden="true">—</div>
+
+    <p class="cs-hero-sub" data-i18n="hero.sub">PLANA · UX Project Manager · UX Researcher · 약 6개월</p>
+    <div class="cs-eyebrow" data-i18n="hero.eyebrow">UAM · 기내 인테리어 · 풀스케일 목업</div>
+
+    <h1 data-i18n="hero.h1">
+      문헌 리서치에서 실물 목업까지, <em>UAM 내장 설계</em>의 근거를 쌓다
+    </h1>
+
+    <p class="cs-hero-question" data-i18n="hero.question">
+      기존 항공기의 실측 사이즈를 UAM에 그대로 쓸 수 없다는 문제에서 출발해, 레거시 데이터와 조종사·승객 조사, 우드 목업 착석 측정으로
+      승객실·조종석 사이즈와 편의성 임계점을 합의해 나간 약 6개월간의 프로젝트입니다.
+    </p>
+
+    <div class="cs-hero-meta">
+      <div>
+        <div class="meta-label" data-i18n="meta.role.l">Role</div>
+        <div class="meta-val" data-i18n="meta.role.v">UX Project Manager · UX Researcher</div>
+      </div>
+      <div>
+        <div class="meta-label" data-i18n="meta.period.l">Period</div>
+        <div class="meta-val" data-i18n="meta.period.v">2022.06 – 2022.12 (약 6개월)</div>
+      </div>
+      <div>
+        <div class="meta-label" data-i18n="meta.domain.l">Domain</div>
+        <div class="meta-val" data-i18n="meta.domain.v">UAM · eVTOL 기내 인테리어</div>
+      </div>
+      <div>
+        <div class="meta-label" data-i18n="meta.tools.l">Tools</div>
+        <div class="meta-val" data-i18n="meta.tools.v">Excel · Figma · Miro · 우드/하드 목업 · 비행 시뮬레이터 · VR</div>
+      </div>
+    </div>
+  </section>
+
+  <!-- BODY -->
+  <div class="cs-body">
+
+    <!-- 01 BACKGROUND -->
+    <section class="cs-section" id="s1">
+      <div class="cs-section-num">01</div>
+      <h2 class="cs-section-title" data-i18n="s1.title">배경 <em>·</em> Background</h2>
+
+      <p class="cs-p" data-i18n="s1.p1">
+        UAM은 저고도·도심 비행이라는 새로운 운용 환경 위에서 조종사, 승객, 운영사, 버티포트, 규제가 동시에 얽히는 시스템입니다.
+        그 안에서 기체 내장(Interior)은 조종사의 업무 공간이자 승객이 가장 먼저 마주하는 접점이지만,
+        eVTOL 인테리어는 상용화 이전 단계라 참고할 수 있는 검증된 사례가 많지 않았습니다.
+      </p>
+      <p class="cs-p" data-i18n="s1.p2">
+        PLANA UX 팀에서 <strong>UX Project Manager이자 UX Researcher</strong>로서, 리서치 설계부터 인테리어 벤치마킹,
+        풀스케일 목업 제작과 시뮬레이터 연동까지 약 6개월간 프로젝트 전 과정에 참여했습니다.
+      </p>
+
+      <div class="cs-two-col">
+        <div class="cs-col-card">
+          <h4 data-i18n="s1.scope">프로젝트 범위</h4>
+          <ul>
+            <li data-i18n="s1.sc1">조종석(Cockpit)과 객실(Cabin) 내장 설계</li>
+            <li data-i18n="s1.sc2">핵심 구성요소: 도어 · 창문 · 좌석 · 공간 · 내부벽</li>
+            <li data-i18n="s1.sc3">문헌·산업·기종 리서치 기반의 설계 근거 확보</li>
+            <li data-i18n="s1.sc4">풀스케일 목업 + 시뮬레이터 연동 검토 환경 구축</li>
+          </ul>
+        </div>
+        <div class="cs-col-card">
+          <h4 data-i18n="s1.ctx">비즈니스 컨텍스트</h4>
+          <ul>
+            <li data-i18n="s1.ctx1">대상 기체: PLANA의 하이브리드 eVTOL 컨셉 — 6개 틸트로터, 객실 최대 6인 탑승</li>
+            <li data-i18n="s1.ctx2">객실 구성: 대칭형 와이드 도어, 3점식 안전벨트와 버킷 시트, 다양한 수납 공간</li>
+            <li data-i18n="s1.ctx3">객실 승무원 없이 운영되는 것을 전제로, 승객이 스스로 쓰는 기능까지 설계</li>
+            <li data-i18n="s1.ctx4">팀: 디자인 리드 2 · 외장 디자인 1 · 내장 디자인 1 · 브랜드 디자인 1 · UX PM 1(본인)</li>
+          </ul>
+          <p class="src-note" data-i18n="s1.ctx.src">기체 정보 출처: Vertical Magazine, 2023.04</p>
+        </div>
+      </div>
+
+      <div class="cs-callout">
+        <p data-i18n="s1.callout">
+          <strong>Project Scope:</strong> 화면(Flypad)이 아닌 <strong>기체 공간 자체</strong>를 설계 대상으로 삼아,
+          도면과 문헌만으로는 판단하기 어려운 배치를 실물 크기에서 직접 확인할 수 있는 환경까지 만드는 것이 프로젝트의 범위였습니다.
+        </p>
+      </div>
+    </section>
+
+    <!-- 02 GOAL -->
+    <section class="cs-section" id="s2">
+      <div class="cs-section-num">02</div>
+      <h2 class="cs-section-title" data-i18n="s2.title">목표 <em>·</em> Goal</h2>
+      <p class="cs-p" data-i18n="s2.lead">
+        이 프로젝트의 목표는 UAM 승객실과 조종석의 <strong>사이즈 기준을 정하는 것</strong>이었습니다. 엔지니어 관점에서 최적화된 크기와,
+        일반 승객이 편안하다고 느끼는 한계선(<strong>편의성 임계점</strong>)을 함께 놓고 <strong>합의</strong>하는 것이 핵심이었습니다.
+      </p>
+
+      <div class="cs-two-col">
+        <div class="cs-col-card accent-border">
+          <h4 class="accent" data-i18n="s2.inp">Input · 근거 데이터</h4>
+          <ul>
+            <li data-i18n="s2.i1">기존 항공기(고정익 · 회전익)의 레거시 데이터</li>
+            <li data-i18n="s2.i2">각 기종 조종사 대상 조사</li>
+            <li data-i18n="s2.i3">각 기종 승객 대상 조사</li>
+          </ul>
+        </div>
+        <div class="cs-col-card accent-border">
+          <h4 class="accent" data-i18n="s2.out">Output · 합의할 기준</h4>
+          <ul>
+            <li data-i18n="s2.o1">엔지니어 관점에서 최적화된 승객실 · 조종석 사이즈</li>
+            <li data-i18n="s2.o2">일반 승객이 느끼는 편의성 임계점</li>
+            <li data-i18n="s2.o3">두 관점을 맞춘 합의안 (확정 수치는 대외비로 비공개)</li>
+            <li data-i18n="s2.o4">UAM 승객실을 위한 정성 평가 가이드 제안</li>
+          </ul>
+        </div>
+      </div>
+    </section>
+
+    <!-- 03 RESEARCH -->
+    <section class="cs-section" id="s3">
+      <div class="cs-section-num">03</div>
+      <h2 class="cs-section-title" data-i18n="s3.title">리서치 <em>·</em> Research</h2>
+
+      <h3 class="sub-h" data-i18n="s3.a.h">A · 이해관계자 맵 &amp; 문헌 127편 분석</h3>
+      <p class="cs-p" data-i18n="s3.a.p">
+        AAM(Advanced Air Mobility)을 둘러싼 이해관계자를 Miro로 8개 영역으로 구조화하고, 저널 127편을
+        <strong>ux · customer · report · market · vertiport/system · data</strong> 여섯 카테고리로 분류했습니다.
+      </p>
+
+      <figure class="fig wide">
+        <img src="./Uam/research-stakeholders-127.jpg" alt="AAM 이해관계자 맵과 127편 저널 카테고리 분포" loading="lazy" />
+        <figcaption data-i18n="s3.a.cap"><strong>Miro 이해관계자 맵 &amp; Out of 127 journals</strong> — 클릭하면 확대됩니다.</figcaption>
+      </figure>
+
+      <div class="framework stk">
+        <div class="fw-card">
+          <div class="fw-rank">01</div><div class="fw-key">Pilot</div>
+          <div class="fw-label" data-i18n="stk1.l">조종사</div>
+          <div class="fw-example" data-i18n="stk1.e">cockpit · 조종 · 심리 · 업무 프로세스 · 공간 · 기체관리</div>
+        </div>
+        <div class="fw-card">
+          <div class="fw-rank">02</div><div class="fw-key">Passenger</div>
+          <div class="fw-label" data-i18n="stk2.l">승객</div>
+          <div class="fw-example" data-i18n="stk2.e">기내 탑승 · 편의 · 동반 수하물 · 기내 안전 · 비상시 행동요령</div>
+        </div>
+        <div class="fw-card">
+          <div class="fw-rank">03</div><div class="fw-key">Operator</div>
+          <div class="fw-label" data-i18n="stk3.l">운영사</div>
+          <div class="fw-example" data-i18n="stk3.e">운항 서비스 · 안전성</div>
+        </div>
+        <div class="fw-card">
+          <div class="fw-rank">04</div><div class="fw-key">Air Traffic Mgmt</div>
+          <div class="fw-label" data-i18n="stk4.l">항공 교통 관리</div>
+          <div class="fw-example" data-i18n="stk4.e">경로 안내 · 항공 용어</div>
+        </div>
+        <div class="fw-card">
+          <div class="fw-rank">05</div><div class="fw-key">Neighborhood</div>
+          <div class="fw-label" data-i18n="stk5.l">지역 사회</div>
+          <div class="fw-example" data-i18n="stk5.e">도심 · 주거 지역</div>
+        </div>
+        <div class="fw-card" style="border-color:rgba(232,24,46,.35);background:rgba(232,24,46,.03);">
+          <div class="fw-rank">06 · FOCUS</div><div class="fw-key">Aircraft Mfr.</div>
+          <div class="fw-label" data-i18n="stk6.l">기체 제작 (Interior)</div>
+          <div class="fw-example" data-i18n="stk6.e"><em>도어 · 창문 · 좌석 · 공간 · 내부벽</em></div>
+        </div>
+        <div class="fw-card">
+          <div class="fw-rank">07</div><div class="fw-key">Vertiport</div>
+          <div class="fw-label" data-i18n="stk7.l">버티포트</div>
+          <div class="fw-example" data-i18n="stk7.e">승하차 공간 · 수하물 위탁 · 보안 검색 · 휴식 · 면세</div>
+        </div>
+        <div class="fw-card">
+          <div class="fw-rank">08</div><div class="fw-key">Law</div>
+          <div class="fw-label" data-i18n="stk8.l">법·규정</div>
+          <div class="fw-example" data-i18n="stk8.e">항공법 · 항공 정책 · 국제 운송법</div>
+        </div>
+      </div>
+
+      <p class="cs-p" data-i18n="s3.a.p2">
+        분류 결과 <strong>vertiport/system</strong> 카테고리가 가장 큰 비중을 차지했고 그다음이 report였으며,
+        ux 카테고리는 전체의 약 1/10 수준이었습니다.
+      </p>
+      <div class="cs-callout">
+        <p data-i18n="s3.a.callout">
+          <strong>Insight:</strong> 시스템·인프라 중심의 문헌에 비해, 기체 내장을 사용자 경험 관점에서 다룬 근거는 상대적으로 부족했습니다.
+          내장 설계에는 문헌만으로 결론을 내리기보다 <strong>직접 비교하고 직접 만들어 보는 단계</strong>가 필요하다고 판단했습니다.
+        </p>
+      </div>
+
+      <h3 class="sub-h" data-i18n="s3.b.h">B · 글로벌 UAM 산업 맵</h3>
+      <p class="cs-p" data-i18n="s3.b.p">
+        기체 OEM, 운영사, 부품·인프라 기업과 투자·제휴 관계를 시간 축과 함께 정리한 산업 맵을 참고해,
+        어떤 기체가 언제 시장에 들어오는지와 내장 설계가 경쟁하게 될 레퍼런스의 범위를 파악했습니다.
+      </p>
+      <figure class="fig wide linked">
+        <a href="https://www.linkedin.com/in/bsshim" target="_blank" rel="noopener noreferrer" aria-label="B. Shim LinkedIn"><img src="./Uam/research-ecosystem-map.jpg" alt="글로벌 UAM 산업 생태계 맵" loading="lazy" /></a>
+        <figcaption data-i18n="s3.b.cap"><strong>UAM 산업 생태계 맵 (참고 자료)</strong> — 출처: B. Shim, 2022.10 · 이미지를 누르면 원 저자의 LinkedIn으로 이동합니다</figcaption>
+      </figure>
+
+      <h3 class="sub-h" data-i18n="s3.c.h">C · 인테리어 벤치마킹 — 30여 개 기종</h3>
+      <p class="cs-p" data-i18n="s3.c.p">
+        eVTOL 12개 사, 헬리콥터 5개 모델, CTOL(소형·비즈니스 항공기) 14개 모델의 조종석·객실 이미지를 수집해 한 장의 벽면 보드로 정리했습니다.
+        eVTOL만으로는 레퍼런스가 부족한 만큼, 인접 카테고리까지 넓혀 <strong>도어 · 창문 · 좌석 · 공간 · 내부벽</strong> 다섯 축으로 비교했습니다.
+      </p>
+      <figure class="fig wide">
+        <img src="./Uam/research-interior-benchmark.jpg" alt="eVTOL, 헬리콥터, CTOL 인테리어 벤치마킹 보드" loading="lazy" />
+        <figcaption data-i18n="s3.c.cap"><strong>인테리어 벤치마킹 보드</strong> — eVTOL(Joby, Lilium, Volocopter, Archer, Wisk 외) · Helicopter(AW109, AW139, Bell 429 외) · CTOL(Pilatus PC-12, Cessna Longitude, Gulfstream 외)</figcaption>
+      </figure>
+      <div class="hyp-meta" style="border-top:none;margin-top:0;padding-top:0;">
+        <span class="hyp-chip" data-i18n="ax1">Door</span>
+        <span class="hyp-chip" data-i18n="ax2">Window</span>
+        <span class="hyp-chip" data-i18n="ax3">Seat</span>
+        <span class="hyp-chip" data-i18n="ax4">Space</span>
+        <span class="hyp-chip" data-i18n="ax5">Interior wall</span>
+      </div>
+
+      <h3 class="sub-h" style="margin-top:44px;" data-i18n="s3.pt.h">벤치마킹에서 발견한 패턴</h3>
+      <div class="strategies">
+        <div class="strat-card">
+          <div class="strat-num" data-i18n="pt1.num">패턴 01</div>
+          <div class="strat-name" data-i18n="pt1.name">전기 구동 &rarr; 내장 공간의 여유</div>
+          <div class="strat-desc" data-i18n="pt1.d">항공유로 운항하는 헬리콥터와 달리 전기 배터리로 운영하기 때문에, 내장 공간에 더 여유가 생깁니다.</div>
+        </div>
+        <div class="strat-card">
+          <div class="strat-num" data-i18n="pt2.num">패턴 02</div>
+          <div class="strat-name" data-i18n="pt2.name">탑승 인원: 2명 &rarr; 4명</div>
+          <div class="strat-desc" data-i18n="pt2.d">배터리 기술의 한계로 2022–23년 당시에는 2명까지가 한계였지만, 모든 기업이 최종적으로 기본 4명은 탑승할 수 있을 것으로 보고 있었습니다.</div>
+        </div>
+        <div class="strat-card">
+          <div class="strat-num" data-i18n="pt3.num">패턴 03</div>
+          <div class="strat-name" data-i18n="pt3.name">운항 거리 · 시간</div>
+          <div class="strat-desc" data-i18n="pt3.d">1시간 이내, 100–200km대 거리를 이동하는 운항을 상정하고 있었습니다.</div>
+        </div>
+      </div>
+    </section>
+
+    <!-- 04 PROBLEM -->
+    <section class="cs-section" id="s4">
+      <div class="cs-section-num">04</div>
+      <h2 class="cs-section-title" data-i18n="s4.title">문제 정의 <em>·</em> Problem</h2>
+
+      <div class="prob-statement-card">
+        <div class="prob-icon-wrap">
+          <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5"><circle cx="12" cy="12" r="10"/><text x="12" y="17" text-anchor="middle" fill="currentColor" stroke="none" font-size="13" font-weight="700" font-family="sans-serif">?</text></svg>
+        </div>
+        <div class="prob-stmt-label">Problem Statement</div>
+        <p class="prob-quote" data-i18n="s4.problem">기존 항공기는 UAM과 크기가 달라<br>실측 사이즈를 그대로 쓸 수 없고,<br>UAM 승객실 설계를 위한 기초 데이터는 기존에 없다</p>
+      </div>
+
+      <p class="cs-p" data-i18n="s4.p">
+        고정익·회전익 항공기의 데이터는 출발점이 될 뿐, UAM 기체 규모에서 조종사와 승객이 어떤 크기를 편하게 느끼는지에 대한 자료는 없었습니다.
+        그래서 레거시 데이터를 기준선으로 삼고, 사용자에게서 직접 기초 데이터를 만들어야 했습니다.
+      </p>
+    </section>
+
+    <!-- 05 HYPOTHESIS -->
+    <section class="cs-section" id="s5">
+      <div class="cs-section-num">05</div>
+      <h2 class="cs-section-title" data-i18n="s5.title">접근 방식 <em>·</em> Approach</h2>
+
+      <div class="hypothesis-card">
+        <p class="hypothesis-text" data-i18n="s5.hyp">
+          Physical UX는 하나의 수치로 답이 나오지 않는 <em>종합 데이터</em>입니다. 그래서 정답을 검증하는 가설을 세우기보다,
+          <em>레거시 데이터 · 사용자 경험 · 엔지니어링 관점</em>을 함께 놓고 합의 가능한 범위를 찾는 방식으로 접근했습니다.
+        </p>
+        <div class="hyp-meta">
+          <span class="hyp-chip" data-i18n="h.c1">레거시 데이터</span>
+          <span class="hyp-chip" data-i18n="h.c2">사용자 경험</span>
+          <span class="hyp-chip" data-i18n="h.c3">엔지니어링 관점</span>
+          
+        </div>
+      </div>
+
+      <h3 class="sub-h" data-i18n="s5.strat.title">접근 전략</h3>
+      <div class="strategies">
+        <div class="strat-card">
+          <div class="strat-num" data-i18n="st1.num">전략 01</div>
+          <div class="strat-name" data-i18n="st1.name">레거시 데이터 수집 (Legacy Data)</div>
+          <div class="strat-desc" data-i18n="st1.desc">문헌 조사와 기종 벤치마킹으로 기존 고정익·회전익 항공기의 사이즈와 배치 기준을 기준선으로 정리한다.</div>
+        </div>
+        <div class="strat-card">
+          <div class="strat-num" data-i18n="st2.num">전략 02</div>
+          <div class="strat-name" data-i18n="st2.name">사용자 조사 (User Research)</div>
+          <div class="strat-desc" data-i18n="st2.desc">각 기종의 조종사와 승객을 대상으로 인터뷰·설문·맥락적 조사를 진행해 사용 경험과 불편을 직접 듣는다.</div>
+        </div>
+        <div class="strat-card">
+          <div class="strat-num" data-i18n="st3.num">전략 03</div>
+          <div class="strat-name" data-i18n="st3.name">착석 측정 &amp; 합의 (Measure &amp; Agree)</div>
+          <div class="strat-desc" data-i18n="st3.desc">우드 목업에 앉아 보는 측정으로 편의성의 범위를 확인하고, 엔지니어링 관점과 맞춰 합의안을 만든다.</div>
+        </div>
+      </div>
+    </section>
+
+    <!-- 06 EXECUTION -->
+    <section class="cs-section" id="s6">
+      <div class="cs-section-num">06</div>
+      <h2 class="cs-section-title" data-i18n="s6.title">실행 <em>·</em> Execution</h2>
+
+      <h3 class="sub-h" data-i18n="s6.role.h">내가 맡은 역할</h3>
+      <div class="cs-two-col">
+        <div class="cs-col-card accent-border">
+          <h4 class="accent" data-i18n="s6.role.r">UX Researcher</h4>
+          <ul>
+            <li data-i18n="s6.r1">Miro로 AAM 이해관계자 8개 영역 구조화, 저널 127편 분류·분석</li>
+            <li data-i18n="s6.r2">글로벌 UAM 산업 맵을 참고해 기체·OEM 동향 파악</li>
+            <li data-i18n="s6.r3">eVTOL·헬리콥터·CTOL 30여 개 기종 인테리어 벤치마킹 보드 제작</li>
+            <li data-i18n="s6.r4">조종사·탑승객 사용자 인터뷰(뎁스 인터뷰)와 우드 목업 착석 측정으로 승객 요구 도출 (신발·수납, 음료 서비스 등)</li>
+            <li data-i18n="s6.r5">리서치·실험에서 UX 데이터를 추출해 내장 디자이너에게 전달, 인테리어 설계의 근거로 연결</li>
+          </ul>
+        </div>
+        <div class="cs-col-card accent-border">
+          <h4 class="accent" data-i18n="s6.role.p">UX Project Manager</h4>
+          <ul>
+            <li data-i18n="s6.p1">디자인 팀 6명(본인 포함)의 2022년 6–12월 일정·범위 관리</li>
+            <li data-i18n="s6.p2">Fabrication Lab 제작 공정 조율, 목업 베이스 프레임 제작 실무 참여</li>
+            <li data-i18n="s6.p3">시뮬레이터·계기 화면(Flypad)과 목업 연동 이슈 조율</li>
+            <li data-i18n="s6.p4">디자인팀 · Avionics팀 · 기체 제작팀과 협업하며 크게 2차례 리뷰 진행</li>
+          </ul>
+        </div>
+      </div>
+
+      <h3 class="sub-h" data-i18n="s6.tl.h">프로젝트 타임라인 · 2022</h3>
+      <div class="months five">
+        <div class="month"><div class="month-n">06–07</div><div class="month-name" data-i18n="m1.n">문헌조사</div><div class="month-d" data-i18n="m1.d">시장·경쟁사 리서치, 이해관계자 분석</div></div>
+        <div class="month"><div class="month-n">08</div><div class="month-name" data-i18n="m2.n">데이터 수집</div><div class="month-d" data-i18n="m2.d">설문조사, 사용자 인터뷰(조종사·탑승객), 맥락적 조사 · 8/17–9/2</div></div>
+        <div class="month"><div class="month-n">09–10</div><div class="month-name" data-i18n="m3.n">데이터 분석</div><div class="month-d" data-i18n="m3.d">설문 정량 분석, 인터뷰 정성 분석, Mental Model, Journey Map, Infographic</div></div>
+        <div class="month"><div class="month-n">11</div><div class="month-name" data-i18n="m4.n">분석 반영</div><div class="month-d" data-i18n="m4.d">Affinity Diagram, Journey Map, Scenario, A/B Test</div></div>
+        <div class="month"><div class="month-n">12</div><div class="month-name" data-i18n="m5.n">iF Award 출품</div><div class="month-d" data-i18n="m5.d">Hard mockup, 발표, 최종 보고서, iF Design Award 제출</div></div>
+      </div>
+      <figure class="fig wide">
+        <img src="./Uam/period.jpeg" alt="프로젝트 진행 기간 (2022년 6~12월)" loading="lazy" />
+        <figcaption data-i18n="g.period"><strong>프로젝트 진행 일정</strong> · 2022년 6월 – 12월 (원본 슬라이드)</figcaption>
+      </figure>
+
+      <h3 class="sub-h" style="margin-top:64px;" data-i18n="s6.rm.h">사용자 리서치 방법</h3>
+      <figure class="fig wide">
+        <img src="./Uam/research-method.jpeg" alt="UX 리서치 방법 분류 — 정성·정량" loading="lazy" />
+        <figcaption data-i18n="g.rm"><strong>리서치 방법 분류</strong> · 붉은 박스: 정성(Qualitative) 영역 — Interviews · Focus Groups · Participatory Design · Ethnographic Field Studies</figcaption>
+      </figure>
+      <p class="src-note" data-i18n="rm.src">방법 분류 틀: Nielsen Norman Group (C. Rohrer)</p>
+      <p class="cs-p" data-i18n="s6.rm.p">
+        설문조사와 인터뷰, 맥락적 조사로 사용자 데이터를 모았고, 그중 <strong>인터뷰와 실험은 두 가지 방식</strong>으로 진행했습니다.
+      </p>
+      <div class="strategies" style="grid-template-columns:repeat(2,minmax(0,1fr));">
+        <div class="strat-card">
+          <div class="strat-num" data-i18n="rm1.num">방식 01</div>
+          <div class="strat-name" data-i18n="rm1.name">Depth Interview &amp; Shadowing</div>
+          <div class="strat-desc" data-i18n="rm1.d">조종사와 탑승객을 각각 만나 깊이 있게 묻는 심층 인터뷰와 섀도잉(관찰)으로, 요구와 사용 맥락을 정성적으로 파악했습니다.</div>
+        </div>
+        <div class="strat-card">
+          <div class="strat-num" data-i18n="rm2.num">방식 02</div>
+          <div class="strat-name" data-i18n="rm2.name">우드 목업 착석 측정</div>
+          <div class="strat-desc" data-i18n="rm2.d">우드 목업에 참가자를 직접 앉히고 수치를 측정했습니다. 홍익대 학부생 24명과 임직원 약 40명이 참여했고, 측정 항목과 결과값은 대외비로 공개하지 않습니다.</div>
+        </div>
+      </div>
+
+      <p class="cs-p" style="margin-top:32px;" data-i18n="rm.pilot.p">
+        조종사 인터뷰는 고정익·회전익 조종사를 각각 만나 <strong>60–90분</strong>씩 진행했고, 비행 전 → 탑승 → 이륙 → 비행 → 착륙 → 주기의 여섯 단계로 나눠
+        단계마다 점검·통신·조작·역할·비상 대응을 물었습니다.
+      </p>
+      <figure class="fig wide">
+        <img src="./Uam/pilot-research-flow.jpg" alt="조종사 인터뷰 구조 — 비행 단계별 질문" loading="lazy" />
+        <figcaption data-i18n="g.pilot"><strong>조종사 인터뷰 구조</strong> · 고정익 &amp; 회전익 조종사, 인터뷰당 60–90분</figcaption>
+      </figure>
+
+      <h3 class="sub-h" style="margin-top:64px;" data-i18n="sp.h">탑승객 설문 · 인터뷰 조사 개요</h3>
+      <dl class="study-spec">
+        <dt data-i18n="sp.l1">대상</dt>
+        <dd data-i18n="sp.v1">미술 · 디자인 · 항공우주학(AERO)을 전공해 전문 지식이 있거나, 항공기 탑승 여행을 많이 해본 사람 &mdash; <strong>인터뷰이 3개 그룹, 총 47명</strong></dd>
+        <dt data-i18n="sp.l2">기간</dt>
+        <dd data-i18n="sp.v2">2022년 8월 17일 &ndash; 9월 2일</dd>
+        <dt data-i18n="sp.l3">방법</dt>
+        <dd data-i18n="sp.v3">설문조사 + Depth Interview 결합 (탑승 경험) · Shadowing</dd>
+        <dt data-i18n="sp.l4">목표</dt>
+        <dd data-i18n="sp.v4">UAM 승객실을 위한 <strong>정성 평가 가이드 제안</strong> (Proposal of Qualitative Assessment Guide for UAM Passenger)</dd>
+      </dl>
+
+      <h3 class="sub-h" style="margin-top:64px;" data-i18n="s6.pj.h">페르소나 &amp; 저니맵</h3>
+      <p class="cs-p" data-i18n="s6.pj.p">
+        설문·인터뷰 조사(47명)를 바탕으로 탑승객을 세 가지 유형의 페르소나 &mdash; <strong>VIP 비즈니스맨 · 이벤트 인플루언서 · 아기·반려견 동반 부모</strong> &mdash; 로 정리하고,
+        이들의 비행 경험을 저니맵으로 그렸습니다. 기존 항공기(As-is)와 AAM(To-be)을 나란히 놓고 무엇이 달라지는지 찾았습니다.
+      </p>
+      <div class="fig-grid g3">
+        <figure class="fig wide"><img src="./Uam/persona1.jpeg" alt="페르소나 — VIP 비즈니스맨" loading="lazy" /><figcaption data-i18n="g.p1"><strong>VIP · 비즈니스맨</strong> — 56세, 컨설턴트</figcaption></figure>
+        <figure class="fig wide"><img src="./Uam/persona2.jpeg" alt="페르소나 — 이벤트 인플루언서" loading="lazy" /><figcaption data-i18n="g.p2"><strong>이벤트 · 인플루언서</strong> — 31세</figcaption></figure>
+        <figure class="fig wide"><img src="./Uam/persona3.jpeg" alt="페르소나 — 아기와 반려견을 동반한 부모" loading="lazy" /><figcaption data-i18n="g.p3"><strong>아기 &amp; 반려견 동반</strong> — 38세, 외교관</figcaption></figure>
+      </div>
+      <figure class="fig wide">
+        <img src="./Uam/journeymap-asis.jpeg" alt="저니맵 As-is (기존 항공기)" loading="lazy" />
+        <figcaption data-i18n="g.jm1"><strong>Journey Map · As-is (기존 항공기)</strong> — 짐 챙기기, 흡연 구역·와이파이 부재, 지루함, 아기 돌봄 등의 장면</figcaption>
+      </figure>
+      <figure class="fig wide">
+        <img src="./Uam/journeymap-tobe.jpeg" alt="저니맵 To-be (AAM)" loading="lazy" />
+        <figcaption data-i18n="g.jm2"><strong>Journey Map · To-be (AAM)</strong> — 직접 짐을 싣는 탑승, 기내 업무·회의, 짧은 휴식, 도착 후 곧바로 이어지는 일정</figcaption>
+      </figure>
+      <div class="strategies">
+        <div class="strat-card">
+          <div class="strat-num" data-i18n="pj1.num">변화 01</div>
+          <div class="strat-name" data-i18n="pj1.name">수하물 · 수납</div>
+          <div class="strat-desc" data-i18n="pj1.d">짐을 부치지 않고 직접 싣고 탑승하면서, 승객 곁의 수납이 새로운 요구가 됩니다.</div>
+        </div>
+        <div class="strat-card">
+          <div class="strat-num" data-i18n="pj2.num">변화 02</div>
+          <div class="strat-name" data-i18n="pj2.name">업무 · 연결</div>
+          <div class="strat-desc" data-i18n="pj2.d">As-is의 &lsquo;와이파이 없음&rsquo;이 To-be에서는 노트북 작업, 온라인 회의, 라이브 스트리밍으로 바뀝니다.</div>
+        </div>
+        <div class="strat-card">
+          <div class="strat-num" data-i18n="pj3.num">변화 03</div>
+          <div class="strat-name" data-i18n="pj3.name">짧은 비행 · 가족 동반</div>
+          <div class="strat-desc" data-i18n="pj3.d">20~30분 안팎의 비행에서 휴식과 준비가 이어지고, 아기 동반 승객은 화장실·기저귀 등 가까운 서비스를 원합니다.</div>
+        </div>
+      </div>
+      <p class="cs-p" style="margin-top:28px;" data-i18n="s6.pj.note">이 장면들을 <strong>탑승장 이동 → 보안 → 탑승 → 하차 → 목적지 이동</strong> 순서로 배열해 저니맵을 설계했습니다.</p>
+
+      <h3 class="sub-h" data-i18n="s6.steps.title">구체적 실행 단계</h3>
+      <div class="exec-list">
+        <div class="exec-item">
+          <div>
+            <div class="exec-item-num">STEP 01</div>
+            <div class="exec-item-title" data-i18n="es1.name">이해관계자 맵 · 문헌 분석</div>
+            <div class="exec-item-sub" data-i18n="es1.desc">AAM 이해관계자 8개 영역을 구조화하고, 저널 127편을 6개 카테고리로 분류해 내장 관련 근거의 밀도를 확인</div>
+          </div>
+          <div class="exec-item-img"><img src="./Uam/research-stakeholders-127.jpg" alt="" loading="lazy" /></div>
+        </div>
+        <div class="exec-item">
+          <div>
+            <div class="exec-item-num">STEP 02</div>
+            <div class="exec-item-title" data-i18n="es2.name">산업 · 기체 동향 파악</div>
+            <div class="exec-item-sub" data-i18n="es2.desc">글로벌 UAM OEM·운영사·인프라 지형과 기체 출시 타임라인을 참고해 레퍼런스 범위를 설정</div>
+          </div>
+          <div class="exec-item-img"><img src="./Uam/research-ecosystem-map.jpg" alt="" loading="lazy" /></div>
+        </div>
+        <div class="exec-item">
+          <div>
+            <div class="exec-item-num">STEP 03</div>
+            <div class="exec-item-title" data-i18n="es3.name">인테리어 벤치마킹</div>
+            <div class="exec-item-sub" data-i18n="es3.desc">eVTOL·헬리콥터·CTOL 30여 개 기종의 조종석·객실을 도어·창문·좌석·공간·내부벽 축으로 비교</div>
+          </div>
+          <div class="exec-item-img"><img src="./Uam/research-interior-benchmark.jpg" alt="" loading="lazy" /></div>
+        </div>
+        <div class="exec-item">
+          <div>
+            <div class="exec-item-num">STEP 04</div>
+            <div class="exec-item-title" data-i18n="es4.name">인테리어 적용안 정리 (Interior Application)</div>
+            <div class="exec-item-sub" data-i18n="es4.desc">인터뷰와 리서치에서 나온 요구를 좌석 파티션 · 개인 데스크 · 센터 콘솔 · 수납 공간 · 레그레스트 적용안으로 정리 (시트벨트는 FAA/EASA 기준)</div>
+          </div>
+          <div class="exec-item-img"><img src="./Uam/step4.jpeg" alt="" loading="lazy" /></div>
+        </div>
+        <div class="exec-item">
+          <div>
+            <div class="exec-item-num">STEP 05</div>
+            <div class="exec-item-title" data-i18n="es5.name">풀스케일 목업 제작</div>
+            <div class="exec-item-sub" data-i18n="es5.desc">Fabrication Lab에서 스틸 베이스 프레임을 용접하고, 합판 리브 구조로 조종석·객실 형상을 구현</div>
+          </div>
+          <div class="exec-item-img"><img src="./Uam/frame-weld-01.jpg" alt="" loading="lazy" /></div>
+        </div>
+        <div class="exec-item">
+          <div>
+            <div class="exec-item-num">STEP 06</div>
+            <div class="exec-item-title" data-i18n="es6.name">시뮬레이터 연동 · 리뷰</div>
+            <div class="exec-item-sub" data-i18n="es6.desc">곡면 스크린 시뮬레이터와 조종석 콘솔(태블릿 계기, 조종 입력 장치)을 목업에 연결하고, 현장에서 리뷰 진행</div>
+          </div>
+          <div class="exec-item-img"><img src="./Uam/mockup-simulator.jpg" alt="" loading="lazy" /></div>
+        </div>
+      </div>
+
+      <h3 class="sub-h" style="margin-top:64px;" data-i18n="s6.app.h">리서치 → 인테리어 적용안</h3>
+      <p class="cs-p" data-i18n="s6.app.p">
+        인터뷰에서 확인한 요구 &mdash; 좌석 근처에서 음료를 찾는 수요, 신발을 벗고 슬리퍼로 갈아신는 습관 &mdash; 와 벤치마킹 결과를
+        <strong>Interior Application (Final)</strong> 안으로 정리했습니다. 객실 승무원이 없는 운영을 전제로, 승객이 스스로 쓸 수 있는 기능에 무게를 두었습니다.
+      </p>
+
+      <figure class="fig wide">
+        <img src="./Uam/step4.jpeg" alt="Interior Application Final — 좌석 단위 적용안" loading="lazy" />
+        <figcaption data-i18n="g.app1"><strong>Interior Application &mdash; 좌석 단위 적용안</strong> · 좌석별 슬라이딩 파티션 · 시트벨트(FAA/EASA) · 좌석별 데스크 · 레그레스트 · 짐·신발 공간 · 좌석 사이 콘솔(승무원 서비스 없이 이용)</figcaption>
+      </figure>
+      <figure class="fig wide">
+        <img src="./Uam/finalview1.jpeg" alt="Interior Application Final — 4가지 적용 포인트" loading="lazy" />
+        <figcaption data-i18n="g.app2"><strong>Interior Application &mdash; 4가지 적용 포인트</strong> · 클릭하면 확대됩니다.</figcaption>
+      </figure>
+
+      <div class="framework stk">
+        <div class="fw-card">
+          <div class="fw-rank">01</div><div class="fw-key">Display</div>
+          <div class="fw-label" data-i18n="ap1.l">좌석별 디스플레이</div>
+          <div class="fw-example" data-i18n="ap1.e">좌석을 전방으로 배치하고 승객마다 디스플레이 제공. 콘텐츠를 즐기거나 레그레스트 각도·좌석 위 조명으로 각자 분위기를 조절</div>
+        </div>
+        <div class="fw-card">
+          <div class="fw-rank">02</div><div class="fw-key">Table</div>
+          <div class="fw-label" data-i18n="ap2.l">접이식 테이블</div>
+          <div class="fw-example" data-i18n="ap2.e">접어서 수납할 수 있고, 휴대폰을 꽂아 둘 수 있는 포켓 포함</div>
+        </div>
+        <div class="fw-card">
+          <div class="fw-rank">03</div><div class="fw-key">Console</div>
+          <div class="fw-label" data-i18n="ap3.l">셀프 서비스 콘솔</div>
+          <div class="fw-example" data-i18n="ap3.e">좌석 근처 음료 수요 확인. 객실 승무원이 없으므로 승객이 직접 쓸 수 있는 서비스 기능을 콘솔에 추가</div>
+        </div>
+        <div class="fw-card">
+          <div class="fw-rank">04</div><div class="fw-key">Storage</div>
+          <div class="fw-label" data-i18n="ap4.l">짐 · 신발 공간</div>
+          <div class="fw-example" data-i18n="ap4.e">화물칸에 싣지 않는 백팩·짐의 자리. 신발을 벗고 슬리퍼로 갈아신는 선호에 맞춰 신발·코트를 고정할 공간</div>
+        </div>
+      </div>
+
+      <h3 class="sub-h" style="margin-top:64px;" data-i18n="s6.gal.h">제작 &amp; 시뮬레이터 연동 기록</h3>
+
+      <div class="fig-grid g3">
+        <figure class="fig portrait"><img src="./Uam/frame-weld-01.jpg" alt="목업 스틸 프레임 용접" loading="lazy" /><figcaption data-i18n="g.w1">스틸 베이스 프레임 용접 ①</figcaption></figure>
+        <figure class="fig portrait"><img src="./Uam/frame-weld-02.jpg" alt="목업 스틸 프레임 용접" loading="lazy" /><figcaption data-i18n="g.w2">스틸 베이스 프레임 용접 ②</figcaption></figure>
+        <figure class="fig portrait"><img src="./Uam/frame-weld-03.jpg" alt="목업 스틸 프레임 용접" loading="lazy" /><figcaption data-i18n="g.w3">스틸 베이스 프레임 용접 ③</figcaption></figure>
+      </div>
+
+      <figure class="fig wide">
+        <img src="./Uam/mockup-simulator.jpg" alt="곡면 스크린 시뮬레이터 앞의 풀스케일 합판 목업" loading="lazy" />
+        <figcaption data-i18n="g.sim"><strong>풀스케일 합판 목업 × 곡면 스크린 시뮬레이터</strong> — 조종석과 객실 프레임을 실물 크기로 구현</figcaption>
+      </figure>
+
+      <div class="fig-grid g2">
+        <figure class="fig"><img src="./Uam/sim-cockpit-view.jpg" alt="조종석에서 본 시뮬레이터 화면" loading="lazy" /><figcaption data-i18n="g.cp">조종석 시점 — 태블릿 계기 화면과 조종 입력 장치</figcaption></figure>
+        <figure class="fig"><img src="./Uam/fab-lab.jpg" alt="Fabrication Lab의 시험 리그" loading="lazy" /><figcaption data-i18n="g.lab">Fabrication Lab — 실험용으로 제작한 목업 시험 리그 (합판 · 알루미늄 프로파일)</figcaption></figure>
+      </div>
+
+      <div class="fig-grid g2">
+        <figure class="fig portrait"><img src="./Uam/console-01.jpg" alt="조종석 콘솔 근접" loading="lazy" /><figcaption data-i18n="g.c1">조종석 콘솔 — 좌·우 조종 입력 장치와 계기 패널</figcaption></figure>
+        <figure class="fig portrait"><img src="./Uam/console-02.jpg" alt="조종석 콘솔과 좌석" loading="lazy" /><figcaption data-i18n="g.c2">조종석 콘솔과 좌석 배치</figcaption></figure>
+      </div>
+
+      <div class="fig-grid g2">
+        <figure class="fig"><img src="./Uam/mockup-review.jpg" alt="목업 리뷰 현장" loading="lazy" /><figcaption data-i18n="g.rv">목업 리뷰 현장</figcaption></figure>
+        <figure class="fig"><img src="./Uam/field-tent.jpg" alt="야외 현장" loading="lazy" style="object-position:50% 68%;" /><figcaption data-i18n="g.tent">야외 현장</figcaption></figure>
+      </div>
+
+      <h3 class="sub-h" style="margin-top:64px;" data-i18n="s6.team.h">팀 &amp; 협업</h3>
+      <div class="cs-stats five">
+        <div class="cs-stat"><div class="cs-stat-num">6</div><div class="cs-stat-label" data-i18n="tm1">디자인 팀 (본인 포함)</div></div>
+        <div class="cs-stat"><div class="cs-stat-num">6</div><div class="cs-stat-label" data-i18n="tm2">Avionics 팀</div></div>
+        <div class="cs-stat"><div class="cs-stat-num">3</div><div class="cs-stat-label" data-i18n="tm3">조종사</div></div>
+        <div class="cs-stat"><div class="cs-stat-num">24</div><div class="cs-stat-label" data-i18n="tm4">홍익대 학부생 (HIDE Lab)</div></div>
+        <div class="cs-stat"><div class="cs-stat-num">~40</div><div class="cs-stat-label" data-i18n="tm5">내부 임직원 참여자</div></div>
+      </div>
+
+      <div class="strategies">
+        <div class="strat-card">
+          <div class="strat-num">Design</div>
+          <div class="strat-name" data-i18n="tc1.name">디자인 팀</div>
+          <div class="strat-desc" data-i18n="tc1.d">디자인 리드 2 · 외장 디자인 1 · 내장 디자인 1 · 브랜드 디자인 1 · UX PM 1(본인). 외장·내장·브랜드 디자이너는 포스터와 PDF 자료를 제작했고, 저는 UX 데이터를 추출해 내장 디자이너에게 전달했습니다.</div>
+        </div>
+        <div class="strat-card">
+          <div class="strat-num">Avionics</div>
+          <div class="strat-name" data-i18n="tc2.name">Avionics 팀 (6명)</div>
+          <div class="strat-desc" data-i18n="tc2.d">조언과 데이터를 제공했고, 실험에도 직접 참여했습니다.</div>
+        </div>
+        <div class="strat-card">
+          <div class="strat-num">Pilots</div>
+          <div class="strat-name" data-i18n="tc3.name">조종사 (3명)</div>
+          <div class="strat-desc" data-i18n="tc3.d">사용자 리서치에 참여해 조언을 주었고, FAA 정책 등 규제 관련 이야기도 많이 나눴습니다.</div>
+        </div>
+      </div>
+
+      <p class="cs-p" style="margin-top:24px;" data-i18n="s6.exp.p">
+        실험은 우드 목업에 참가자를 앉혀 수치를 측정하는 방식으로, <strong>홍익대 학부생(HIDE Lab) 24명과 내부 임직원 약 40명</strong>을 대상으로 진행했습니다. 측정값은 대외비로 공개하지 않으며, 방식은 위 &lsquo;사용자 리서치 방법&rsquo;에 정리했습니다.
+      </p>
+
+      <h3 class="sub-h" style="margin-top:64px;" data-i18n="s6.collab.title">iF Design Award 출품</h3>
+      <p class="cs-p" data-i18n="s6.collab.p">
+        프로젝트에서 조사한 리서치와 인터뷰 결과를 인테리어 컨셉 자료로 정리해 PLANA의 <strong>iF Design Award 출품 자료에 반영</strong>했고,
+        이를 제출해 수상으로 이어졌습니다. 출품 보드는 배경(AAM · 버티포트 · CO₂ 비교) → 500km 데이 트립 컨셉 → 익스테리어 →
+        인테리어(Interior Concept, A/B details) 순으로 구성되며, 리서치에서 도출한 인테리어 근거가 마지막 설계 스토리로 연결됩니다.
+      </p>
+      <figure class="fig wide">
+        <img src="./Uam/finalview2.jpeg" alt="iF Award 출품 보드" loading="lazy" />
+        <figcaption data-i18n="g.award"><strong>iF Design Award 출품 보드</strong> · 2022년 겨울 출품 · 2023년 초 수상 발표</figcaption>
+      </figure>
+    </section>
+
+    <!-- 07 RESULTS -->
+    <section class="cs-section" id="s7">
+      <div class="cs-section-num">07</div>
+      <h2 class="cs-section-title" data-i18n="s7.title">결과 <em>·</em> Results</h2>
+
+      <h3 class="sub-h" data-i18n="s7.aw.h">수상</h3>
+      <div class="big-stat-block">
+        <div class="big-stat-num">iF</div>
+        <div class="big-stat-desc" data-i18n="aw.d"><strong>iF Design Award 2023 · Professional Concept 수상</strong><br>PLANA의 하이브리드 eVTOL 컨셉이 전 세계 11,000건 이상의 출품작 가운데 수상했습니다. 이 프로젝트에서 조사한 인테리어 리서치를 바탕으로 출품 자료를 구성해 제출했습니다.</div>
+      </div>
+      <p class="src-note" data-i18n="aw.src">출처: Vertical Magazine, 2023.04.17 (하단 관련 링크)</p>
+
+      <h3 class="sub-h" data-i18n="s7.del.h">산출물</h3>
+      <div class="cs-stats">
+        <div class="cs-stat">
+          <div class="cs-stat-num">127</div>
+          <div class="cs-stat-label" data-i18n="d1">저널 분석 · 8개 이해관계자 영역으로 구조화</div>
+        </div>
+        <div class="cs-stat">
+          <div class="cs-stat-num">30+</div>
+          <div class="cs-stat-label" data-i18n="d2">기종 인테리어 벤치마킹 (eVTOL · 헬리콥터 · CTOL)</div>
+        </div>
+        <div class="cs-stat">
+          <div class="cs-stat-num sm">Full-scale</div>
+          <div class="cs-stat-label" data-i18n="d3">풀스케일 목업 1식 — 시뮬레이터 연동 조종석 콘솔 포함</div>
+        </div>
+      </div>
+
+      <h3 class="sub-h" data-i18n="s7.art.h">리서치 결과물</h3>
+      <p class="cs-p" data-i18n="s7.sum">인터뷰와 우드 목업 실험, 설문 분석을 거쳐 인테리어 적용안으로 정리했고, 이 결과가 iF Design Award 출품 자료의 인테리어 파트로 이어졌습니다.</p>
+      <div class="hyp-meta" style="border-top:none;margin-top:0;padding-top:0;">
+        <span class="hyp-chip">Mental Model</span>
+        <span class="hyp-chip">Journey Map</span>
+        <span class="hyp-chip">Affinity Diagram</span>
+        <span class="hyp-chip">Scenario</span>
+        <span class="hyp-chip">Infographic</span>
+        <span class="hyp-chip" data-i18n="art.guide">정성 평가 가이드 (제안)</span>
+        <span class="hyp-chip" data-i18n="art.rep">최종 보고서</span>
+      </div>
+      <p class="src-note" data-i18n="s7.conf">※ 실험 측정값 등 정량 결과는 사내 대외비로 이 페이지에 공개하지 않습니다.</p>
+    </section>
+
+    <!-- 08 LESSONS -->
+    <section class="cs-section" id="s8">
+      <div class="cs-section-num">08</div>
+      <h2 class="cs-section-title" data-i18n="s8.title">레슨런 <em>·</em> Lessons</h2>
+
+      <div class="lesson-list">
+        <div class="lesson-item">
+          <div class="lesson-icon">L1</div>
+          <div class="lesson-content">
+            <h4 data-i18n="l1.h">Physical UX는 종합 데이터 &mdash; 분류 체계가 먼저다</h4>
+            <p data-i18n="l1.p">Physical UX는 하나의 수치가 아니라 여러 종류의 데이터가 얽힌 종합 데이터입니다. 그래서 먼저 카테고리를 정하고, 그 분류에 따라 raw data를 수집하는 방법이 필요했습니다. 이 구조가 갖춰져야 이후 데이터를 디지털화할 때 그대로 활용할 수 있습니다.</p>
+          </div>
+        </div>
+        <div class="lesson-item">
+          <div class="lesson-icon">L2</div>
+          <div class="lesson-content">
+            <h4 data-i18n="l2.h">주관적인 편안함을 엔지니어링 언어로 번역하기</h4>
+            <p data-i18n="l2.p">승객이 느끼는 편의성은 정성적이지만, 설계는 치수라는 수치로 결정됩니다. 인터뷰·설문의 표현을 엔지니어가 쓰는 기준(치수·범위)으로 옮기고, 우드 목업에 실제로 앉아 보며 양쪽의 합의점을 찾았습니다. 정성 데이터도 엔지니어링 의사결정에 쓰이려면 측정 가능한 형태로 바꾸는 방법을 기초부터 터득했습니다.</p>
+          </div>
+        </div>
+        <div class="lesson-item">
+          <div class="lesson-icon">L3</div>
+          <div class="lesson-content">
+            <h4 data-i18n="l3.h">저해상도 실물 목업으로 먼저 측정하고, 정밀 제작은 나중에</h4>
+            <p data-i18n="l3.p">도면과 문헌만으로는 승객이 실제로 느끼는 공간을 알 수 없어, 먼저 우드 목업에 앉아 보는 측정으로 범위를 좁혔습니다. 싸고 빠르게 확인한 뒤 하드 목업으로 넘어가면, 정밀한 제작에 들어가기 전에 잘못된 가정을 일찍 걸러낼 수 있습니다.</p>
+          </div>
+        </div>
+      </div>
+    </section>
+
+    <div class="rel-wrap">
+      <div class="rel-label" data-i18n="rel.h">관련 링크</div>
+      <a class="rel-card" href="https://verticalmag.com/press-releases/plana-receives-if-design-award-for-hybrid-evtol-concept/" target="_blank" rel="noopener noreferrer">
+        <div>
+          <div class="rel-meta" data-i18n="rel.meta">Vertical Magazine · Press Release · 2023.04.17</div>
+          <div class="rel-title" data-i18n="rel.title">Plana receives iF Design Award for hybrid eVTOL concept</div>
+        </div>
+        <span class="rel-arrow" aria-hidden="true">↗</span>
+      </a>
+    </div>
+
+  </div><!-- /cs-body -->
+
+  <div class="cs-next">
+    <div>
+      <div class="next-label" data-i18n="next.label">다음 케이스 스터디</div>
+      <a href="/case-study-plana" class="next-link" style="display:block;">
+        <div class="next-title">PLANA Flypad UX for UAM Pilots →</div>
+      </a>
+    </div>
+    <a href="/case-study-plana" class="next-link next-arrow">↗</a>
+  </div>
+
+  <footer>
+    <p>© 2026 Sumin Lee</p>
+    <p>
+      <a href="/index"
+         style="font-size:11px;color:var(--text-3);transition:color .2s;"
+         onmouseover="this.style.color='var(--accent)'"
+         onmouseout="this.style.color='var(--text-3)'"
+         data-i18n="footer.back">← Projects</a>
+    </p>
+  </footer>
+
+  <div id="lb" aria-hidden="true"><img alt="" /></div>
+
+  <script>
+    /* ── i18n ───────────────────────────────────────── */
+    const en = {
+      'nav.work':`Projects`,'nav.about':`About`,
+      'hero.sub':`PLANA · UX Project Manager · UX Researcher · about 6 months`,
+      'hero.eyebrow':`UAM · Cabin Interior · Full-Scale Mock-up`,
+      'hero.h1':`From literature research to a physical mock-up: building the evidence base for <em>UAM interior design</em>`,
+      'hero.question':`Existing aircraft cannot be measured and copied straight into a UAM. Starting from that problem, I worked over about six months through legacy data, pilot and passenger research and seated measurements in a wood mock-up to agree on cabin and cockpit sizes and the comfort threshold.`,
+      'meta.role.l':`Role`,'meta.role.v':`UX Project Manager · UX Researcher`,
+      'meta.period.l':`Period`,'meta.period.v':`Jun – Dec 2022 (about 6 months)`,
+      'meta.domain.l':`Domain`,'meta.domain.v':`UAM · eVTOL Cabin Interior`,
+      'meta.tools.l':`Tools`,'meta.tools.v':`Excel · Figma · Miro · Wood/Hard Mock-up · Flight Simulator · VR`,
+
+      's1.title':`Background <em>·</em> Context`,
+      's1.p1':`UAM is a system where pilots, passengers, operators, vertiports and regulation are entangled at once, on top of a new low-altitude, urban flight environment. Within it, the aircraft interior is both the pilot&rsquo;s workspace and the passenger&rsquo;s first point of contact &mdash; yet eVTOL interiors were still pre-commercial, with few proven examples to learn from.`,
+      's1.p2':`On PLANA&rsquo;s UX team, I took part in the whole project for about six months as <strong>UX Project Manager and UX Researcher</strong> &mdash; from research design and interior benchmarking to building the full-scale mock-up and connecting it to a simulator.`,
+      's1.scope':`Project Scope`,
+      's1.sc1':`Interior design of the Cockpit and the Cabin`,
+      's1.sc2':`Core elements: door · window · seat · space · interior wall`,
+      's1.sc3':`Securing design rationale through literature, industry and model research`,
+      's1.sc4':`Building a review environment: full-scale mock-up + simulator link`,
+      's1.ctx':`Business Context`,
+      's1.ctx1':`Target aircraft: PLANA&rsquo;s hybrid eVTOL concept &mdash; six tilt-rotors, cabin for up to six passengers`,
+      's1.ctx2':`Cabin: wide symmetrical doors, three-point safety belts and bucket seats, various storage spaces`,
+      's1.ctx3':`Designed to operate without cabin crew, so features had to work for passengers on their own`,
+      's1.ctx4':`Team: two design leads · one exterior designer · one interior designer · one brand designer · one UX PM (me)`,
+      's1.ctx.src':`Aircraft details: Vertical Magazine, Apr 2023`,
+      's1.callout':`<strong>Project Scope:</strong> The design target was the <strong>aircraft space itself</strong>, not a screen (Flypad) &mdash; including an environment where layouts that are hard to judge from drawings and papers alone could be checked at real size.`,
+
+      's2.title':`Goal <em>·</em> Objective`,
+      's2.lead':`The goal of the project was to <strong>set size criteria</strong> for the UAM cabin and cockpit &mdash; to put the sizes optimized from an engineering point of view next to the limit at which ordinary passengers still feel comfortable (the <strong>comfort threshold</strong>) and <strong>reach agreement</strong> between them.`,
+      's2.inp':`Input · Evidence`,
+      's2.i1':`Legacy data from existing aircraft (fixed-wing &amp; rotary-wing)`,
+      's2.i2':`Research with the pilots of each aircraft type`,
+      's2.i3':`Research with the passengers of each aircraft type`,
+      's2.out':`Output · Criteria to agree on`,
+      's2.o1':`Cabin and cockpit sizes optimized from an engineering point of view`,
+      's2.o2':`The comfort threshold ordinary passengers feel`,
+      's2.o4':`A qualitative assessment guide proposal for the UAM passenger cabin`,
+      's2.o3':`An agreed proposal that reconciles the two views (final values are confidential)`,
+
+      's3.title':`Research <em>·</em> Analysis`,
+      's3.a.h':`A · Stakeholder Map &amp; 127-Paper Analysis`,
+      's3.a.p':`I structured the stakeholders around AAM (Advanced Air Mobility) into eight areas in Miro, and classified 127 journal papers into six categories: <strong>ux · customer · report · market · vertiport/system · data</strong>.`,
+      's3.a.cap':`<strong>Miro stakeholder map &amp; Out of 127 journals</strong> &mdash; click to enlarge.`,
+      'stk1.l':`Flight crew`,'stk1.e':`cockpit · piloting · psychology · work process · space · aircraft management`,
+      'stk2.l':`Riders`,'stk2.e':`boarding · comfort · carry-on baggage · cabin safety · emergency procedures`,
+      'stk3.l':`Service operators`,'stk3.e':`flight services · safety`,
+      'stk4.l':`Air traffic control`,'stk4.e':`route guidance · aviation terminology`,
+      'stk5.l':`Local community`,'stk5.e':`urban core · residential areas`,
+      'stk6.l':`Aircraft Manufacturer (Interior)`,'stk6.e':`<em>door · window · seat · space · interior wall</em>`,
+      'stk7.l':`Ground infrastructure`,'stk7.e':`boarding space · baggage check-in · security screening · lounge · duty-free`,
+      'stk8.l':`Regulation`,'stk8.e':`aviation law · aviation policy · international transport law`,
+      's3.a.p2':`The <strong>vertiport/system</strong> category was the largest, followed by report; ux made up only about a tenth of the total.`,
+      's3.a.callout':`<strong>Insight:</strong> Compared with system- and infrastructure-focused literature, evidence treating the aircraft interior from a user-experience angle was relatively scarce. Rather than concluding from papers alone, interior design needed <strong>a stage of comparing directly and building directly</strong>.`,
+      's3.b.h':`B · Global UAM Industry Map`,
+      's3.b.p':`Using an industry map that lays out OEMs, operators, suppliers, infrastructure players and their investment/partnership ties along a timeline, I mapped when which aircraft would enter the market and the range of references the interior would be competing against.`,
+      's3.b.cap':`<strong>UAM ecosystem map (reference material)</strong> &mdash; Source: B. Shim, Oct 2022 · click the image to open the author&rsquo;s LinkedIn`,
+      's3.c.h':`C · Interior Benchmarking &mdash; 30+ Aircraft Models`,
+      's3.c.p':`I collected cockpit and cabin images from 12 eVTOL makers, 5 helicopter models and 14 CTOL (light/business aircraft) models, and organized them on one wall board. Since eVTOL alone offered too few references, I widened to adjacent categories and compared along five axes: <strong>door · window · seat · space · interior wall</strong>.`,
+      's3.c.cap':`<strong>Interior benchmarking board</strong> &mdash; eVTOL (Joby, Lilium, Volocopter, Archer, Wisk, etc.) · Helicopter (AW109, AW139, Bell 429, etc.) · CTOL (Pilatus PC-12, Cessna Longitude, Gulfstream, etc.)`,
+      'ax1':`Door`,'ax2':`Window`,'ax3':`Seat`,'ax4':`Space`,'ax5':`Interior wall`,
+      's3.pt.h':`Patterns Found in the Benchmarking`,
+      'pt1.num':`Pattern 01`,'pt1.name':`Electric power &rarr; more room in the cabin`,
+      'pt1.d':`Because they run on batteries rather than jet fuel like a helicopter, the interior has more room to spare.`,
+      'pt2.num':`Pattern 02`,'pt2.name':`Seats: 2 &rarr; 4`,
+      'pt2.d':`Because of battery-technology limits, two was the ceiling in 2022&ndash;23, but every company expected to be able to carry at least four people in the end.`,
+      'pt3.num':`Pattern 03`,'pt3.name':`Range &middot; Flight Time`,
+      'pt3.d':`The expected operation was flights of under one hour, covering roughly 100&ndash;200 km.`,
+
+      's4.title':`Problem <em>·</em> Diagnosis`,
+      's4.problem':`Existing aircraft differ in size from a UAM, so their measured dimensions<br>cannot be reused as they are,<br>and no baseline data exists for designing a UAM cabin`,
+      's4.p':`Data from fixed-wing and rotary-wing aircraft could only be a starting point; there was no material on what size pilots and passengers find comfortable at UAM scale. So we used the legacy data as a baseline and built the underlying data directly from users.`,
+
+      's5.title':`Approach <em>·</em> Method`,
+      's5.hyp':`Physical UX is <em>composite data</em> that no single number can answer. So rather than setting a hypothesis to prove, we put <em>legacy data, user experience and the engineering view</em> side by side and looked for a range everyone could agree on.`,
+      'h.c1':`Legacy data`,'h.c2':`User experience`,'h.c3':`Engineering view`,
+      's5.strat.title':`Approach`,
+      'st1.num':`Strategy 01`,'st1.name':`Legacy Data`,
+      'st1.desc':`Use the literature review and model benchmarking to set the size and layout criteria of existing fixed-wing and rotary-wing aircraft as a baseline.`,
+      'st2.num':`Strategy 02`,'st2.name':`User Research`,
+      'st2.desc':`Run interviews, a survey and contextual inquiry with the pilots and passengers of each aircraft type and hear their experience and discomfort first-hand.`,
+      'st3.num':`Strategy 03`,'st3.name':`Measure &amp; Agree`,
+      'st3.desc':`Confirm the range of comfort through seated measurements in a wood mock-up, then reconcile it with the engineering view into an agreed proposal.`,
+
+      's6.title':`Execution <em>·</em> Process`,
+      's6.role.h':`My Role`,
+      's6.role.r':`UX Researcher`,
+      's6.r1':`Structured eight AAM stakeholder areas in Miro and classified/analyzed 127 papers`,
+      's6.r2':`Used the global UAM industry map to track aircraft and OEM trends`,
+      's6.r3':`Built the interior benchmarking board across 30+ eVTOL, helicopter and CTOL models`,
+      's6.r5':`Extracted UX data from the research and experiments and handed it to the interior designer as the basis for the interior design`,
+      's6.r4':`Drew out passenger needs through user interviews with pilots and passengers (depth interviews) and seated measurements in the wood mock-up (shoes &amp; storage, drink service, etc.)`,
+      's6.role.p':`UX Project Manager`,
+      's6.p1':`Managed the schedule and scope (Jun&ndash;Dec 2022) for the six-person design team (including me)`,
+      's6.p2':`Coordinated the Fabrication Lab build process and took part hands-on in fabricating the mock-up&rsquo;s base frame`,
+      's6.p3':`Coordinated integration issues between the simulator, the instrument display (Flypad) and the mock-up`,
+      's6.p4':`Worked with the design, avionics and airframe-build teams and ran two major reviews`,
+      's6.tl.h':`Project Timeline · 2022`,
+      'm1.n':`Literature Review`,'m1.d':`Market &amp; competitor research, stakeholder analysis`,
+      'm2.n':`Data Collection`,'m2.d':`Survey, user interviews (pilots &amp; passengers), contextual inquiry · Aug 17&ndash;Sep 2`,
+      'm3.n':`Data Analysis`,'m3.d':`Quantitative survey analysis, qualitative interview analysis, Mental Model, Journey Map, Infographic`,
+      'm4.n':`Applying the Analysis`,'m4.d':`Affinity Diagram, Journey Map, Scenario, A/B Test`,
+      'm5.n':`iF Award Submission`,'m5.d':`Hard mockup, presentation, final report, iF Design Award submission`,
+      'g.period':`<strong>Project schedule</strong> · June &ndash; December 2022 (original slide)`,
+      's6.rm.h':`User Research Methods`,
+      'g.rm':`<strong>Research-method landscape</strong> · red box: the qualitative area &mdash; Interviews · Focus Groups · Participatory Design · Ethnographic Field Studies`,
+      'rm.src':`Method taxonomy: Nielsen Norman Group (C. Rohrer)`,
+      's6.rm.p':`I gathered user data through a survey, interviews and contextual inquiry, and ran <strong>the interviews and experiments in two ways</strong>.`,
+      'rm1.num':`Method 01`,'rm1.name':`Depth Interview & Shadowing`,
+      'rm1.d':`One-on-one in-depth interviews and shadowing (observation) with pilots and with passengers, to understand needs and context of use qualitatively.`,
+      'rm2.num':`Method 02`,'rm2.name':`Seated Measurement in the Wood Mock-up`,
+      'rm2.d':`Participants sat in the wood mock-up and measurements were taken, with 24 Hongik University undergraduates and about 40 internal employees taking part. The measures and resulting values are confidential and not shown here.`,
+      'rm.pilot.p':`Pilot interviews were held separately with fixed-wing and rotary-wing pilots, <strong>60&ndash;90 minutes</strong> each, split into six flight phases &mdash; before flight, boarding, take-off, flight, landing, parking &mdash; and at every phase we asked about inspection, communication, handling, roles and emergency response.`,
+      'g.pilot':`<strong>Pilot interview structure</strong> · fixed-wing &amp; rotary-wing pilots, 60&ndash;90 min per interview`,
+      's6.pj.h':`Personas &amp; Journey Maps`,
+      's6.pj.p':`Based on the survey and interview study (47 people), I summarized the passengers into three personas &mdash; <strong>a VIP businessman, an event influencer, and parents travelling with a baby and a dog</strong> &mdash; and drew their flight experience as a journey map. Setting today&rsquo;s aircraft (As-is) beside AAM (To-be), I looked for what changes.`,
+      'g.p1':`<strong>VIP &middot; Businessman</strong> &mdash; age 56, consultant`,
+      'g.p2':`<strong>Event &middot; Influencer</strong> &mdash; age 31`,
+      'g.p3':`<strong>Baby &amp; Pets</strong> &mdash; age 38, diplomat`,
+      'g.jm1':`<strong>Journey Map &middot; As-is (existing aircraft)</strong> &mdash; packing, no smoking area or Wi-Fi, boredom, caring for a baby`,
+      'g.jm2':`<strong>Journey Map &middot; To-be (AAM)</strong> &mdash; boarding with your own luggage, working and meeting on board, a short rest, and a schedule that continues right after landing`,
+      'pj1.num':`Change 01`,'pj1.name':`Luggage &middot; Storage`,
+      'pj1.d':`Passengers carry their own luggage on board instead of checking it in, so storage right beside the seat becomes a new need.`,
+      'pj2.num':`Change 02`,'pj2.name':`Work &middot; Connectivity`,
+      'pj2.d':`The As-is &ldquo;no Wi-Fi&rdquo; becomes laptop work, online meetings and live streaming in the To-be.`,
+      'pj3.num':`Change 03`,'pj3.name':`Short Flights &middot; Families`,
+      'pj3.d':`Flights of around 20&ndash;30 minutes chain rest and preparation together, and passengers with a baby want services such as a restroom and diapers close at hand.`,
+      's6.pj.note':`I laid these scenes out in the order <strong>moving to the vertiport &rarr; security &rarr; boarding &rarr; disembarking &rarr; travelling on to the destination</strong> to design the journey map.`,
+      'sp.h':`Passenger Survey & Interview Study`,
+      'sp.l1':`Participants`,'sp.v1':`People with specialist knowledge from studying art, design or aerospace (AERO), or who have travelled a lot by air &mdash; <strong>three interviewee groups, 47 people in total</strong>`,
+      'sp.l2':`Period`,'sp.v2':`August 17 &ndash; September 2, 2022`,
+      'sp.l3':`Method`,'sp.v3':`Survey + depth interview combined (on the flight experience) · Shadowing`,
+      'sp.l4':`Goal`,'sp.v4':`A <strong>qualitative assessment guide</strong> for the UAM passenger cabin (Proposal of Qualitative Assessment Guide for UAM Passenger)`,
+      's6.steps.title':`Concrete Execution Steps`,
+      'es1.name':`Stakeholder Map &amp; Literature Analysis`,
+      'es1.desc':`Structured eight AAM stakeholder areas and classified 127 papers into six categories to gauge how dense the interior-related evidence was`,
+      'es2.name':`Industry &amp; Aircraft Trends`,
+      'es2.desc':`Set the reference scope using the global UAM OEM/operator/infrastructure landscape and aircraft launch timelines`,
+      'es3.name':`Interior Benchmarking`,
+      'es3.desc':`Compared cockpits and cabins of 30+ eVTOL, helicopter and CTOL models along door, window, seat, space and interior wall`,
+      'es4.name':`Interior Application`,
+      'es4.desc':`Organized needs from interviews and research into seat partition, personal desk, center console, storage and leg-rest applications (seat belts to FAA/EASA standards)`,
+      'es5.name':`Full-Scale Mock-up Build`,
+      'es5.desc':`Steel base frame welded in the Fabrication Lab, with the cockpit/cabin shape realized in a plywood rib structure`,
+      'es6.name':`Simulator Integration &amp; Review`,
+      'es6.desc':`Connected a curved-screen simulator and a cockpit console (tablet instruments, control inputs) to the mock-up, and ran reviews on site`,
+      's6.team.h':`Team &amp; Collaboration`,
+      'tm1':`Design team (incl. me)`,
+      'tm2':`Avionics team`,
+      'tm3':`Pilots`,
+      'tm4':`Hongik undergrads (HIDE Lab)`,
+      'tm5':`Internal employees (approx.)`,
+      'tc1.name':`Design Team`,
+      'tc1.d':`Two design leads · one exterior designer · one interior designer · one brand designer · one UX PM (me). The exterior, interior and brand designers produced the posters and PDF materials; I extracted the UX data and handed it to the interior designer.`,
+      'tc2.name':`Avionics Team (6)`,
+      'tc2.d':`Gave input and provided data, and took part in the experiments themselves.`,
+      'tc3.name':`Pilots (3)`,
+      'tc3.d':`Took part in the user research and advised us, and we talked at length about FAA policy and related regulation.`,
+      's6.exp.p':`The experiment had participants sit in the wood mock-up while measurements were taken, with <strong>24 Hongik University undergraduates (HIDE Lab) and about 40 internal employees</strong>. The measured values are confidential; the method is described under &lsquo;User Research Methods&rsquo; above.`,
+      's6.app.h':`Research &rarr; Interior Application`,
+      's6.app.p':`I organized the needs confirmed in interviews &mdash; demand for drinks near the seat, the habit of taking shoes off and changing into slippers &mdash; together with the benchmarking results into the <strong>Interior Application (Final)</strong> proposal. With operation assumed to have no cabin crew, the emphasis was on features passengers can use by themselves.`,
+      'g.app1':`<strong>Interior Application &mdash; per-seat application</strong> · sliding partition per seat · seat belts (FAA/EASA) · desk per seat · leg rest · space for luggage and shoes · console between seats usable without crew service`,
+      'g.app2':`<strong>Interior Application &mdash; four key points</strong> · click to enlarge.`,
+      'ap1.l':`Per-seat display`,
+      'ap1.e':`Seats face forward and each passenger gets a display. Passengers enjoy content or set their own atmosphere with leg-rest angle and lights above the seat`,
+      'ap2.l':`Foldable table`,
+      'ap2.e':`Folds away, with a pocket that holds a phone`,
+      'ap3.l':`Self-service console`,
+      'ap3.e':`Demand for drinks near the seat was confirmed. With no cabin crew, service functions passengers can use themselves were added to the console`,
+      'ap4.l':`Luggage &amp; shoe space`,
+      'ap4.e':`A place for backpacks and bags that don&rsquo;t go in the cargo hold, and room to secure shoes and coats, since passengers like to take off their shoes and change into slippers`,
+      's6.gal.h':`Build &amp; Simulator Integration Log`,
+      'g.w1':`Welding the steel base frame ①`,'g.w2':`Welding the steel base frame ②`,'g.w3':`Welding the steel base frame ③`,
+      'g.sim':`<strong>Full-scale plywood mock-up × curved-screen simulator</strong> &mdash; cockpit and cabin frame built at real size`,
+      'g.cp':`Pilot&rsquo;s view &mdash; tablet instrument display and control inputs`,
+      'g.lab':`Fabrication Lab &mdash; test rig built for the experiments (plywood &amp; aluminum profile)`,
+      'g.c1':`Cockpit console &mdash; left/right control inputs and instrument panel`,
+      'g.c2':`Cockpit console and seat layout`,
+      'g.rv':`Mock-up review on site`,
+      'g.tent':`Outdoor site`,
+      's6.collab.title':`iF Design Award Submission`,
+      's6.collab.p':`I organized the research and interview results from the project into interior-concept material, <strong>reflected it in PLANA&rsquo;s iF Design Award submission</strong>, and submitted it, which led to the award. The board runs from Background (AAM · vertiport · CO&#8322; comparison) &rarr; a 500 km day-trip concept &rarr; Exterior &rarr; Interior (Interior Concept, A/B details), with the interior rationale from the research forming the final design story.`,
+      'g.award':`<strong>iF Design Award submission board</strong> · submitted winter 2022 · award announced early 2023`,
+
+      's7.title':`Results <em>·</em> Outcomes`,
+      's7.aw.h':`Award`,
+      'aw.d':`<strong>iF Design Award 2023 &middot; Professional Concept winner</strong><br>PLANA&rsquo;s hybrid eVTOL concept won among more than 11,000 entries worldwide. The submission was built on the interior research investigated in this project.`,
+      'aw.src':`Source: Vertical Magazine, Apr 17, 2023 (see Related Link below)`,
+      's7.del.h':`Deliverables`,
+      'd1':`papers analyzed &middot; structured into 8 stakeholder areas`,
+      'd2':`aircraft interiors benchmarked (eVTOL &middot; helicopter &middot; CTOL)`,
+      'd3':`One full-scale mock-up, including a simulator-linked cockpit console`,
+      's7.art.h':`Research Outputs`,
+      's7.sum':`Interviews, the wood mock-up experiment and the survey analysis were turned into interior application proposals, and that work fed the interior part of the iF Design Award submission.`,
+      'art.guide':`Qualitative assessment guide (proposal)`,
+      'art.rep':`Final report`,
+      's7.conf':`* Measured values and other quantitative results are confidential and are not shown on this page.`,
+
+      's8.title':`Lessons <em>·</em> Learned`,
+      'l1.h':`Physical UX is composite data &mdash; the classification comes first`,
+      'l1.p':`Physical UX is not one number but composite data in which many kinds of data are intertwined. So we first had to settle the categories, and then find a way to collect raw data according to that classification. With that structure in place, the data can be used as it is when it is digitized later.`,
+      'l2.h':`Translating subjective comfort into engineering language`,
+      'l3.h':`Measure first in a low-fidelity physical mock-up, build precisely later`,
+      'l3.p':`Drawings and papers cannot tell you the space a passenger actually feels, so we first narrowed the range with seated measurements in a wood mock-up. If that is checked cheaply and quickly before moving on to a hard mock-up, wrong assumptions can be filtered out early, before precise fabrication begins.`,
+      'l2.p':`How comfortable passengers feel is qualitative, but a design is decided by dimensions, which are numbers. We carried the wording of the interviews and survey over into the criteria engineers use (dimensions and ranges), and found the point both sides could agree on by actually sitting in the wood mock-up. I learned from the ground up how to turn qualitative data into a measurable form so that it can feed engineering decisions.`,
+      'rel.h':`Related Link`,
+      'rel.meta':`Vertical Magazine · Press Release · Apr 17, 2023`,
+      'rel.title':`Plana receives iF Design Award for hybrid eVTOL concept`,
+      'next.label':`Next Case Study`,
+      'footer.back':`← Projects`
+    };
+
+    const ko = {};
+    document.querySelectorAll('[data-i18n]').forEach(el => { ko[el.dataset.i18n] = el.innerHTML; });
+
+    let lang = 'en';
+    function setLang(next) {
+      lang = next;
+      document.documentElement.lang = next;
+      const src = next === 'en' ? en : ko;
+      document.querySelectorAll('[data-i18n]').forEach(el => {
+        el.classList.add('t-fade','fading');
+        setTimeout(() => {
+          if (src[el.dataset.i18n] !== undefined) el.innerHTML = src[el.dataset.i18n];
+          el.classList.remove('fading');
+        }, 220);
+      });
+      document.querySelectorAll('.lang-btn').forEach(b => b.classList.toggle('active', b.dataset.lang === next));
+    }
+    document.getElementById('langToggle').addEventListener('click', e => {
+      const btn = e.target.closest('.lang-btn');
+      if (btn && btn.dataset.lang !== lang) setLang(btn.dataset.lang);
+    });
+    setLang('en');
+
+    /* ── NAV scroll ─────────────── */
+    const nav = document.getElementById('nav');
+    window.addEventListener('scroll', () => nav.classList.toggle('scrolled', scrollY > 40), { passive:true });
+
+    /* ── CURSOR ─────────────────── */
+    const dot = document.getElementById('cur-dot');
+    const ring = document.getElementById('cur-ring');
+    let mx = innerWidth/2, my = innerHeight/2, rx = mx, ry = my;
+    window.addEventListener('mousemove', e => {
+      mx = e.clientX; my = e.clientY;
+      dot.style.left = mx+'px'; dot.style.top = my+'px';
+    });
+    (function anim() {
+      rx += (mx-rx)*.12; ry += (my-ry)*.12;
+      ring.style.left = rx+'px'; ring.style.top = ry+'px';
+      requestAnimationFrame(anim);
+    })();
+    document.querySelectorAll('a,button').forEach(el => {
+      el.addEventListener('mouseenter', () => document.body.classList.add('cursor-link'));
+      el.addEventListener('mouseleave', () => document.body.classList.remove('cursor-link'));
+    });
+
+    /* ── SCROLL REVEAL ───────────── */
+    const obs = new IntersectionObserver(entries => {
+      entries.forEach(e => { if (e.isIntersecting) e.target.classList.add('visible'); });
+    }, { threshold:.06 });
+    document.querySelectorAll('.cs-section').forEach(el => obs.observe(el));
+
+    (function(){
+      const toc=document.getElementById('csToc');
+      if(!toc)return;
+      const sections=document.querySelectorAll('.cs-section[id]');
+      const links=[];
+      sections.forEach(sec=>{
+        const titleEl=sec.querySelector('.cs-section-title,.cs-title');
+        if(!titleEl)return;
+        const parts=titleEl.textContent.split('·');
+        const label=(parts.length>1?parts[parts.length-1]:parts[0]).trim().split('—')[0].trim();
+        const a=document.createElement('a');
+        a.href='#'+sec.id; a.className='cs-toc-link'; a.dataset.target=sec.id;
+        a.innerHTML='<span class="cs-toc-tick"></span><span>'+label+'</span>';
+        toc.appendChild(a); links.push({el:a,sec});
+      });
+      const spy=new IntersectionObserver(entries=>{
+        entries.forEach(e=>{const l=links.find(x=>x.sec===e.target);if(l)l.el.classList.toggle('active',e.isIntersecting);});
+      },{rootMargin:'-20% 0px -65% 0px',threshold:0});
+      sections.forEach(s=>spy.observe(s));
+      toc.addEventListener('click',e=>{const a=e.target.closest('.cs-toc-link');if(!a)return;e.preventDefault();document.getElementById(a.dataset.target)?.scrollIntoView({behavior:'smooth'});});
+      const hero=document.querySelector('.cs-hero');
+      if(hero){toc.style.opacity='0';toc.style.visibility='hidden';new IntersectionObserver(es=>{const v=!es[0].isIntersecting;toc.style.opacity=v?'1':'0';toc.style.visibility=v?'visible':'hidden';toc.style.pointerEvents=v?'auto':'none';},{threshold:0.05}).observe(hero);}
+    })();
+
+    /* ── LIGHTBOX ────────────────── */
+    (function(){
+      const lb=document.getElementById('lb'); const lbi=lb.querySelector('img');
+      document.querySelectorAll('.fig:not(.linked) img').forEach(i=>i.addEventListener('click',()=>{lbi.src=i.src;lb.classList.add('on');}));
+      lb.addEventListener('click',()=>lb.classList.remove('on'));
+      addEventListener('keydown',e=>{if(e.key==='Escape')lb.classList.remove('on');});
+    })();
+  </script>
+</body>
+</html>
