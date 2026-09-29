@@ -384,6 +384,7 @@
     }
   </style>
   <script src="image-protect.js" defer></script>
+  <script>if(Date.now()>=Date.parse('2026-09-29T18:00:00+09:00')){document.write('<style>#row-autospot{display:none!important}</style>');}</script>
   <script src="lang-persist.js" defer></script>
 </head>
 <body>
@@ -430,12 +431,37 @@
 
     <div class="project-rows" id="projectRows">
 
+      <!-- 01 AutoSpot (2026-09-29 18:00 KST 이후 자동 숨김) -->
+      <a class="project-row" id="row-autospot"
+         href="/case-study-roai"
+         data-tags="mobility"
+         style="--row-accent:#10B981; --row-glow:rgba(16,185,129,.04);">
+        <div class="row-num">01</div>
+        <div class="row-body">
+          <div class="row-tags">
+            <span class="row-tag accent-tag" style="--row-accent:#10B981">2026</span>
+            <span class="row-tag">Project Manager</span>
+            <span class="row-tag">Robotics</span>
+            <span class="row-tag">Manufacturing</span>
+          </div>
+          <div class="row-title" data-i18n="p6.title">Tool · Fixture · Carriage 3D 공간 구성 설계</div>
+          <div class="row-sub" data-i18n="p6.co">AutoSpot · Project Manager</div>
+        </div>
+        <div class="row-right">
+          <div>
+            <div class="row-metric" style="color:#10B981" data-i18n="p6.metric">88%</div>
+            <div class="row-metric-label" data-i18n="p6.mlabel">3D 공간 구성 완료율</div>
+          </div>
+          <div class="row-arrow"><svg viewBox="0 0 24 24" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><line x1="7" y1="17" x2="17" y2="7"/><polyline points="7 7 17 7 17 17"/></svg></div>
+        </div>
+      </a>
+
       <!-- 01 PickAround -->
       <a class="project-row"
          href="/case-study-pickaround"
          data-tags="commerce"
          style="--row-accent:#FF6B35; --row-glow:rgba(255,107,53,.04);">
-        <div class="row-num">01</div>
+        <div class="row-num">02</div>
         <div class="row-body">
           <div class="row-tags">
             <span class="row-tag accent-tag" style="--row-accent:#FF6B35">2025</span>
@@ -460,7 +486,7 @@
          href="/case-study-plana"
          data-tags="ux"
          style="--row-accent:#E8182E; --row-glow:rgba(232,24,46,.04);">
-        <div class="row-num">02</div>
+        <div class="row-num">03</div>
         <div class="row-body">
           <div class="row-tags">
             <span class="row-tag accent-tag" style="--row-accent:#E8182E">2023</span>
@@ -485,7 +511,7 @@
          href="/case-study-airway"
          data-tags="ux"
          style="--row-accent:#A78BFA; --row-glow:rgba(167,139,250,.04);">
-        <div class="row-num">03</div>
+        <div class="row-num">04</div>
         <div class="row-body">
           <div class="row-tags">
             <span class="row-tag accent-tag" style="--row-accent:#A78BFA">2023</span>
@@ -511,7 +537,7 @@
          href="/case-study-uam"
          data-tags="mobility,ux"
          style="--row-accent:#E8182E; --row-glow:rgba(232,24,46,.04);">
-        <div class="row-num">04</div>
+        <div class="row-num">05</div>
         <div class="row-body">
           <div class="row-tags">
             <span class="row-tag accent-tag" style="--row-accent:#E8182E">2022</span>
@@ -536,7 +562,7 @@
          href="/case-study-remote"
          data-tags="mobility,ux"
          style="--row-accent:#4A9EFF; --row-glow:rgba(74,158,255,.04);">
-        <div class="row-num">05</div>
+        <div class="row-num">06</div>
         <div class="row-body">
           <div class="row-tags">
             <span class="row-tag accent-tag" style="--row-accent:#4A9EFF">2022</span>
@@ -551,31 +577,6 @@
           <div>
             <div class="row-metric" style="color:#4A9EFF">−30%</div>
             <div class="row-metric-label" data-i18n="p2.metric">시선 이탈 시간 감소</div>
-          </div>
-          <div class="row-arrow"><svg viewBox="0 0 24 24" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><line x1="7" y1="17" x2="17" y2="7"/><polyline points="7 7 17 7 17 17"/></svg></div>
-        </div>
-      </a>
-
-      <!-- 06 AutoSpot -->
-      <a class="project-row"
-         href="/case-study-roai"
-         data-tags="mobility"
-         style="--row-accent:#10B981; --row-glow:rgba(16,185,129,.04);">
-        <div class="row-num">06</div>
-        <div class="row-body">
-          <div class="row-tags">
-            <span class="row-tag accent-tag" style="--row-accent:#10B981">2026</span>
-            <span class="row-tag">Project Manager</span>
-            <span class="row-tag">Robotics</span>
-            <span class="row-tag">Manufacturing</span>
-          </div>
-          <div class="row-title" data-i18n="p6.title">Tool · Fixture · Carriage 3D 공간 구성 설계</div>
-          <div class="row-sub" data-i18n="p6.co">AutoSpot · Project Manager</div>
-        </div>
-        <div class="row-right">
-          <div>
-            <div class="row-metric" style="color:#10B981" data-i18n="p6.metric">88%</div>
-            <div class="row-metric-label" data-i18n="p6.mlabel">3D 공간 구성 완료율</div>
           </div>
           <div class="row-arrow"><svg viewBox="0 0 24 24" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><line x1="7" y1="17" x2="17" y2="7"/><polyline points="7 7 17 7 17 17"/></svg></div>
         </div>
