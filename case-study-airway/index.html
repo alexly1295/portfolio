@@ -960,6 +960,14 @@
   tocData.forEach(({ id, key }) => {
     const a = document.createElement('a');
     a.className = 'cs-toc-link'; a.href = '#' + id;
+    /* <base href="/"> 때문에 #앵커가 홈(/#s1)으로 해석되므로, 클릭 시 직접 스크롤 */
+    a.addEventListener('click', ev => {
+      const target = document.getElementById(id);
+      if (!target) return;
+      ev.preventDefault();
+      window.scrollTo({ top: target.getBoundingClientRect().top + window.scrollY - 80, behavior: 'smooth' });
+      history.replaceState(null, '', location.pathname + location.search + '#' + id);
+    });
     const label = (i18n[currentLang] && i18n[currentLang][key] !== undefined) ? i18n[currentLang][key] : i18n.ko[key];
     a.innerHTML = `<span class="cs-toc-tick"></span><span data-i18n="${key}">${label}</span>`;
     tocEl.appendChild(a);
