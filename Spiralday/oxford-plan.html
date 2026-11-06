@@ -1,0 +1,575 @@
+<!DOCTYPE html><html lang="ko"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1"><title>옥스포드 노트 기획서 v1.0</title><style>@import url('https://fonts.googleapis.com/css2?family=Gaegu:wght@400;700&family=Noto+Sans+KR:wght@400;500;700&display=swap');
+:root{--desk:#EDE7DB;--paper:#FBF8F1;--card:#FFFEFB;--ink:#2B2B2B;--sub:#6F695D;--line:#E4DECF;--mint:#BFE6DA;--mint-d:#3E9E82;--yellow:#F4E2A0;--pink:#F4C6CC;--hand:'Gaegu','Noto Sans KR',cursive;--body:'Noto Sans KR',system-ui,sans-serif}
+*{box-sizing:border-box}html{scroll-behavior:smooth}
+body{margin:0;background:var(--desk);color:var(--ink);font:400 15px/1.75 var(--body)}
+.page{max-width:1180px;margin:0 auto;padding:28px 16px 60px;display:grid;grid-template-columns:240px minmax(0,1fr);gap:28px;align-items:start}
+.toc{position:sticky;top:20px;background:var(--paper);border:1px solid var(--line);border-radius:16px;padding:18px 18px 14px;max-height:calc(100vh - 40px);overflow:auto;font-size:13px;line-height:1.5}
+.toc b{font:700 20px/1 var(--hand);display:block;margin-bottom:10px}
+.toc ul{list-style:none;margin:0;padding:0}.toc ul ul{padding-left:12px;margin:2px 0 6px}
+.toc li{margin:5px 0}.toc a{color:var(--ink);text-decoration:none}.toc a:hover{text-decoration:underline}
+.doc{background:var(--paper);border:1px solid var(--line);border-radius:20px;box-shadow:0 10px 28px rgba(64,51,26,.14);padding:44px 48px 48px;min-width:0}
+h1{font:700 44px/1.1 var(--hand);margin:0 0 12px;background:linear-gradient(transparent 64%,var(--pink) 64%);display:inline-block}
+h2{font:700 30px/1.2 var(--hand);margin:46px 0 12px;padding-bottom:6px;border-bottom:1px solid var(--ink);scroll-margin-top:16px}
+h3{font:700 22px/1.3 var(--hand);margin:30px 0 8px;scroll-margin-top:16px}
+h3:before{content:"";display:inline-block;width:12px;height:12px;border-radius:50%;background:var(--mint-d);margin-right:8px}
+p{margin:10px 0}ul,ol{padding-left:22px}li{margin:4px 0}a{color:#2F6FBE}
+code{background:#F1EBDD;border-radius:4px;padding:1px 6px;font:500 13px/1.5 ui-monospace,Menlo,monospace}
+pre{background:#F6F1E4;border:1px solid var(--line);border-radius:12px;padding:14px 16px;overflow:auto;font-size:13px;line-height:1.6}pre code{background:none;padding:0}
+blockquote{margin:16px 0;padding:10px 18px;background:var(--yellow);border-radius:12px}blockquote p{margin:0}
+.tw{overflow-x:auto;margin:14px 0}table{border-collapse:collapse;width:100%;font-size:13.5px;line-height:1.6;min-width:520px}
+th,td{border:1px solid var(--line);padding:8px 12px;text-align:left;vertical-align:top}th{background:#F1EBDD;font-weight:700;white-space:nowrap}
+tbody tr:nth-child(even) td{background:rgba(255,254,251,.7)}
+img{max-width:100%;border:1px solid var(--line);border-radius:14px;box-shadow:0 6px 18px rgba(64,51,26,.16);margin:10px 0;background:#fff}
+hr{border:0;border-top:1px dashed var(--sub);margin:2em 0}
+@media(max-width:900px){.page{grid-template-columns:1fr}.toc{position:static;max-height:none}.doc{padding:26px 18px}}</style></head><body><div class="page"><nav class="toc" aria-label="목차"><b>목차</b><ul><li><a href="#s1">1. 서비스 개요</a><ul><li><a href="#s2">1-1. 어떤 필기법인가 · 어디서 쓰이나 · 어떤 학습에 맞나</a></li></ul></li><li><a href="#s3">2. 화면 구조</a></li><li><a href="#s4">3. 노트 화면</a><ul><li><a href="#s5">3-1. 노트 한 장 배치</a></li><li><a href="#s6">3-2. 노트 색</a></li><li><a href="#s7">3-3. 같은 분야 노트 목록(칩)</a></li><li><a href="#s8">3-4. 인덱스 탭 동작</a></li></ul></li><li><a href="#s9">4. 복습 모드</a></li><li><a href="#s10">5. 분야 입력 폼</a></li><li><a href="#s11">6. 학습 지도(진행 말판)</a><ul><li><a href="#s12">6-1. 구성</a></li><li><a href="#s13">6-2. 칸 상태</a></li><li><a href="#s14">6-3. 칸 수와 배치</a></li><li><a href="#s15">6-4. 칸 상세(칸을 눌렀을 때)</a></li><li><a href="#s16">6-5. 복습 카드 칸</a></li></ul></li><li><a href="#s17">7. 일간 · 주간 · 월간</a></li><li><a href="#s18">8. 학습 통계 · 내 서재 · 검색</a></li><li><a href="#s19">9. 데이터</a></li><li><a href="#s20">10. 엣지 케이스 (정함 / 임시 / 미정)</a></li><li><a href="#s21">11. 변경 이력</a></li><li><a href="#s22">12. 후속 후보</a></li></ul></nav><main class="doc"><h1>옥스포드 노트 기획서 v1.0 (1차 확정)</h1>
+<div class="tw"><table>
+<thead>
+<tr>
+<th>항목</th>
+<th>내용</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>문서</td>
+<td>화면 · 동작 · 규칙 기획서 (PRD는 <code>옥스포드 노트 PRD.md</code>)</td>
+</tr>
+<tr>
+<td>기준</td>
+<td>HTML 프로토타입 v0.6 (직접 사용 테스트 중). 이 버전을 1차 확정본으로 한다</td>
+</tr>
+<tr>
+<td>작성일</td>
+<td>2026-11-06</td>
+</tr>
+<tr>
+<td>영감</td>
+<td>플래너 앱 <a href="https://spiralday.com/">Spiralday</a>: 스프링 노트 감성과 월 · 주 · 일 정보 구조를 가져옴. 학습에 맞게 재해석했고 시간 블록 같은 플래너 기능은 뺌.</td>
+</tr>
+<tr>
+<td>디자인</td>
+<td>Quote 프로토타입(독서노트)의 스프링 노트 · 개구 폰트 · 민트/라벤더/피치 팔레트를 재사용</td>
+</tr>
+</tbody>
+</table></div>
+<p><strong>처음 스케치</strong></p>
+<p><img alt="옥스포드 노트 스케치" src="/Spiralday/img/oxford-01.jpg" /></p>
+<blockquote>
+<p>화면 캡처는 프로토타입 v0.5 샘플 데이터 기준(데스크톱 1240px). 숫자 목표와 타깃은 사용 테스트 후 확정.</p>
+</blockquote>
+<hr />
+<h2 id="s1">1. 서비스 개요</h2>
+<p>공부한 것을 <strong>키워드 · 노트 · Remember</strong> 세 칸으로 한 장에 적고, 복습할 때마다 Remember 칸을 직접 새로 채워 기억을 점검하는 학습 노트. 분야마다 <strong>목표 · 기간 · 학습 지도 단계</strong>를 정하고, 학습 지도(부루마블식 말판)에서 "끝까지 어디까지, 지금 어디쯤"을 본다.</p>
+<h3 id="s2">1-1. 어떤 필기법인가 · 어디서 쓰이나 · 어떤 학습에 맞나</h3>
+<p><strong>필기법의 뿌리</strong>
+- 이 서비스의 노트 틀은 코넬 노트(월터 포크 교수가 코넬대에서 개발)와 같은 계열의 3분할 구조다. 좁은 단서 칸(키워드), 넓은 필기 칸, 하단 정리 칸으로 나뉜다.
+- "옥스포드 노트"라는 이름은 수민이 스케치로 정한 서비스 이름이다. 코넬 노트처럼 정형화된 정식 필기법 명칭으로 확인된 자료는 찾지 못했다. 외부에 소개할 때는 "코넬식 3분할 노트를 복습 중심으로 바꾼 것"이라고 설명한다.
+- 코넬과 다른 점: 하단 칸을 "요약"이 아니라 <strong>복습할 때마다 기억에서 꺼내 쓰는 Remember 칸</strong>으로 쓰고, 그 이력을 쌓는다.</p>
+<p><strong>주로 쓰이는 곳</strong> (코넬식 3분할 필기 기준)
+- 고등학교 · 대학 수업 필기와 교재 읽기 정리, 이후 성인 학습까지 폭넓게 사용된다.
+- 온라인 강의, 전자책 학습에도 그대로 쓰인다.
+- 업무에서는 회의록, 프로젝트 관리, 학습 과정 기록에 활용된다고 소개된다.</p>
+<p><strong>잘 맞는 학습 전략</strong>
+| 전략 | 이 노트에서 하는 일 |
+|---|---|
+| 능동적 회상(꺼내 쓰기) | 복습 모드에서 본문을 가리고 키워드만 보며 Remember에 직접 쓴다 |
+| 간격 두고 반복 복습 | 복습 때마다 새로 쓰고 날짜별 이력을 쌓아 기억 변화를 본다 |
+| 핵심 뽑기(요약 · 질문 만들기) | 필기하면서 키워드 칸에 핵심어를 뽑는다 |
+| 단계적 로드맵 학습 | 학습 지도 말판에서 전체 단계와 현재 위치를 본다 |</p>
+<p><strong>잘 맞는 사람 · 상황</strong>: 강의나 책으로 여러 분야를 독학하는 사람, 자격증 · 어학 · 직무 공부처럼 "얼마나 기억하는지" 확인이 중요한 학습. 반대로 자유로운 아이디어 발산, 표 중심의 비교 정리, 협업 회의록에는 덜 맞는다.</p>
+<blockquote>
+<p>근거 수준: 코넬 노트의 구조 · 사용처는 외부 자료로 확인했다. 위 학습 전략과의 연결은 이 서비스를 설계한 가설이며, 사용 테스트(H1~H5)로 검증한다.</p>
+</blockquote>
+<hr />
+<h2 id="s3">2. 화면 구조</h2>
+<p>상단 탭 순서: <strong>노트 &gt; 일간 &gt; 주간 &gt; 월간 &gt; 학습 통계 &gt; 내 서재 &gt; 학습 지도</strong>, 그 옆에 검색 입력.</p>
+<p>공통 요소
+- 제목 영역: "옥스포드 노트" + 부제 "키워드 · 노트 · 기억하기"
+- 우측 상단: 저장 상태(저장됨 / 저장 실패 · 새로고침하면 사라져요)
+- 샘플 데이터를 보는 중이면 "샘플 데이터" 표시
+- 하단: [샘플 데이터로 되돌리기] [빈 상태로 시작]
+- 분야 인덱스: 포스트잇 모양 탭. 분야색, 노트 수, 중요 분야는 ★와 함께 맨 앞. "인덱스 : 학습분야" 같은 안내 라벨은 없음</p>
+<div class="tw"><table>
+<thead>
+<tr>
+<th>화면</th>
+<th>목적</th>
+<th>주요 구성</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>노트</td>
+<td>한 장 작성 · 복습</td>
+<td>같은 분야 노트 목록, 인덱스 탭, 노트 한 장</td>
+</tr>
+<tr>
+<td>일간</td>
+<td>하루 단위 학습 보기</td>
+<td>날짜 이동, 그날 노트 카드, 최근 7일 복습 전 노트</td>
+</tr>
+<tr>
+<td>주간</td>
+<td>한 주 보기</td>
+<td>월~일 컬럼, 이번 주 키워드, 노트/키워드/복습 요약</td>
+</tr>
+<tr>
+<td>월간</td>
+<td>한 달 보기</td>
+<td>달력(날짜별 노트 제목), 월 요약</td>
+</tr>
+<tr>
+<td>학습 통계</td>
+<td>쌓인 양</td>
+<td>전체 · 이번 주 · 복습률 · 키워드 수, 최근 14일 막대, 분야별 막대</td>
+</tr>
+<tr>
+<td>내 서재</td>
+<td>노트 모아보기</td>
+<td>전체/분야/분야 없음 필터, 카드, 분야 목표 · 수정</td>
+</tr>
+<tr>
+<td>학습 지도</td>
+<td>분야별 말판</td>
+<td>분야 선택, 목표 · 기간, 말판, 칸 상세, 분야 수정 · 삭제</td>
+</tr>
+</tbody>
+</table></div>
+<h2 id="s4">3. 노트 화면</h2>
+<h3 id="s5">3-1. 노트 한 장 배치</h3>
+<pre><code>┌────────────┬──────────────────────────────────────┐
+│ 분야       │ Title                     학습 날짜  │
+│ 학습 지도 칸├──────────────────────────────────────┤
+│ KEYWORD    │ Note taking  (텍스트 + 이미지)        │
+│ (세로 칸)   │                                      │
+├────────────┴──────────────────────────────────────┤
+│ Remember   (스티커 메모 + 복습 이력)               │
+└───────────────────────────────────────────────────┘
+</code></pre>
+<div class="tw"><table>
+<thead>
+<tr>
+<th>영역</th>
+<th>규칙</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>분야</td>
+<td>선택 목록. 처음엔 "분야 선택"(비어 있음), 마지막 항목 "＋ 새 분야 만들기"로 바로 분야 생성. 분야를 바꾸면 학습 지도 칸은 초기화</td>
+</tr>
+<tr>
+<td>학습 지도 칸</td>
+<td>선택한 분야의 칸 목록에서 선택(선택 안 함 가능). 분야 선택 전에는 비활성</td>
+</tr>
+<tr>
+<td>Title</td>
+<td>텍스트 한 줄. 비어 있으면 목록에서 "제목 없음"</td>
+</tr>
+<tr>
+<td>학습 날짜</td>
+<td>날짜 입력. 기본값 오늘</td>
+</tr>
+<tr>
+<td>KEYWORD</td>
+<td>입력 후 Enter로 추가, 같은 키워드는 무시, × 로 삭제</td>
+</tr>
+<tr>
+<td>Note taking</td>
+<td>여러 줄 입력, 줄 노트 배경. 입력 즉시 저장</td>
+</tr>
+<tr>
+<td>이미지</td>
+<td>[이미지 삽입] 또는 붙여넣기. 긴 변 900px로 줄여 JPEG로 저장. 이미지마다 × 삭제</td>
+</tr>
+<tr>
+<td>Remember</td>
+<td>평소에는 비활성(스티커 메모) + "복습 시 직접 쓰는 칸". 복습 모드에서만 입력</td>
+</tr>
+<tr>
+<td>노트 삭제</td>
+<td>우측 상단 [이 노트 삭제]</td>
+</tr>
+<tr>
+<td>새 노트</td>
+<td>[+ 새 노트]. 항상 분야 없이(회색) 열림. 분야를 고르면 분야색으로 바뀜</td>
+</tr>
+</tbody>
+</table></div>
+<p><img alt="노트 화면" src="/Spiralday/img/oxford-02.png" /></p>
+<h3 id="s6">3-2. 노트 색</h3>
+<ul>
+<li>분야 미선택: 회색 시트, 인덱스 탭은 "분야 없음"</li>
+<li>분야 선택: 분야색이 분야 칸, 키워드 칩, 칸 선택 등에 적용</li>
+</ul>
+<h3 id="s7">3-3. 같은 분야 노트 목록(칩)</h3>
+<ul>
+<li>평소: 최근 노트 5개(학습 날짜 최신순, 같은 날짜는 새로 만든 순). 현재 노트는 강조. 5개가 넘으면 [펼치기 +N]</li>
+<li>펼치기: 학습 지도 칸 순서대로 "1. 칸 이름" 구분 아래 노트 칩을 계속 나열, 칸이 없는 노트는 "칸 없음"에 묶음. [접기]로 되돌림</li>
+</ul>
+<h3 id="s8">3-4. 인덱스 탭 동작</h3>
+<ul>
+<li>탭을 누르면 그 분야의 가장 최근 노트로 이동(노트가 없으면 그 분야의 새 노트)</li>
+<li>탭은 이동만 하고 현재 노트의 분야를 바꾸지 않는다. 분야 변경은 시트 안의 분야 선택에서만</li>
+</ul>
+<h2 id="s9">4. 복습 모드</h2>
+<div class="tw"><table>
+<thead>
+<tr>
+<th>상태</th>
+<th>화면</th>
+<th>동작</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>평소</td>
+<td>본문 · 이미지 보임, Remember 비활성</td>
+<td>[복습 모드] 누르면 복습 상태로</td>
+</tr>
+<tr>
+<td>복습 중</td>
+<td>본문 · 이미지 흐림 + "키워드만 보고 기억나는 걸 아래에 적어 보세요", 키워드는 보임, Remember 입력 가능("기억하니?")</td>
+<td>[확인하기] 또는 [복습 끝내기]</td>
+</tr>
+<tr>
+<td>확인 후</td>
+<td>본문 공개</td>
+<td>입력이 있으면 날짜와 함께 복습 이력에 추가(n회차). 입력이 없으면 기록 없이 종료</td>
+</tr>
+</tbody>
+</table></div>
+<ul>
+<li>복습 이력: 최신순 "n회차 · 날짜 · 내용". 복습 횟수는 카드와 학습 지도 상태에 쓰임</li>
+<li>복습 중 작성하다 다른 노트로 이동하면 작성 중이던 글은 그 노트의 임시 글로 남음(새로고침하면 사라짐)</li>
+</ul>
+<p><img alt="복습 모드" src="/Spiralday/img/oxford-03.png" /></p>
+<h2 id="s10">5. 분야 입력 폼</h2>
+<p><a href="인덱스 탭, 학습 지도, 노트의 분야 선택">+ 분야</a> 또는 <a href="학습 지도 · 내 서재">분야 수정</a>에서 같은 폼.</p>
+<div class="tw"><table>
+<thead>
+<tr>
+<th>필드</th>
+<th>필수</th>
+<th>규칙</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>분야명</td>
+<td>필수</td>
+<td>최대 14자, 같은 이름 불가(대소문자 무시)</td>
+</tr>
+<tr>
+<td>목표</td>
+<td>선택</td>
+<td>최대 80자</td>
+</tr>
+<tr>
+<td>목표 학습 기간</td>
+<td>선택</td>
+<td>시작일 ~ 종료일. 둘 다 있으면 종료일이 시작일보다 빠를 수 없음</td>
+</tr>
+<tr>
+<td>학습 지도 단계</td>
+<td>필수 1개 이상</td>
+<td>순서대로 입력, 최대 24자. Enter로 다음 단계 추가, × 삭제, [+ 단계 추가]. 말판의 칸이 됨</td>
+</tr>
+<tr>
+<td>중요</td>
+<td>선택</td>
+<td>on/off. on이면 인덱스 맨 앞에 ★, 일간 "복습 전" 목록에서 그 분야 노트를 먼저 보여줌 (11/6 확정)</td>
+</tr>
+</tbody>
+</table></div>
+<ul>
+<li>색: 아직 쓰지 않은 분야색을 순서대로 자동 지정</li>
+<li>수정 시 단계를 지우면 그 칸에 연결된 노트는 칸 연결만 해제, 단계 이름만 바꾸면 연결 유지</li>
+<li>
+<p>오류 문구: "분야명을 입력해 주세요." / "이미 있는 분야 이름이에요." / "종료일이 시작일보다 빨라요." / "학습 지도 단계를 1개 이상 입력해 주세요."
+<img alt="분야 수정 폼" src="/Spiralday/img/oxford-04.png" /></p>
+</li>
+<li>
+<p>분야 삭제: 확인 창("이 분야와 학습 지도 칸이 삭제돼요. 노트 N개는 지워지지 않고 '분야 없음'으로 옮겨져요.")</p>
+</li>
+</ul>
+<h2 id="s11">6. 학습 지도(진행 말판)</h2>
+<h3 id="s12">6-1. 구성</h3>
+<ul>
+<li>위쪽: 분야 탭, 선택 분야의 이름 · 목표 · 기간(남은 일수 D-n, 지나면 "기간 지남 n일"), [분야 수정] [분야 삭제]</li>
+<li>말판: 직사각형 한 바퀴. 출발(오른쪽 아래) → 칸들 → 도착. 가운데에 분야명, 진행률 막대, "N칸 중 X칸 지나왔어요", 지금 위치, [이어서 배우기] [복습 카드 뽑기]</li>
+<li>말판 아래: 칸 추가 입력, 선택한 칸의 상세</li>
+</ul>
+<p><img alt="학습 지도" src="/Spiralday/img/oxford-05.png" /></p>
+<h3 id="s13">6-2. 칸 상태</h3>
+<div class="tw"><table>
+<thead>
+<tr>
+<th>상태</th>
+<th>조건</th>
+<th>표시</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>아직</td>
+<td>연결 노트 없음</td>
+<td>점선 테두리</td>
+</tr>
+<tr>
+<td>복습 전</td>
+<td>연결 노트 있음, 복습 기록 없음</td>
+<td>분야색 띠(아래만 채움)</td>
+</tr>
+<tr>
+<td>복습 완료</td>
+<td>연결 노트 중 하나라도 복습 기록 1회 이상</td>
+<td>분야색 채움</td>
+</tr>
+<tr>
+<td>이미 아는 칸</td>
+<td>사용자가 표시</td>
+<td>분야색 채움, "노트 없이 지나가기"</td>
+</tr>
+</tbody>
+</table></div>
+<ul>
+<li>상태는 저장하지 않고 노트 데이터로 계산한다(이미 아는 칸만 칸에 저장)</li>
+<li>말(나): 순서상 처음으로 "아직" 또는 "복습 전"인 칸. 모두 완료하면 도착</li>
+<li>진행률: (복습 완료 + 이미 아는 칸) / 전체 칸</li>
+</ul>
+<h3 id="s14">6-3. 칸 수와 배치</h3>
+<ul>
+<li>가로 w칸, 세로 w−1칸의 직사각형. 칸이 4w−8개를 넘지 않도록 w를 5부터 키움</li>
+<li>남는 자리는 "복습 카드" 칸으로 고르게 분산</li>
+<li>720px 이하에서는 말판 대신 세로 길(칸 목록)로 표시</li>
+</ul>
+<h3 id="s15">6-4. 칸 상세(칸을 눌렀을 때)</h3>
+<ul>
+<li>칸 이름 수정, "이미 아는 칸" 체크, 연결 노트 카드, [이 칸에 노트 쓰기], 앞으로 · 뒤로 이동, 칸 삭제</li>
+<li>칸을 삭제하면 연결된 노트는 칸 연결만 해제</li>
+</ul>
+<h3 id="s16">6-5. 복습 카드 칸</h3>
+<ul>
+<li>같은 분야 노트 중 복습 기록이 없거나 마지막 복습이 오래된 순으로 3개를 추려 무작위 1개를 뽑음</li>
+<li>키워드와 제목을 보여주고 [복습 모드로 열기]로 해당 노트를 복습 모드로 연다. [다시 뽑기]</li>
+<li>노트가 없으면 "노트를 먼저 써야 카드를 뽑을 수 있어요."</li>
+</ul>
+<h2 id="s17">7. 일간 · 주간 · 월간</h2>
+<div class="tw"><table>
+<thead>
+<tr>
+<th>화면</th>
+<th>규칙</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>일간</td>
+<td>날짜 이동(◀ ▶ 오늘), 그날 노트 카드, [이 날짜로 새 노트], 선택일 기준 최근 7일 중 복습 전 노트. 복습 전 노트는 <strong>중요 분야 노트를 먼저</strong>, 같은 순위는 학습 날짜 최신순</td>
+</tr>
+<tr>
+<td>주간</td>
+<td>월요일 시작. 요일별 노트 제목(분야색 점), 날짜 클릭 시 일간. 노트/키워드/복습 수, 이번 주 키워드</td>
+</tr>
+<tr>
+<td>월간</td>
+<td>달력, 날짜별 노트 최대 3개 제목 + "+N", 날짜 클릭 시 일간. 월 요약(노트, 학습한 날, 복습한 노트)</td>
+</tr>
+</tbody>
+</table></div>
+<p><strong>일간</strong></p>
+<p><img alt="일간" src="/Spiralday/img/oxford-06.png" /></p>
+<p><strong>주간</strong></p>
+<p><img alt="주간" src="/Spiralday/img/oxford-07.png" /></p>
+<p><strong>월간</strong></p>
+<p><img alt="월간" src="/Spiralday/img/oxford-08.png" /></p>
+<h2 id="s18">8. 학습 통계 · 내 서재 · 검색</h2>
+<ul>
+<li>학습 통계: NOTES, THIS WEEK, REVIEWED(복습한 노트 비율), KEYWORDS(복습 기록 횟수 표시), 최근 14일 막대, 분야별 노트 막대("분야 없음" 포함)</li>
+<li>내 서재: 전체 / 분야 / 분야 없음 필터, 노트 카드(분야, 날짜, 제목, 키워드, 복습 상태). 분야를 고르면 목표와 [분야 수정] 표시</li>
+<li>검색: 제목 · 키워드 · 본문 · Remember 안의 글자를 찾음. 입력하면 내 서재 결과로 이동. 결과 없음 안내 문구</li>
+</ul>
+<p><strong>학습 통계</strong></p>
+<p><img alt="학습 통계" src="/Spiralday/img/oxford-09.png" /></p>
+<p><strong>내 서재</strong></p>
+<p><img alt="내 서재" src="/Spiralday/img/oxford-10.png" /></p>
+<h2 id="s19">9. 데이터</h2>
+<pre><code>Field { id, name, color, goal, start, end, important, route: Stage[] }
+Stage { id, name, known }
+Note  { id, title, date, field | null, stage | null, keywords[], body, images[], remember: [{date, text}] }
+</code></pre>
+<p>저장: 브라우저 localStorage(임시). 저장 실패 시 상단에 표시.</p>
+<h2 id="s20">10. 엣지 케이스 (정함 / 임시 / 미정)</h2>
+<div class="tw"><table>
+<thead>
+<tr>
+<th>영역</th>
+<th>상황</th>
+<th>처리</th>
+<th>분류</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>빈 상태</td>
+<td>분야 0개</td>
+<td>학습 지도에 안내 + [새 분야 만들기], 노트에서는 "＋ 새 분야 만들기"</td>
+<td>정함</td>
+</tr>
+<tr>
+<td>빈 상태</td>
+<td>노트 0개</td>
+<td>안내 + 첫 노트 쓰기</td>
+<td>정함</td>
+</tr>
+<tr>
+<td>입력 검증</td>
+<td>분야명 비어 있음 · 중복, 기간 역순, 단계 0개</td>
+<td>저장 전 안내 문구</td>
+<td>정함</td>
+</tr>
+<tr>
+<td>입력 검증</td>
+<td>제목 비어 있음</td>
+<td>"제목 없음" 표시</td>
+<td>임시</td>
+</tr>
+<tr>
+<td>입력 검증</td>
+<td>아무것도 안 쓴 새 노트</td>
+<td>다른 화면으로 이동하면 자동 삭제</td>
+<td>정함</td>
+</tr>
+<tr>
+<td>키워드</td>
+<td>중복</td>
+<td>무시</td>
+<td>정함</td>
+</tr>
+<tr>
+<td>복습</td>
+<td>빈 Remember로 확인</td>
+<td>기록 없이 종료</td>
+<td>정함</td>
+</tr>
+<tr>
+<td>복습</td>
+<td>완료 기준</td>
+<td>복습 1회 이상 (11/6 확정, 사용 테스트 후 재검토)</td>
+<td>정함</td>
+</tr>
+<tr>
+<td>칸 상태</td>
+<td>한 칸에 노트 여러 개</td>
+<td>하나라도 복습했으면 완료</td>
+<td>임시</td>
+</tr>
+<tr>
+<td>분야</td>
+<td>분야 삭제</td>
+<td>노트는 "분야 없음"으로 이동</td>
+<td>정함</td>
+</tr>
+<tr>
+<td>분야</td>
+<td>노트의 분야 변경</td>
+<td>칸 연결 초기화</td>
+<td>정함</td>
+</tr>
+<tr>
+<td>분야</td>
+<td>순서 직접 변경</td>
+<td>중요 분야 우선 + 생성 순</td>
+<td>미정</td>
+</tr>
+<tr>
+<td>많을 때</td>
+<td>한 분야 노트 50개 이상</td>
+<td>최근 5개 + 펼치기(칸 순서 나열)</td>
+<td>임시</td>
+</tr>
+<tr>
+<td>많을 때</td>
+<td>칸 30개 이상</td>
+<td>말판이 자동으로 커짐</td>
+<td>임시</td>
+</tr>
+<tr>
+<td>많을 때</td>
+<td>노트 200개 이상</td>
+<td>서재는 카드 나열</td>
+<td>미정</td>
+</tr>
+<tr>
+<td>이미지</td>
+<td>큰 이미지</td>
+<td>900px JPEG 압축</td>
+<td>임시</td>
+</tr>
+<tr>
+<td>저장</td>
+<td>용량 초과 · 브라우저 데이터 삭제</td>
+<td>저장 실패 표시만. 복구 불가</td>
+<td><strong>미정</strong> (1순위: 백업 · 복원)</td>
+</tr>
+<tr>
+<td>삭제</td>
+<td>노트 · 분야 삭제 실행 취소</td>
+<td>없음</td>
+<td>미정</td>
+</tr>
+<tr>
+<td>언어 · 날짜</td>
+<td>영어 전환, 시간대</td>
+<td>한국어 고정, 기기 날짜</td>
+<td>임시</td>
+</tr>
+</tbody>
+</table></div>
+<h2 id="s21">11. 변경 이력</h2>
+<div class="tw"><table>
+<thead>
+<tr>
+<th>버전</th>
+<th>날짜</th>
+<th>내용</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>v0.1</td>
+<td>11/5</td>
+<td>스케치 기반 첫 프로토타입(노트, 복습, 일 · 주 · 월, 서재, 통계)</td>
+</tr>
+<tr>
+<td>v0.2</td>
+<td>11/5</td>
+<td>Quote 디자인 적용</td>
+</tr>
+<tr>
+<td>v0.3</td>
+<td>11/5</td>
+<td>학습 지도를 부루마블식 진행 말판으로 변경</td>
+</tr>
+<tr>
+<td>v0.4</td>
+<td>11/5</td>
+<td>인덱스 탭이 노트의 분야를 바꾸던 오류 수정, 같은 분야 노트 목록 추가</td>
+</tr>
+<tr>
+<td>v0.5</td>
+<td>11/6</td>
+<td>새 노트 빈 화면 오류 수정, 새 노트 분야 없이(회색) 열기, 분야 입력 폼(목표 · 기간 · 단계 · 중요) · 수정 · 삭제, 노트 목록 5개 + 펼치기, 빈 상태에서 모두 삭제, "인덱스 : 학습분야" 라벨 삭제</td>
+</tr>
+<tr>
+<td>v1.0</td>
+<td>11/6</td>
+<td>1차 확정. 프로토타입 v0.6: KEYWORD 글자 크기 축소(화면 폭이 바뀌어도 안 겹침), 분야 선택 글자 축소, 중요 분야 노트를 일간 "복습 전"에서 먼저 표시. 스케치와 화면 캡처 9장 추가, 필기법 소개(1-1) 추가. 분야 삭제 시 노트는 "분야 없음"으로 이동, 칸 완료 기준 복습 1회, 사용 테스트 3일(11/6~11/8) 확정</td>
+</tr>
+</tbody>
+</table></div>
+<h2 id="s22">12. 후속 후보</h2>
+<p>백업 · 복원, 노트 · 분야 삭제 실행 취소, 분야 순서 변경, 영어판, 칸 완료 기준 재검토(테스트 후), 중요 분야 효과 확장, 목표 기간 대비 진행 페이스 표시, AI 학습 지도 초안, 복습 알림.</p>
+<hr />
+<p>출처: 이 서비스의 정보 구조와 스프링 노트 감성은 <a href="https://spiralday.com/">Spiralday</a>에서 영감을 받았다.</p></main></div></body></html>

@@ -1,0 +1,250 @@
+<!DOCTYPE html><html lang="ko"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1"><title>필사 노트 기획서 v0.1 (1차 확정)</title><link rel="preconnect" href="https://fonts.googleapis.com"><link href="https://fonts.googleapis.com/css2?family=Gaegu:wght@400;700&family=Noto+Sans+KR:wght@400;500;700&display=swap" rel="stylesheet"><style>
+/* 레이아웃: 왼쪽 고정 목차 + 본문 한 열. 종이 질감 단일 테마(프로덕트와 같은 팔레트) */
+:root{--desk:#EDE7DB;--paper:#FBF8F1;--card:#FFFEFB;--ink:#2B2B2B;--sub:#6F695D;--line:#E4DECF;--red:#D9534F;--mint:#BFE6DA;--mint-d:#3E9E82;--lav:#D9CCF0;--yellow:#F4E2A0;--pink:#F4C6CC;--hand:'Gaegu','Noto Sans KR',cursive;--body:'Noto Sans KR',system-ui,sans-serif;color-scheme:light}
+*{box-sizing:border-box}
+html{scroll-behavior:smooth}
+body{margin:0;background:var(--desk);color:var(--ink);font:400 15px/1.75 var(--body)}
+:focus-visible{outline:2px solid var(--ink);outline-offset:2px}
+.page{max-width:1180px;margin:0 auto;padding:28px 16px 60px;display:grid;grid-template-columns:240px minmax(0,1fr);gap:28px;align-items:start}
+.toc{position:sticky;top:20px;background:var(--paper);border:1px solid var(--line);border-radius:16px;padding:18px 18px 14px;max-height:calc(100vh - 40px);overflow:auto;font-size:13px;line-height:1.5}
+.toc b{font:700 20px/1 var(--hand);display:block;margin-bottom:10px}
+.toc ul{list-style:none;margin:0;padding:0}.toc ul ul{padding-left:12px;margin:2px 0 6px}
+.toc li{margin:5px 0}.toc a{color:var(--ink);text-decoration:none}.toc a:hover{text-decoration:underline}
+.doc{background:var(--paper);border:1px solid var(--line);border-radius:20px;box-shadow:0 10px 28px rgba(64,51,26,.14);padding:44px 48px 48px;min-width:0}
+.cover{border-bottom:2px solid var(--ink);padding-bottom:22px;margin-bottom:10px}
+.cover h1{font:700 54px/1.05 var(--hand);margin:0 0 6px;background:linear-gradient(transparent 64%,var(--pink) 64%);display:inline-block}
+.cover p{margin:8px 0 0;color:var(--sub)}
+.chips{display:flex;gap:8px;flex-wrap:wrap;margin-top:14px}
+.chip{border:1px solid var(--line);background:var(--card);border-radius:999px;padding:2px 12px;font-size:12px}
+.chip.a{background:var(--ink);color:#fff;border-color:var(--ink)}
+.chip a{color:inherit}
+h2{font:700 30px/1.2 var(--hand);margin:46px 0 12px;padding-bottom:6px;border-bottom:1px solid var(--ink);scroll-margin-top:16px}
+h3{font:700 22px/1.3 var(--hand);margin:30px 0 8px;scroll-margin-top:16px}
+h3:before{content:"";display:inline-block;width:12px;height:12px;border-radius:50%;background:var(--mint-d);margin-right:8px}
+p{margin:10px 0}
+ul,ol{padding-left:22px}li{margin:4px 0}
+a{color:#2F6FBE}
+code{background:#F1EBDD;border-radius:4px;padding:1px 6px;font:500 13px/1.5 ui-monospace,SFMono-Regular,Menlo,monospace}
+pre{background:#F6F1E4;border:1px solid var(--line);border-radius:12px;padding:14px 16px;overflow:auto;font-size:13px;line-height:1.6}
+pre code{background:none;padding:0}
+blockquote{margin:16px 0;padding:12px 18px;background:var(--yellow);border-radius:12px;font:700 20px/1.5 var(--hand)}
+blockquote p{margin:0}
+.tw{overflow-x:auto;margin:14px 0}
+table{border-collapse:collapse;width:100%;font-size:13.5px;line-height:1.6;min-width:520px}
+th,td{border:1px solid var(--line);padding:8px 12px;text-align:left;vertical-align:top}
+th{background:#F1EBDD;font-weight:700;white-space:nowrap}
+tbody tr:nth-child(even) td{background:rgba(255,254,251,.7)}
+figure.shot{margin:18px 0 22px}
+figure.shot img{width:100%;display:block;border:1px solid var(--line);border-radius:14px;box-shadow:0 6px 18px rgba(64,51,26,.16)}
+figure.shot.narrow img{width:300px;max-width:100%}
+figcaption{font-size:12.5px;color:var(--sub);margin-top:6px}
+em{color:var(--sub)}
+.foot{margin-top:40px;padding-top:14px;border-top:1px dashed var(--sub);font-size:12px;color:var(--sub)}
+@media (max-width:900px){.page{grid-template-columns:1fr}.toc{position:static;max-height:none}.doc{padding:28px 20px 32px}.cover h1{font-size:42px}}
+@media print{body{background:#fff}.toc{display:none}.page{display:block;padding:0}.doc{box-shadow:none;border:0;padding:0}}
+</style></head><body><div class="page"><nav class="toc" aria-label="목차"><b>목차</b><ul><li><a href="#1">1. 서비스 개요</a></li><li><a href="#2">2. 화면 구조</a></li><li><a href="#3">3. 노트 화면</a><ul><li><a href="#3-1">3-1. 새 필사 (책 미선택 회색)</a></li><li><a href="#3-2">3-2. 왼쪽: 필사</a></li><li><a href="#3-3">3-3. 오른쪽: 외우기</a></li><li><a href="#3-4">3-4. 단어 · 뜻 메모패드</a></li><li><a href="#3-5">3-5. 외우기 기록 회차</a></li><li><a href="#3-6">3-6. 책 정보</a></li></ul></li><li><a href="#4">4. 일 · 주 · 월</a></li><li><a href="#5">5. 서재 · 검색 · 통계</a></li><li><a href="#6">6. 데이터 모델</a></li><li><a href="#7">7. 엣지 케이스</a></li><li><a href="#8">8. 변경 이력</a></li><li><a href="#9">9. 후속 후보</a></li></ul></nav><main class="doc"><header class="cover"><h1>필사 노트 기획서</h1><p>베껴 쓰고, 보지 않고 떠올리는 필사 노트 · 화면, 규칙, 데이터</p><div class="chips"><span class="chip a">v0.1 (1차 확정)</span><span class="chip">업데이트 2026-11-06</span><span class="chip">프로토타입 v0.3 기준</span><span class="chip">PRD와 함께 읽기</span></div></header><div class="tw"><table>
+<thead>
+<tr>
+<th>항목</th>
+<th>내용</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>문서</td>
+<td>화면 · 동작 · 규칙 기획서 (PRD는 <code>필사 노트 PRD.md</code>)</td>
+</tr>
+<tr>
+<td>기준</td>
+<td>HTML 프로토타입 v0.3 (<code>필사 노트 프로토타입.html</code>)</td>
+</tr>
+<tr>
+<td>작성일</td>
+<td>2026-11-06</td>
+</tr>
+<tr>
+<td>영감</td>
+<td>플래너 앱 <a href="https://spiralday.com/">Spiralday</a>: 스프링 노트 감성과 월 · 주 · 일 정보 구조를 가져옴.</td>
+</tr>
+<tr>
+<td>디자인</td>
+<td>Quote · 옥스포드 노트 프로토타입의 스프링 노트 · 개구 폰트 · 민트/노랑/핑크/라벤더/피치 팔레트를 재사용</td>
+</tr>
+</tbody>
+</table></div>
+<figure class="shot"><img src="/Spiralday/img/pilsa-01.jpg" alt="기획 스케치"><figcaption>화면 캡처 · 기획 스케치: 필사(왼쪽) + 외우기(오른쪽) 펼침면, 학습 기록(일 · 주 · 월), 서재 · 검색 · 통계, 책별 인덱스(포스트잇)</figcaption></figure>
+<blockquote>
+<p>1차 확정. 숫자 목표와 타깃은 사용 테스트 후 확정.</p>
+</blockquote>
+<hr />
+<h2 id="1">1. 서비스 개요</h2>
+<p>언어를 배우는 사람이 책의 문장을 <strong>직접 손으로 베껴 쓰고(필사), 보지 않고 다시 떠올려 쓰며(외우기)</strong> 익히는 노트. 분량은 한 줄에서 시작해 1줄 → 2줄 → 3줄 → 4~9줄 → 한 페이지로 늘려 간다. 모르는 단어는 뜻과 함께 메모패드에 적는다.</p>
+<ul>
+<li>근거(가설): 읽기만 반복하는 것보다 스스로 떠올려 쓰는 인출 연습이 기억에 더 오래 남는다 (Karpicke &amp; Roediger 2008, Science).</li>
+<li>앱이 해 주지 않는 것: 자동 번역, 사전, 발음, 문법 설명. 해석과 단어 뜻은 사용자가 직접 적는다.</li>
+</ul>
+<h2 id="2">2. 화면 구조</h2>
+<div class="tw"><table>
+<thead>
+<tr>
+<th>화면</th>
+<th>내용</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>노트</td>
+<td>필사 + 외우기 펼침면, 단어 · 뜻 메모패드, 외우기 기록 회차</td>
+</tr>
+<tr>
+<td>일</td>
+<td>날짜별 필사 목록</td>
+</tr>
+<tr>
+<td>주 · 월</td>
+<td>필사한 날과 줄 수를 달력으로 보기</td>
+</tr>
+<tr>
+<td>통계</td>
+<td>필사 횟수, 줄 수 추이, 외움 비율</td>
+</tr>
+<tr>
+<td>서재</td>
+<td>책 목록, 책 추가 · 수정</td>
+</tr>
+<tr>
+<td>검색</td>
+<td>문장 · 해석 · 단어 · 뜻 · 책 이름 · 외우기 기록</td>
+</tr>
+</tbody>
+</table></div>
+<p>위쪽에는 책마다 포스트잇 <strong>인덱스 탭</strong>이 붙고, 탭은 이동만 한다. 인덱스와 날짜 · 쪽수 태그 사이는 충분히 띄우고 "인덱스 : 책" 라벨은 두지 않는다.</p>
+<h2 id="3">3. 노트 화면</h2>
+<h3 id="3-1">3-1. 새 필사 (책 미선택 회색)</h3>
+<ul>
+<li>[+ 새 필사]는 인덱스로 이동하지 않고 <strong>빈 새 페이지</strong>가 그대로 열린다.</li>
+<li>책을 고르기 전까지 페이지는 <strong>회색</strong>이고, 문장 · 해석 칸과 [외우기 시작]이 잠긴다.</li>
+<li>인덱스 탭을 누르거나 왼쪽 위 책 선택에서 책을 고르면 <strong>그 책의 색</strong>으로 바뀌고 잠금이 풀린다. 쪽수는 그 책의 마지막 필사 쪽수로 채워진다.</li>
+<li>책이 없다면 책 선택에서 [+ 책 추가]로 바로 만들 수 있고, 만든 책은 지금 페이지에 연결된다.</li>
+<li>아무것도 쓰지 않고 다른 곳으로 가면 빈 페이지는 자동 삭제된다.</li>
+</ul>
+<h3 id="3-2">3-2. 왼쪽: 필사</h3>
+<ul>
+<li>책 선택 · 날짜 · 쪽수(p.N) 한 줄, 아래에 필사할 문장 입력.</li>
+<li><strong>해석(선택)</strong>: 문장 바로 아래, 사용자가 편한 언어로 적는다. 비워 둬도 된다. 외우기 중에도 보인다.</li>
+<li>분량 사다리와 다음 분량 안내(nudge): 한 줄에서 시작해 다음 단계로 올려 가도록 권한다.</li>
+<li>입력은 즉시 자동 저장.</li>
+</ul>
+<h3 id="3-3">3-3. 오른쪽: 외우기</h3>
+<ul>
+<li>"{언어} 문장 자체 외우기": 문장을 가리고 처음부터 떠올려 쓴다. 시도마다 처음부터 다시 쓴다.</li>
+<li>Enter = 다음 시도, Shift+Enter = 줄바꿈, Ctrl/⌘+Enter = 확인하기. 한글 조합 중 Enter는 무시한다(IME 보호).</li>
+<li>채점: 대소문자 · 문장부호를 무시하고 단어 단위로 비교(한중일은 글자 단위). 일치한 부분과 놓친 부분을 색으로 보여 준다.</li>
+<li>상태: 외우기 전 / 외우는 중 / 외움(한 번이라도 완전 일치).</li>
+</ul>
+<h3 id="3-4">3-4. 단어 · 뜻 메모패드</h3>
+<ul>
+<li>필사 · 외우기 펼침면 아래, 외우기 기록 회차 위에 노란 메모지로 놓인다.</li>
+<li>[+ 단어 추가] → 단어와 뜻을 한 줄씩. 즉시 저장, 줄별 삭제.</li>
+<li>단어와 뜻이 모두 빈 줄은 화면을 떠날 때 정리된다.</li>
+</ul>
+<h3 id="3-5">3-5. 외우기 기록 회차</h3>
+<p>메모패드 아래에 회차별 시도 횟수와 결과가 나열된다. 삭제하면 8초 동안 실행 취소 토스트가 뜬다.</p>
+<h3 id="3-6">3-6. 책 정보</h3>
+<ul>
+<li>필사 화면의 [책 정보]에서 보기 · 수정: 책 이름, 저자, 언어, 총 쪽수, 메모.</li>
+<li>인덱스 아래에 한 줄 요약: <code>윌리엄 셰익스피어 · 영어 · 총 300쪽 중 p.54 (18%)</code>. 책을 고르기 전에는 안내 문구가 나온다.</li>
+<li>저자 · 총 쪽수 · 메모는 비워도 된다.</li>
+</ul>
+<h2 id="4">4. 일 · 주 · 월</h2>
+<p>날짜를 누르면 그날의 필사 목록으로 간다. 필사한 날은 표시되고, 월 화면에서는 줄 수가 늘어나는 흐름을 볼 수 있다.</p>
+<h2 id="5">5. 서재 · 검색 · 통계</h2>
+<ul>
+<li>서재: 책 카드, 책 추가 · 수정 · 삭제. 책 색은 자동 배정.</li>
+<li>검색: 문장 · 해석 · 단어 · 뜻 · 책 이름 · 외우기 기록.</li>
+<li>통계: 필사 횟수, 줄 수 추이, 단어 메모 수, 외움 비율.</li>
+</ul>
+<h2 id="6">6. 데이터 모델</h2>
+<pre><code>Book   { id, title, author?, lang, color, total?, memo? }
+Entry  { id, book | &quot;&quot; (미선택), date, page?, text, tr?, vocab: [{ w, m }], recalls: Recall[] }
+</code></pre>
+<p>저장은 브라우저 localStorage(<code>pilsa.v1</code>). 계정 · 서버 동기화는 후속.</p>
+<h2 id="7">7. 엣지 케이스</h2>
+<div class="tw"><table>
+<thead>
+<tr>
+<th>상황</th>
+<th>동작</th>
+<th>상태</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>책 미선택 새 필사</td>
+<td>회색, 문장 · 해석 · 외우기 잠김</td>
+<td>정함</td>
+</tr>
+<tr>
+<td>아무것도 안 쓴 새 필사</td>
+<td>이동 시 자동 삭제 (책만 고른 경우 포함)</td>
+<td>정함</td>
+</tr>
+<tr>
+<td>책 선택 후 쪽수 비어 있음</td>
+<td>그 책의 마지막 쪽수로 채움</td>
+<td>정함</td>
+</tr>
+<tr>
+<td>단어 · 뜻 모두 빈 줄</td>
+<td>화면을 떠날 때 정리</td>
+<td>정함</td>
+</tr>
+<tr>
+<td>같은 단어 중복</td>
+<td>막지 않음</td>
+<td>임시</td>
+</tr>
+<tr>
+<td>쪽수가 총 쪽수 초과</td>
+<td>진행 %는 100%까지만 표시</td>
+<td>임시</td>
+</tr>
+<tr>
+<td>책 삭제</td>
+<td>그 책의 필사 처리 방식</td>
+<td>미정</td>
+</tr>
+<tr>
+<td>해석 칸 언어</td>
+<td>지정 없음, 안내 문구만</td>
+<td>미정</td>
+</tr>
+</tbody>
+</table></div>
+<h2 id="8">8. 변경 이력</h2>
+<div class="tw"><table>
+<thead>
+<tr>
+<th>날짜</th>
+<th>내용</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>11/5</td>
+<td>v0.1 최초 프로토타입 (필사 · 외우기 · 일 · 주 · 월 · 통계 · 서재 · 검색)</td>
+</tr>
+<tr>
+<td>11/5</td>
+<td>v0.2 학습 지도(말판) 제거, 인덱스와 날짜 태그 간격 확대, "인덱스 : 책" 라벨 삭제</td>
+</tr>
+<tr>
+<td>11/6</td>
+<td>v0.3 새 필사 책 미선택(회색) 시작, 해석(선택), 단어 · 뜻 메모패드, 책 정보</td>
+</tr>
+</tbody>
+</table></div>
+<h2 id="9">9. 후속 후보</h2>
+<p>표지 사진 · 읽기 기간 같은 책 정보 확장, 해석 언어 지정, 원문 붙여넣고 따라쓰기, 책 삭제 정책, 백업 · 복원, 계정 동기화, 외우기 복습 알림, 영어 외 언어 채점 보강.</p>
+<hr />
+<p>출처: 이 서비스의 정보 구조와 스프링 노트 감성은 <a href="https://spiralday.com/">Spiralday</a>에서 영감을 받았다.</p></main></div></body></html>
