@@ -39,7 +39,7 @@
     .lang-btn.active { background:var(--accent); color:#0B0C11; }
     .lang-btn:hover:not(.active) { color:var(--text); }
 
-    .cs-hero { min-height:64vh; display:flex; flex-direction:column; justify-content:flex-end; padding:140px 64px 64px; position:relative; overflow:hidden; }
+    .cs-hero { min-height:52vh; display:flex; flex-direction:column; justify-content:flex-end; padding:140px 64px 64px; position:relative; overflow:hidden; }
     .cs-hero-bg { position:absolute; inset:0; background:radial-gradient(ellipse 70% 60% at 100% 0%, rgba(242,139,130,.07) 0%, transparent 55%); }
     .cs-hero-number { font-family:'Lexend',sans-serif; font-size:180px; font-weight:700; letter-spacing:-12px; color:rgba(242,139,130,.05); line-height:1; position:absolute; right:40px; bottom:40px; user-select:none; pointer-events:none; }
     .cs-eyebrow { display:inline-flex; align-items:center; gap:8px; font-size:10px; font-weight:500; letter-spacing:.22em; text-transform:uppercase; color:var(--accent); margin-bottom:24px; opacity:0; animation:fadeUp .7s .2s forwards; }
@@ -53,15 +53,21 @@
     .meta-val { font-family:'Lexend',sans-serif; font-size:14px; font-weight:500; color:var(--text); }
     @keyframes fadeUp { from { opacity:0; transform:translateY(16px); } to { opacity:1; transform:none; } }
 
-    .cs-body { max-width:1100px; margin:0 auto; padding:0 64px 120px; }
-    .cs-section { padding:72px 0 0; border-top:1px solid var(--border); margin-top:24px; opacity:0; transform:translateY(24px); transition:opacity .75s,transform .75s; }
-    .cs-section.visible { opacity:1; transform:none; }
+    .cs-layout { max-width:1320px; margin:0 auto; padding:56px 64px 120px; display:grid; grid-template-columns:190px minmax(0,1fr); gap:48px; align-items:start; border-top:1px solid var(--border); }
+    .cs-toc { position:sticky; top:110px; display:flex; flex-direction:column; }
+    .cs-toc-link { display:flex; align-items:center; gap:12px; padding:9px 0; color:var(--text-3); font-size:15px; letter-spacing:.02em; background:none; border:0; text-align:left; font-family:inherit; transition:color .25s; cursor:none; }
+    .cs-toc-link:hover { color:var(--text-2); }
+    .cs-toc-link.active { color:var(--accent); font-weight:500; }
+    .cs-toc-tick { width:2px; height:20px; background:currentColor; border-radius:2px; flex-shrink:0; opacity:.5; transition:opacity .25s; }
+    .cs-toc-link.active .cs-toc-tick { opacity:1; }
+    .cs-panel[hidden] { display:none; }
+    .cs-panel { animation:fadeUp .5s forwards; }
     .cs-head { display:flex; align-items:baseline; gap:14px; flex-wrap:wrap; margin-bottom:10px; }
     .cs-num { font-family:'Lexend',sans-serif; font-size:11px; font-weight:500; letter-spacing:.22em; color:var(--accent); }
     .cs-title { font-family:'Lexend',sans-serif; font-size:clamp(22px,2.6vw,32px); font-weight:700; letter-spacing:-1px; color:var(--text); }
     .cs-open { margin-left:auto; font-size:12px; letter-spacing:.04em; color:var(--text-2); border:1px solid var(--border-h); border-radius:100px; padding:7px 16px; transition:all .2s; }
     .cs-open:hover { color:var(--accent); border-color:var(--accent-glow); }
-    .cs-desc { font-size:14px; color:var(--text-3); line-height:1.7; margin-bottom:28px; }
+    .cs-desc { font-size:14px; color:var(--text-3); line-height:1.7; margin-bottom:24px; }
 
     .mat { padding:22px; background:var(--bg-card); border:1px solid var(--border-h); border-radius:20px; box-shadow:inset 0 0 0 1px rgba(255,255,255,.03); }
     .frame { border:1px solid rgba(242,139,130,.35); border-radius:10px; overflow:hidden; background:#EDE7DB; }
@@ -69,8 +75,8 @@
     .frame-dots { display:flex; gap:6px; }
     .frame-dots i { width:8px; height:8px; border-radius:50%; background:var(--border-h); display:block; }
     .frame-title { font-size:12px; color:var(--text-3); white-space:nowrap; overflow:hidden; text-overflow:ellipsis; }
-    .frame iframe { display:block; width:100%; height:min(80vh,820px); min-height:520px; border:0; background:#EDE7DB; }
-    .cs-note { font-size:12px; color:var(--text-3); line-height:1.7; padding:16px 20px; border:1px solid var(--border); border-radius:8px; margin-top:56px; }
+    .frame iframe { display:block; width:100%; height:min(82vh,860px); min-height:520px; border:0; background:#EDE7DB; }
+    .cs-note { font-size:12px; color:var(--text-3); line-height:1.7; padding:16px 20px; border:1px solid var(--border); border-radius:8px; margin-top:28px; }
 
     .cs-next { border-top:1px solid var(--border); padding:64px; display:flex; justify-content:space-between; align-items:center; }
     .next-label { font-size:10px; letter-spacing:.22em; text-transform:uppercase; color:var(--text-3); margin-bottom:12px; }
@@ -83,7 +89,11 @@
 
     @media (max-width:900px) {
       nav#nav { padding:18px 28px; } .nav-links { display:none; }
-      .cs-hero { padding:120px 28px 48px; } .cs-body { padding:0 20px 80px; }
+      .cs-hero { padding:120px 28px 48px; }
+      .cs-layout { grid-template-columns:1fr; gap:20px; padding:32px 20px 80px; }
+      .cs-toc { position:static; flex-direction:row; gap:20px; border-bottom:1px solid var(--border); }
+      .cs-toc-link { padding:10px 0; font-size:14px; } .cs-toc-tick { display:none; }
+      .cs-toc-link.active { box-shadow:0 2px 0 var(--accent); }
       .mat { padding:10px; border-radius:14px; } .frame iframe { min-height:480px; height:72vh; }
       .cs-next { padding:40px 28px; } footer { padding:24px 28px; } .cs-open { margin-left:0; }
     }
@@ -127,37 +137,43 @@
     </div>
   </section>
 
-  <div class="cs-body">
-    <section class="cs-section" id="s1">
-      <div class="cs-head">
-        <span class="cs-num">01</span>
-        <h2 class="cs-title" data-i18n="s1.t">기획서</h2>
-        <a class="cs-open" href="/Spiralday/quote-plan.html" target="_blank" rel="noopener" data-i18n="open">새 탭에서 열기 ↗</a>
-      </div>
-      <p class="cs-desc" data-i18n="s1.d">화면 · 규칙 · 데이터 · 엣지 케이스를 정리한 기획서입니다. 액자 안에서 스크롤해 읽을 수 있어요.</p>
-      <div class="mat">
-        <div class="frame" data-frame>
-          <div class="frame-bar"><span class="frame-dots"><i></i><i></i><i></i></span><span class="frame-title">Quote 기획서</span></div>
-          <iframe src="/Spiralday/quote-plan.html" title="Quote 기획서" loading="lazy"></iframe>
-        </div>
-      </div>
-    </section>
+  <div class="cs-layout">
+    <nav class="cs-toc" id="csToc" aria-label="Contents">
+      <button class="cs-toc-link active" data-tab="plan"><span class="cs-toc-tick"></span><span data-i18n="toc.s1">기획서</span></button>
+      <button class="cs-toc-link" data-tab="proto"><span class="cs-toc-tick"></span><span data-i18n="toc.s2">프로토타입</span></button>
+    </nav>
 
-    <section class="cs-section" id="s2">
-      <div class="cs-head">
-        <span class="cs-num">02</span>
-        <h2 class="cs-title" data-i18n="s2.t">프로토타입</h2>
-        <a class="cs-open" href="/Spiralday/quote-proto.html" target="_blank" rel="noopener" data-i18n="open">새 탭에서 열기 ↗</a>
-      </div>
-      <p class="cs-desc" data-i18n="s2.d">직접 눌러 써볼 수 있는 HTML 프로토타입입니다. 처음엔 빈 상태이고, 화면 아래 "샘플 데이터" 버튼을 누르면 예시가 채워져요. 입력한 내용은 이 브라우저에만 저장돼요.</p>
-      <div class="mat">
-        <div class="frame" data-frame>
-          <div class="frame-bar"><span class="frame-dots"><i></i><i></i><i></i></span><span class="frame-title">Quote 독서노트 프로토타입</span></div>
-          <iframe src="/Spiralday/quote-proto.html" title="Quote 독서노트 프로토타입" loading="lazy"></iframe>
+    <div class="cs-main">
+      <section class="cs-panel" id="plan" data-panel="plan">
+        <div class="cs-head">
+          <h2 class="cs-title" data-i18n="s1.t">기획서</h2>
+          <a class="cs-open" href="/Spiralday/quote-plan.html" target="_blank" rel="noopener" data-i18n="open">새 탭에서 열기 ↗</a>
         </div>
-      </div>
+        <p class="cs-desc" data-i18n="s1.d">화면 · 규칙 · 데이터 · 엣지 케이스를 정리한 기획서입니다. 액자 안에서 스크롤해 읽을 수 있어요.</p>
+        <div class="mat">
+          <div class="frame" data-frame>
+            <div class="frame-bar"><span class="frame-dots"><i></i><i></i><i></i></span><span class="frame-title">Quote 기획서</span></div>
+            <iframe src="/Spiralday/quote-plan.html" title="Quote 기획서" loading="lazy"></iframe>
+          </div>
+        </div>
+      </section>
+
+      <section class="cs-panel" id="proto" data-panel="proto" hidden>
+        <div class="cs-head">
+          <h2 class="cs-title" data-i18n="s2.t">프로토타입</h2>
+          <a class="cs-open" href="/Spiralday/quote-proto.html" target="_blank" rel="noopener" data-i18n="open">새 탭에서 열기 ↗</a>
+        </div>
+        <p class="cs-desc" data-i18n="s2.d">직접 눌러 써볼 수 있는 HTML 프로토타입입니다. 처음엔 빈 상태이고, 화면 아래 "샘플 데이터" 버튼을 누르면 예시가 채워져요. 입력한 내용은 이 브라우저에만 저장돼요.</p>
+        <div class="mat">
+          <div class="frame" data-frame>
+            <div class="frame-bar"><span class="frame-dots"><i></i><i></i><i></i></span><span class="frame-title">Quote 독서노트 프로토타입</span></div>
+            <iframe src="/Spiralday/quote-proto.html" title="Quote 독서노트 프로토타입" loading="lazy"></iframe>
+          </div>
+        </div>
+      </section>
+
       <p class="cs-note" data-i18n="note">플래너 앱 Spiralday의 스프링 노트 감성과 월 · 주 · 일 정보 구조에서 영감을 받아 재해석했습니다.</p>
-    </section>
+    </div>
   </div>
 
   <div class="cs-next">
@@ -249,10 +265,16 @@
       el.addEventListener('mouseleave', () => document.body.classList.remove('cursor-frame'));
     });
 
-    const revealObs = new IntersectionObserver(entries => {
-      entries.forEach(e => { if (e.isIntersecting) { e.target.classList.add('visible'); revealObs.unobserve(e.target); } });
-    }, { threshold:0.05 });
-    document.querySelectorAll('.cs-section').forEach(s => revealObs.observe(s));
+    const tabs = document.querySelectorAll('.cs-toc-link'), panels = document.querySelectorAll('.cs-panel');
+    function showTab(id, push) {
+      if (!document.getElementById(id) || !document.querySelector('[data-panel="' + id + '"]')) id = 'plan';
+      panels.forEach(p => { p.hidden = p.dataset.panel !== id; });
+      tabs.forEach(b => b.classList.toggle('active', b.dataset.tab === id));
+      if (push) { try { history.replaceState(null, '', location.pathname + location.search + '#' + id); } catch (e) {} }
+    }
+    tabs.forEach(b => b.addEventListener('click', () => showTab(b.dataset.tab, true)));
+    showTab(location.hash.replace('#', '') || 'plan', false);
+    window.addEventListener('hashchange', () => showTab(location.hash.replace('#', '') || 'plan', false));
   </script>
 </body>
 </html>
